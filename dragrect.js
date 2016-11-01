@@ -159,6 +159,20 @@ function dragmove(d) {
     dragbarbottom
         .attr("cy", function(d) { return d.y + height; });
 
+    // resize so edges remain on axes if necessary
+    if (!left_fixed){
+        ldragresize_inner( dragrect.attr("x"), 0);
+    }
+    if (!right_fixed){
+        rdragresize_inner(dragrect.attr("x"), w);
+    }
+    if (!top_fixed){
+        tdragresize_inner(dragrect.attr("y"), 0);
+    }
+    if (!bottom_fixed){
+        bdragresize_inner(dragrect.attr("y"), h);
+    }
+
     update_text();
 }
 
