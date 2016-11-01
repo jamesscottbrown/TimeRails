@@ -177,6 +177,11 @@ function dragmove(d) {
 }
 
 function ldragresize(d) {
+
+    if (!left_fixed){
+        return;
+    }
+
     var oldx = d.x;
     //Max x on the right is x + width - dragbarw
     //Max x on the left is 0 - (dragbarw/2)
@@ -209,6 +214,10 @@ function ldragresize_inner(oldx, newx) {
 
 
 function rdragresize(d) {
+    if (!right_fixed){
+        return;
+    }
+
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
     var dragx = Math.max(d.x + (dragbarw/2), Math.min(w, d.x + width + d3.event.dx));
@@ -244,6 +253,10 @@ function rdragresize_inner(oldx, dragx) {
 
 
 function tdragresize(d) {
+    if (!top_fixed){
+        return;
+    }
+
     var oldy = d.y;
     //Max x on the right is x + width - dragbarw
     //Max x on the left is 0 - (dragbarw/2)
@@ -278,6 +291,10 @@ function tdragresize_inner(oldy, newy) {
 
 
 function bdragresize(d) {
+    if (!bottom_fixed){
+        return;
+    }
+
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
     var dragy = Math.max(d.y + (dragbarw/2), Math.min(h, d.y + height + d3.event.dy));
