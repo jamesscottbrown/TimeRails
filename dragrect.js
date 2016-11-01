@@ -101,24 +101,41 @@ function setup(){
 
 }
 
+// Handle right-clicks on control points
 function rclick_left(){
     left_fixed = !left_fixed;
+
+    if (!left_fixed){
+        ldragresize_inner( dragrect.attr("x"), 0);
+    }
+
     set_edges();
     return false;
 }
 function rclick_right(){
     right_fixed = !right_fixed;
+    if (!right_fixed){
+        rdragresize_inner(dragrect.attr("x"), w);
+    }
     set_edges();
 }
 function rclick_top(){
     top_fixed = !top_fixed;
+    if (!top_fixed){
+        tdragresize_inner(dragrect.attr("y"), 0);
+    }
     set_edges();
 }
 function rclick_bottom(){
     bottom_fixed = !bottom_fixed;
+    if (!bottom_fixed){
+        bdragresize_inner(dragrect.attr("y"), h);
+    }
     set_edges();
 }
 
+
+// Handle dragging and resizing
 function dragmove(d) {
     dragrect
         .attr("x", d.x = Math.max(0, Math.min(w - width, d3.event.x)));
@@ -150,33 +167,45 @@ function ldragresize(d) {
     //Max x on the right is x + width - dragbarw
     //Max x on the left is 0 - (dragbarw/2)
     d.x = Math.max(0, Math.min(d.x + width - (dragbarw / 2), d3.event.x));
-    width = width + (oldx - d.x);
+
+    ldragresize_inner(oldx, d.x);
+}
+
+function ldragresize_inner(oldx, newx) {
+    width = width + (oldx - newx);
+
     dragbarleft
-        .attr("cx", function(d) { return d.x; });
+        .attr("cx", function(d) { return newx; });
 
     dragrect
-        .attr("x", function(d) { return d.x; })
+        .attr("x", function(d) { return newx; })
         .attr("width", width);
 
     dragbartop
-        .attr("cx", function(d) { return d.x + (width/2); })
+        .attr("cx", function(d) { return newx + (width/2); })
         .attr("width", width - dragbarw);
 
     dragbarbottom
-        .attr("cx", function(d) { return d.x + (width/2); })
+        .attr("cx", function(d) { return newx + (width/2); })
         .attr("width", width - dragbarw);
 
     set_edges();
     update_text();
 }
 
+
 function rdragresize(d) {
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
     var dragx = Math.max(d.x + (dragbarw/2), Math.min(w, d.x + width + d3.event.dx));
 
+    rdragresize_inner(d.x ,dragx);
+}
+
+function rdragresize_inner(oldx, dragx) {
+
     //recalculate width
-    width = dragx - d.x;
+    width = dragx - oldx;
 
     //move the right drag handle
     dragbarright
@@ -188,54 +217,70 @@ function rdragresize(d) {
         .attr("width", width);
 
     dragbartop
-        .attr("cx", function(d) { return d.x + (width/2); })
+        .attr("cx", function(d) { return oldx + (width/2); })
         .attr("width", width - dragbarw);
 
     dragbarbottom
-        .attr("cx", function(d) { return d.x + (width/2); })
+        .attr("cx", function(d) { return oldx + (width/2); })
         .attr("width", width - dragbarw);
 
     set_edges();
     update_text();
 }
 
-function tdragresize(d) {
 
+function tdragresize(d) {
     var oldy = d.y;
     //Max x on the right is x + width - dragbarw
     //Max x on the left is 0 - (dragbarw/2)
+
     d.y = Math.max(0, Math.min(d.y + height - (dragbarw / 2), d3.event.y));
-    height = height + (oldy - d.y);
+    tdragresize_inner(oldy, d.y);
+}
+
+function tdragresize_inner(oldy, newy) {
+
+    //Max x on the right is x + width - dragbarw
+    //Max x on the left is 0 - (dragbarw/2)
+    height = height + (oldy - newy);
 
     dragbartop
-        .attr("cy", function(d) { return d.y; });
+        .attr("cy", function(d) { return newy; });
 
     dragrect
-        .attr("y", function(d) { return d.y; })
+        .attr("y", function(d) { return newy; })
         .attr("height", height);
 
     dragbarleft
-        .attr("cy", function(d) { return d.y + (height/2); })
+        .attr("cy", function(d) { return newy + (height/2); })
         .attr("height", height - dragbarw);
     dragbarright
-        .attr("cy", function(d) { return d.y + (height/2); })
+        .attr("cy", function(d) { return newy + (height/2); })
         .attr("height", height - dragbarw);
 
     set_edges();
     update_text();
 }
+
 
 function bdragresize(d) {
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
     var dragy = Math.max(d.y + (dragbarw/2), Math.min(h, d.y + height + d3.event.dy));
 
+    bdragresize_inner(d.y, dragy);
+}
+
+function bdragresize_inner(oldy, newy) {
+    //Max x on the left is x - width
+    //Max x on the right is width of screen + (dragbarw/2)
+
     //recalculate width
-    height = dragy - d.y;
+    height = newy - oldy;
 
     //move the right drag handle
     dragbarbottom
-        .attr("cy", function(d) { return dragy });
+        .attr("cy", function(d) { return newy });
 
     //resize the drag rectangle
     //as we are only resizing from the right, the x coordinate does not need to change
@@ -243,15 +288,19 @@ function bdragresize(d) {
         .attr("height", height);
 
     dragbarleft
-        .attr("cy", function(d) { return d.y + (height/2); })
+        .attr("cy", function(d) { return oldy + (height/2); })
         .attr("height", height - dragbarw);
     dragbarright
-        .attr("cy", function(d) { return d.y + (height/2); })
+        .attr("cy", function(d) { return oldy + (height/2); })
         .attr("height", height - dragbarw);
 
     set_edges();
     update_text();
 }
+
+
+
+// Shading edges
 
 function set_edges() {
 
@@ -313,6 +362,8 @@ function set_edges() {
     update_text();
 }
 
+
+// Describing selected region
 function get_time_option_box(choice){
 
     if (choice == "between times"){
