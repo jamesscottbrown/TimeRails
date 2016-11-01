@@ -106,7 +106,7 @@ function rclick_left(){
     left_fixed = !left_fixed;
 
     if (!left_fixed){
-        drag_resize_left_inner( dragrect.attr("x"), 0);
+        drag_resize_left_inner(parseFloat(dragrect.attr("x")), 0);
     }
 
     set_edges();
@@ -115,21 +115,21 @@ function rclick_left(){
 function rclick_right(){
     right_fixed = !right_fixed;
     if (!right_fixed){
-        drag_resize_right_inner(dragrect.attr("x"), w);
+        drag_resize_right_inner(parseFloat(dragrect.attr("x")), w);
     }
     set_edges();
 }
 function rclick_top(){
     top_fixed = !top_fixed;
     if (!top_fixed){
-        drag_resize_top_inner(dragrect.attr("y"), 0);
+        drag_resize_top_inner(parseFloat(dragrect.attr("y")), 0);
     }
     set_edges();
 }
 function rclick_bottom(){
     bottom_fixed = !bottom_fixed;
     if (!bottom_fixed){
-        drag_resize_bottom_inner(dragrect.attr("y"), h);
+        drag_resize_bottom_inner(parseFloat(dragrect.attr("y")), h);
     }
     set_edges();
 }
