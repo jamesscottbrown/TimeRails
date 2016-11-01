@@ -313,30 +313,58 @@ function set_edges() {
     update_text();
 }
 
+function get_time_option_box(choice){
+
+    if (choice == "between times"){
+        return '<select><option>between times</option><option>after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+    } else if (choice == "after"){
+        return '<select><option>between times</option><option selected=true">after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+    } else if (choice == "before"){
+        return '<select><option>between times</option><option>after</option><option selected=true">before</option><option>always</option><option>unconstrained</option></select>';
+    } else if (choice == "always"){
+        return '<select><option>between times</option><option>after</option><option>before</option><option selected=true">always</option><option>unconstrained</option></select>';
+    } else if (choice == "unconstrained"){
+        return '<select><option>between times</option><option>after</option><option>before</option><option>always</option><option selected="true">unconstrained</option></option></select>';
+    }
+
+}
+
+function get_y_option_box(choice){
+
+    if (choice == "between"){
+        return '<select><option selected=true">between</option><option>below</option><option>above</option><option>unconstrained</option></select>';
+    } else if (choice == "below"){
+        return '<select><option>between</option><option selected=true">below</option><option>above</option><option>unconstrained</option></select>';
+    } else if (choice == "above"){
+        return '<select><option>between</option><option>below</option><option selected=true">above</option><option>unconstrained</option></select>';
+    } else if (choice == "unconstrained"){
+        return '<select><option>between</option><option>below</option><option>above</option><option selected=true">unconstrained</option></select>';
+    }
+
+}
+
+
 
 function describe_y(){
-    // Form a natural-language statement of y bounds
-
     y_upper = parseInt(dragrect.attr("y"));
     y_lower = y_upper + parseInt(dragrect.attr("height"));
-    //console.log([x_lower, x_upper, y_lower, y_upper].join(","))
-
 
     // 2 bounds
     if (top_fixed && bottom_fixed) {
-        return "between " + y_lower + " and " + y_upper;
+        return get_y_option_box("between") + y_lower + " and " + y_upper;
     }
 
     // 1 bound
     else if (top_fixed) {
-        return "below " + y_upper;
+        return get_y_option_box("below") + y_upper;
     }
     else if (bottom_fixed) {
-        return "above " + y_lower;
+        return get_y_option_box("above") + y_lower;
     }
 
     // 0 bounds
     else {
+        // Don't convert, but keep as an easily checkable sentinel value
         return "unconstrained";
     }
 }
@@ -345,25 +373,28 @@ function describe_constraint(){
     var y_constraint = describe_y();
 
     if (y_constraint == "unconstrained"){
-        return y_constraint;
+        return get_y_option_box("unconstrained");
     }
 
     x_lower = parseInt(dragrect.attr("x"));
     x_upper = x_lower + parseInt(dragrect.attr("width"));
 
+    // 2 bounds
     if (left_fixed && right_fixed){
-        return y_constraint + ", between times " + x_lower + " and " + x_upper;
+        return y_constraint + ", " + get_time_option_box("between times")  + x_lower + " and " + x_upper;
     }
 
+    // 1 bound
     else if (left_fixed){
-        return y_constraint + " after " + x_lower
+        return y_constraint + get_time_option_box("after") + + x_lower
     }
     else if (right_fixed){
-        return y_constraint + " before " + x_lower
+        return y_constraint + get_time_option_box("before") + x_lower
     }
 
+    // 0 bounds
     else {
-        return y_constraint + " at all times "
+        return y_constraint + get_time_option_box("always")
     }
 }
 
