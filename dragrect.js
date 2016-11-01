@@ -351,15 +351,15 @@ function describe_y(){
 
     // 2 bounds
     if (top_fixed && bottom_fixed) {
-        return get_y_option_box("between") + y_lower + " and " + y_upper;
+        return get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "'/>" + " and " + "<input id='y_2' value='" + y_upper + "'/>";
     }
 
     // 1 bound
     else if (top_fixed) {
-        return get_y_option_box("below") + y_upper;
+        return get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "'/>";
     }
     else if (bottom_fixed) {
-        return get_y_option_box("above") + y_lower;
+        return get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "'/>";
     }
 
     // 0 bounds
@@ -381,15 +381,15 @@ function describe_constraint(){
 
     // 2 bounds
     if (left_fixed && right_fixed){
-        return y_constraint + ", " + get_time_option_box("between times")  + x_lower + " and " + x_upper;
+        return y_constraint + ", " + get_time_option_box("between times")  + "<input id='time_1' value='" + x_lower + "'/>" + " and " + "<input id='time_2' value='" + x_upper + "'/>";
     }
 
     // 1 bound
     else if (left_fixed){
-        return y_constraint + get_time_option_box("after") + + x_lower
+        return y_constraint + get_time_option_box("after") +  "<input id='time_1' value='" + x_lower + "'/>"
     }
     else if (right_fixed){
-        return y_constraint + get_time_option_box("before") + x_lower
+        return y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "'/>"
     }
 
     // 0 bounds
