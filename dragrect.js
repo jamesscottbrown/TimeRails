@@ -95,7 +95,11 @@ var dragbarbottom = newg.append("circle")
     .on("contextmenu", rclick_bottom);
 
 
-set_edges();
+function setup(){
+    set_edges();
+    describe_constraint();
+
+}
 
 function rclick_left(){
     left_fixed = !left_fixed;
@@ -137,6 +141,8 @@ function dragmove(d) {
         .attr("cy", function(d) { return d.y; });
     dragbarbottom
         .attr("cy", function(d) { return d.y + height; });
+
+    update_text();
 }
 
 function ldragresize(d) {
@@ -161,6 +167,7 @@ function ldragresize(d) {
         .attr("width", width - dragbarw);
 
     set_edges();
+    update_text();
 }
 
 function rdragresize(d) {
@@ -189,6 +196,7 @@ function rdragresize(d) {
         .attr("width", width - dragbarw);
 
     set_edges();
+    update_text();
 }
 
 function tdragresize(d) {
@@ -214,6 +222,7 @@ function tdragresize(d) {
         .attr("height", height - dragbarw);
 
     set_edges();
+    update_text();
 }
 
 function bdragresize(d) {
@@ -241,6 +250,7 @@ function bdragresize(d) {
         .attr("height", height - dragbarw);
 
     set_edges();
+    update_text();
 }
 
 function set_edges() {
@@ -278,7 +288,7 @@ function set_edges() {
     } else  if (bottom_fixed && right_fixed) {
         dragrect.style("stroke-dasharray", [0, width, height + width, height].join(','));
     }  else  if (left_fixed && right_fixed) {
-        dragrect.style("stroke-dasharray", [width, height + width, height].join(','));
+        dragrect.style("stroke-dasharray", [0, width, height , width, height].join(','));
     }
 
     // 1 edges
@@ -299,4 +309,65 @@ function set_edges() {
     else {
         dragrect.style("stroke-dasharray", [0, width + height + width + height].join(','));
     }
+
+    update_text();
+}
+
+
+function describe_y(){
+    // Form a natural-language statement of y bounds
+
+    y_upper = parseInt(dragrect.attr("y"));
+    y_lower = y_upper + parseInt(dragrect.attr("height"));
+    //console.log([x_lower, x_upper, y_lower, y_upper].join(","))
+
+
+    // 2 bounds
+    if (top_fixed && bottom_fixed) {
+        return "between " + y_lower + " and " + y_upper;
+    }
+
+    // 1 bound
+    else if (top_fixed) {
+        return "below " + y_upper;
+    }
+    else if (bottom_fixed) {
+        return "above " + y_lower;
+    }
+
+    // 0 bounds
+    else {
+        return "unconstrained";
+    }
+}
+
+function describe_constraint(){
+    var y_constraint = describe_y();
+
+    if (y_constraint == "unconstrained"){
+        return y_constraint;
+    }
+
+    x_lower = parseInt(dragrect.attr("x"));
+    x_upper = x_lower + parseInt(dragrect.attr("width"));
+
+    if (left_fixed && right_fixed){
+        return y_constraint + ", between times " + x_lower + " and " + x_upper;
+    }
+
+    else if (left_fixed){
+        return y_constraint + " after " + x_lower
+    }
+    else if (right_fixed){
+        return y_constraint + " before " + x_lower
+    }
+
+    else {
+        return y_constraint + " at all times "
+    }
+}
+
+function update_text(){
+    var msg = describe_constraint();
+    document.getElementById("placeholder").innerHTML = msg;
 }
