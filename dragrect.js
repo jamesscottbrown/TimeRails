@@ -6,10 +6,10 @@ var width = 300,
     height = 200,
     dragbarw = 20;
 
-top_fixed = true;
-bottom_fixed = true;
-left_fixed = true;
-right_fixed = true;
+var top_fixed = true;
+var bottom_fixed = true;
+var left_fixed = true;
+var right_fixed = true;
 
 var drag = d3.behavior.drag()
     .origin(Object)
@@ -194,18 +194,18 @@ function drag_resize_left_inner(oldx, newx) {
     width = width + (oldx - newx);
 
     dragbarleft
-        .attr("cx", function(d) { return newx; });
+        .attr("cx", newx);
 
     dragrect
-        .attr("x", function(d) { return newx; })
+        .attr("x", newx)
         .attr("width", width);
 
     dragbartop
-        .attr("cx", function(d) { return newx + (width/2); })
+        .attr("cx", newx + (width/2))
         .attr("width", width - dragbarw);
 
     dragbarbottom
-        .attr("cx", function(d) { return newx + (width/2); })
+        .attr("cx", newx + (width/2))
         .attr("width", width - dragbarw);
 
     set_edges();
@@ -232,7 +232,7 @@ function drag_resize_right_inner(oldx, dragx) {
 
     //move the right drag handle
     dragbarright
-        .attr("cx", function(d) { return dragx  });
+        .attr("cx", dragx);
 
     //resize the drag rectangle
     //as we are only resizing from the right, the x coordinate does not need to change
@@ -240,11 +240,11 @@ function drag_resize_right_inner(oldx, dragx) {
         .attr("width", width);
 
     dragbartop
-        .attr("cx", function(d) { return oldx + (width/2); })
+        .attr("cx", oldx + (width/2))
         .attr("width", width - dragbarw);
 
     dragbarbottom
-        .attr("cx", function(d) { return oldx + (width/2); })
+        .attr("cx", oldx + (width/2))
         .attr("width", width - dragbarw);
 
     set_edges();
@@ -272,17 +272,17 @@ function drag_resize_top_inner(oldy, newy) {
     height = height + (oldy - newy);
 
     dragbartop
-        .attr("cy", function(d) { return newy; });
+        .attr("cy", newy);
 
     dragrect
-        .attr("y", function(d) { return newy; })
+        .attr("y", newy)
         .attr("height", height);
 
     dragbarleft
-        .attr("cy", function(d) { return newy + (height/2); })
+        .attr("cy", newy + (height/2))
         .attr("height", height - dragbarw);
     dragbarright
-        .attr("cy", function(d) { return newy + (height/2); })
+        .attr("cy", newy + (height/2))
         .attr("height", height - dragbarw);
 
     set_edges();
@@ -311,7 +311,7 @@ function drag_resize_bottom_inner(oldy, newy) {
 
     //move the right drag handle
     dragbarbottom
-        .attr("cy", function(d) { return newy });
+        .attr("cy", newy);
 
     //resize the drag rectangle
     //as we are only resizing from the right, the x coordinate does not need to change
@@ -319,10 +319,10 @@ function drag_resize_bottom_inner(oldy, newy) {
         .attr("height", height);
 
     dragbarleft
-        .attr("cy", function(d) { return oldy + (height/2); })
+        .attr("cy", oldy + (height/2))
         .attr("height", height - dragbarw);
     dragbarright
-        .attr("cy", function(d) { return oldy + (height/2); })
+        .attr("cy", oldy + (height/2))
         .attr("height", height - dragbarw);
 
     set_edges();
@@ -428,8 +428,8 @@ function get_y_option_box(choice){
 
 
 function describe_y(){
-    y_upper = parseInt(dragrect.attr("y"));
-    y_lower = y_upper + parseInt(dragrect.attr("height"));
+    var y_upper = parseInt(dragrect.attr("y"));
+    var y_lower = y_upper + parseInt(dragrect.attr("height"));
 
     // 2 bounds
     if (top_fixed && bottom_fixed) {
@@ -458,8 +458,8 @@ function describe_constraint(){
         return get_y_option_box("unconstrained");
     }
 
-    x_lower = parseInt(dragrect.attr("x"));
-    x_upper = x_lower + parseInt(dragrect.attr("width"));
+    var x_lower = parseInt(dragrect.attr("x"));
+    var x_upper = x_lower + parseInt(dragrect.attr("width"));
 
     // 2 bounds
     if (left_fixed && right_fixed){
@@ -480,7 +480,6 @@ function describe_constraint(){
     }
 }
 
-function update_text(){
-    var msg = describe_constraint();
-    document.getElementById("placeholder").innerHTML = msg;
+    function update_text(){
+    document.getElementById("placeholder").innerHTML = describe_constraint();
 }
