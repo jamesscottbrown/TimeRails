@@ -17,19 +17,19 @@ var drag = d3.behavior.drag()
 
 var dragright = d3.behavior.drag()
     .origin(Object)
-    .on("drag", rdragresize);
+    .on("drag", drag_resize_right);
 
 var dragleft = d3.behavior.drag()
     .origin(Object)
-    .on("drag", ldragresize);
+    .on("drag", drag_resize_left);
 
 var dragtop = d3.behavior.drag()
     .origin(Object)
-    .on("drag", tdragresize);
+    .on("drag", drag_resize_top);
 
 var dragbottom = d3.behavior.drag()
     .origin(Object)
-    .on("drag", bdragresize);
+    .on("drag", drag_resize_bottom);
 
 var svg = d3.select("body").append("svg")
     .attr("width", w)
@@ -106,7 +106,7 @@ function rclick_left(){
     left_fixed = !left_fixed;
 
     if (!left_fixed){
-        ldragresize_inner( dragrect.attr("x"), 0);
+        drag_resize_left_inner( dragrect.attr("x"), 0);
     }
 
     set_edges();
@@ -115,21 +115,21 @@ function rclick_left(){
 function rclick_right(){
     right_fixed = !right_fixed;
     if (!right_fixed){
-        rdragresize_inner(dragrect.attr("x"), w);
+        drag_resize_right_inner(dragrect.attr("x"), w);
     }
     set_edges();
 }
 function rclick_top(){
     top_fixed = !top_fixed;
     if (!top_fixed){
-        tdragresize_inner(dragrect.attr("y"), 0);
+        drag_resize_top_inner(dragrect.attr("y"), 0);
     }
     set_edges();
 }
 function rclick_bottom(){
     bottom_fixed = !bottom_fixed;
     if (!bottom_fixed){
-        bdragresize_inner(dragrect.attr("y"), h);
+        drag_resize_bottom_inner(dragrect.attr("y"), h);
     }
     set_edges();
 }
@@ -161,22 +161,22 @@ function dragmove(d) {
 
     // resize so edges remain on axes if necessary
     if (!left_fixed){
-        ldragresize_inner( dragrect.attr("x"), 0);
+        drag_resize_left_inner( dragrect.attr("x"), 0);
     }
     if (!right_fixed){
-        rdragresize_inner(dragrect.attr("x"), w);
+        drag_resize_right_inner(dragrect.attr("x"), w);
     }
     if (!top_fixed){
-        tdragresize_inner(dragrect.attr("y"), 0);
+        drag_resize_top_inner(dragrect.attr("y"), 0);
     }
     if (!bottom_fixed){
-        bdragresize_inner(dragrect.attr("y"), h);
+        drag_resize_bottom_inner(dragrect.attr("y"), h);
     }
 
     update_text();
 }
 
-function ldragresize(d) {
+function drag_resize_left(d) {
 
     if (!left_fixed){
         return;
@@ -187,10 +187,10 @@ function ldragresize(d) {
     //Max x on the left is 0 - (dragbarw/2)
     d.x = Math.max(0, Math.min(d.x + width - (dragbarw / 2), d3.event.x));
 
-    ldragresize_inner(oldx, d.x);
+    drag_resize_left_inner(oldx, d.x);
 }
 
-function ldragresize_inner(oldx, newx) {
+function drag_resize_left_inner(oldx, newx) {
     width = width + (oldx - newx);
 
     dragbarleft
@@ -213,7 +213,7 @@ function ldragresize_inner(oldx, newx) {
 }
 
 
-function rdragresize(d) {
+function drag_resize_right(d) {
     if (!right_fixed){
         return;
     }
@@ -222,10 +222,10 @@ function rdragresize(d) {
     //Max x on the right is width of screen + (dragbarw/2)
     var dragx = Math.max(d.x + (dragbarw/2), Math.min(w, d.x + width + d3.event.dx));
 
-    rdragresize_inner(d.x ,dragx);
+    drag_resize_right_inner(d.x ,dragx);
 }
 
-function rdragresize_inner(oldx, dragx) {
+function drag_resize_right_inner(oldx, dragx) {
 
     //recalculate width
     width = dragx - oldx;
@@ -252,7 +252,7 @@ function rdragresize_inner(oldx, dragx) {
 }
 
 
-function tdragresize(d) {
+function drag_resize_top(d) {
     if (!top_fixed){
         return;
     }
@@ -262,10 +262,10 @@ function tdragresize(d) {
     //Max x on the left is 0 - (dragbarw/2)
 
     d.y = Math.max(0, Math.min(d.y + height - (dragbarw / 2), d3.event.y));
-    tdragresize_inner(oldy, d.y);
+    drag_resize_top_inner(oldy, d.y);
 }
 
-function tdragresize_inner(oldy, newy) {
+function drag_resize_top_inner(oldy, newy) {
 
     //Max x on the right is x + width - dragbarw
     //Max x on the left is 0 - (dragbarw/2)
@@ -290,7 +290,7 @@ function tdragresize_inner(oldy, newy) {
 }
 
 
-function bdragresize(d) {
+function drag_resize_bottom(d) {
     if (!bottom_fixed){
         return;
     }
@@ -299,10 +299,10 @@ function bdragresize(d) {
     //Max x on the right is width of screen + (dragbarw/2)
     var dragy = Math.max(d.y + (dragbarw/2), Math.min(h, d.y + height + d3.event.dy));
 
-    bdragresize_inner(d.y, dragy);
+    drag_resize_bottom_inner(d.y, dragy);
 }
 
-function bdragresize_inner(oldy, newy) {
+function drag_resize_bottom_inner(oldy, newy) {
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
 
