@@ -6,6 +6,11 @@ var width = 300,
     height = 200,
     dragbarw = 20;
 
+top_fixed = true;
+bottom_fixed = true;
+left_fixed = true;
+right_fixed = true;
+
 var drag = d3.behavior.drag()
     .origin(Object)
     .on("drag", dragmove);
@@ -39,7 +44,7 @@ var dragrect = newg.append("rect")
     .attr("y", function(d) { return d.y; })
     .attr("height", height)
     .attr("width", width)
-    .attr("fill-opacity", .5)
+    .attr("fill-opacity", .1)
     .attr("cursor", "move")
     .call(drag);
 
@@ -51,7 +56,8 @@ var dragbarleft = newg.append("circle")
     .attr("fill", "lightblue")
     .attr("fill-opacity", .5)
     .attr("cursor", "ew-resize")
-    .call(dragleft);
+    .call(dragleft)
+    .on("contextmenu", rclick_left);
 
 var dragbarright = newg.append("circle")
     .attr("cx", function(d) { return d.x + width; })
@@ -61,7 +67,9 @@ var dragbarright = newg.append("circle")
     .attr("fill", "lightblue")
     .attr("fill-opacity", .5)
     .attr("cursor", "ew-resize")
-    .call(dragright);
+    .call(dragright)
+    .on("contextmenu", rclick_right);
+
 
 var dragbartop = newg.append("circle")
     .attr("cx", function(d) { return d.x + width/2; })
@@ -71,7 +79,9 @@ var dragbartop = newg.append("circle")
     .attr("fill", "lightgreen")
     .attr("fill-opacity", .5)
     .attr("cursor", "ns-resize")
-    .call(dragtop);
+    .call(dragtop)
+    .on("contextmenu", rclick_top);
+
 
 var dragbarbottom = newg.append("circle")
     .attr("cx", function(d) { return d.x + (width/2); })
@@ -81,7 +91,29 @@ var dragbarbottom = newg.append("circle")
     .attr("fill", "lightgreen")
     .attr("fill-opacity", .5)
     .attr("cursor", "ns-resize")
-    .call(dragbottom);
+    .call(dragbottom)
+    .on("contextmenu", rclick_bottom);
+
+
+set_edges();
+
+function rclick_left(){
+    left_fixed = !left_fixed;
+    set_edges();
+    return false;
+}
+function rclick_right(){
+    right_fixed = !right_fixed;
+    set_edges();
+}
+function rclick_top(){
+    top_fixed = !top_fixed;
+    set_edges();
+}
+function rclick_bottom(){
+    bottom_fixed = !bottom_fixed;
+    set_edges();
+}
 
 function dragmove(d) {
     dragrect
@@ -126,7 +158,9 @@ function ldragresize(d) {
 
     dragbarbottom
         .attr("cx", function(d) { return d.x + (width/2); })
-        .attr("width", width - dragbarw)
+        .attr("width", width - dragbarw);
+
+    set_edges();
 }
 
 function rdragresize(d) {
@@ -154,6 +188,7 @@ function rdragresize(d) {
         .attr("cx", function(d) { return d.x + (width/2); })
         .attr("width", width - dragbarw);
 
+    set_edges();
 }
 
 function tdragresize(d) {
@@ -177,6 +212,8 @@ function tdragresize(d) {
     dragbarright
         .attr("cy", function(d) { return d.y + (height/2); })
         .attr("height", height - dragbarw);
+
+    set_edges();
 }
 
 function bdragresize(d) {
@@ -202,4 +239,64 @@ function bdragresize(d) {
     dragbarright
         .attr("cy", function(d) { return d.y + (height/2); })
         .attr("height", height - dragbarw);
+
+    set_edges();
+}
+
+function set_edges() {
+
+    dragrect.style("stroke", "black");
+
+    // Edging goes top, right, bottom, left
+    // As a rectangle has 4 sides, there are 2^4 = 16 cases to handle.
+
+    // 4 edges:
+    if (top_fixed && bottom_fixed && left_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [width + height + width + height].join(','));
+    }
+
+    // 3 edges
+    else if (top_fixed && bottom_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [width + height + width, height].join(','));
+    } else if (top_fixed && bottom_fixed && left_fixed) {
+        dragrect.style("stroke-dasharray", [width, height, width + height].join(',') );
+    } else if (top_fixed && left_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [width + height, width, height].join(',') );
+    } else if (bottom_fixed && left_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [0, (width), height + width + height].join(','));
+    }
+
+    // 2 edges
+    else if (top_fixed && bottom_fixed) {
+        dragrect.style("stroke-dasharray", [width, height, width, height].join(','));
+    }  else if (top_fixed && left_fixed) {
+        dragrect.style("stroke-dasharray", [width, height + width, height].join(','));
+    }   else if (top_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [width + height, width + height].join(','));
+    }   else  if (bottom_fixed && left_fixed) {
+        dragrect.style("stroke-dasharray", [0, width + height, width + height].join(','));
+    } else  if (bottom_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [0, width, height + width, height].join(','));
+    }  else  if (left_fixed && right_fixed) {
+        dragrect.style("stroke-dasharray", [width, height + width, height].join(','));
+    }
+
+    // 1 edges
+    else if (top_fixed) {
+        dragrect.style("stroke-dasharray", [width, (height + width + height)].join(','));
+    }
+    else if (bottom_fixed) {
+        dragrect.style("stroke-dasharray", [0, (width + height), width, height].join(','));
+    }
+    else if (left_fixed) {
+        dragrect.style("stroke-dasharray", [0, (width + height + width), height].join(','));
+    }
+    else if (right_fixed){
+        dragrect.style("stroke-dasharray", [0, (width + height + width), height].join(','));
+    }
+
+    // 0 edges
+    else {
+        dragrect.style("stroke-dasharray", [0, width + height + width + height].join(','));
+    }
 }
