@@ -561,7 +561,7 @@ function setup(div_name) {
     }
 
     function change_time_interval_type() {
-        new_interval_type = document.getElementById("time_option").value;
+        var new_interval_type = document.getElementById("time_option").value;
 
         if (new_interval_type == "between times") {
             left_fixed = true;
@@ -576,7 +576,6 @@ function setup(div_name) {
             left_fixed = false;
             right_fixed = true;
         }
-
         else if (new_interval_type == "always") {
             left_fixed = false;
             right_fixed = false;
@@ -588,7 +587,7 @@ function setup(div_name) {
 
 
     function change_value_constraint_type() {
-        new_interval_type = document.getElementById("value_option").value;
+        var new_interval_type = document.getElementById("value_option").value;
 
         if (new_interval_type == "between") {
             top_fixed = true;
