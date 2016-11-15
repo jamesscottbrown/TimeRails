@@ -398,27 +398,24 @@ function set_edges() {
 function get_time_option_box(choice){
 
     if (choice == "between times"){
-        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option>always</option></select>';
     } else if (choice == "after"){
-        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option selected=true">after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option selected="true">after</option><option>before</option><option>always</option></select>';
     } else if (choice == "before"){
-        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option selected=true">before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option selected="true">before</option><option>always</option></select>';
     } else if (choice == "always"){
-        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option selected=true">always</option><option>unconstrained</option></select>';
-    } else if (choice == "unconstrained"){
-        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option>always</option><option selected="true">unconstrained</option></option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option selected="true">always</option></select>';
     }
-
 }
 
 function get_y_option_box(choice){
 
     if (choice == "between"){
-        return '<select id="value_option" onchange="change_value_constraint_type()"><option selected=true">between</option><option>below</option><option>above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option selected="true">between</option><option>below</option><option>above</option><option>unconstrained</option></select>';
     } else if (choice == "below"){
-        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option selected=true">below</option><option>above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option selected="true">below</option><option>above</option><option>unconstrained</option></select>';
     } else if (choice == "above"){
-        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option>below</option><option selected=true">above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option>below</option><option selected="true">above</option><option>unconstrained</option></select>';
     } else if (choice == "unconstrained"){
         return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option>below</option><option>above</option><option selected=true">unconstrained</option></select>';
     }
@@ -471,7 +468,7 @@ function describe_constraint(){
         return y_constraint + get_time_option_box("after") +  "<input id='time_1' value='" + x_lower + "' onchange='change_time_value_lower(this)'/>"
     }
     else if (right_fixed){
-        return y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + " onchange='change_time_value_upper(this)'/>"
+        return y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "' onchange='change_time_value_upper(this)'/>"
     }
 
     // 0 bounds
