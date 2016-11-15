@@ -40,7 +40,7 @@ function setup(div_name) {
     var p = d3.select(div_name).append("p");
     p.text("X is");
     var placeholder = p.append("b");
-
+    var placeholder_latex = p.append("div");
 
 
     var newg = svg.append("g")
@@ -467,43 +467,47 @@ function setup(div_name) {
         var y_upper = parseInt(dragrect.attr("y"));
         var y_lower = y_upper + parseInt(dragrect.attr("height"));
 
-        var html_sting;
-        var y_callbacks;
+        var html_sting, latex_string,  y_callbacks;
 
         // 2 bounds
         if (top_fixed && bottom_fixed) {
             y_callbacks = [change_value_lower, change_value_upper];
+            latex_string = "(" + y_lower + "< x <" + y_upper + ")";
             html_sting = get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "' />" + " and " + "<input id='y_2' value='" + y_upper + "'/>";
         }
 
         // 1 bound
         else if (top_fixed) {
             y_callbacks = [change_value_upper];
+            latex_string = "(x <" + y_upper + ")";
             html_sting = get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "'/>";
         }
         else if (bottom_fixed) {
             y_callbacks = [change_value_lower];
+            latex_string = "(" + y_lower + "< x)";
             html_sting = get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "' />";
         }
 
         // 0 bounds
         else {
             // Don't convert, but keep as an easily checkable sentinel value
+            latex_string = "";
             html_sting = "unconstrained";
         }
 
-        return [html_sting, y_callbacks];
+        return [html_sting, latex_string, y_callbacks];
     }
 
     function describe_constraint() {
-        var y_constraint, y_callbacks;
-        [y_constraint, y_callbacks] = describe_y();
+        var y_constraint, y_callbacks, y_latex_string;
+        [y_constraint, y_latex_string, y_callbacks] = describe_y();
 
         var html_string;
+        var latex_string;
         var x_callbacks;
 
         if (y_constraint == "unconstrained") {
-            return get_y_option_box("unconstrained");
+            return [get_y_option_box("unconstrained"), []];
         }
 
         var x_lower = parseInt(dragrect.attr("x"));
@@ -512,32 +516,36 @@ function setup(div_name) {
         // 2 bounds
         if (left_fixed && right_fixed) {
             html_string = y_constraint + ", " + get_time_option_box("between times") + "<input id='time_1' value='" + x_lower + "' />" + " and " + "<input id='time_2' value='" + x_upper + "' />";
+            latex_string = "\\diamond_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
             x_callbacks = [change_time_value_lower, change_time_value_upper];
         }
 
         // 1 bound
         else if (left_fixed) {
             html_string = y_constraint + get_time_option_box("after") + "<input id='time_1' value='" + x_lower + "' />";
+            latex_string = "\\diamond_{[" + x_lower + ", \\infty]}" + y_latex_string;
             x_callbacks = [change_time_value_lower];
         }
         else if (right_fixed) {
             html_string = y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "' />";
             x_callbacks = [change_time_value_upper];
+            latex_string = "\\diamond_{[0," + x_upper + "]}" + y_latex_string;
         }
 
         // 0 bounds
         else {
             html_string = y_constraint + get_time_option_box("always");
             x_callbacks = [];
+            latex_string = "\\diamond_{[0, \\infty]}" + y_latex_string;
         }
 
-        return [html_string, x_callbacks, y_callbacks];
+        return [html_string, x_callbacks, y_callbacks, latex_string];
     }
 
     function update_text() {
 
-        var html_string, x_callbacks, y_callbacks;
-        [html_string, x_callbacks, y_callbacks] = describe_constraint();
+        var html_string, x_callbacks, y_callbacks, latex_string;
+        [html_string, x_callbacks, y_callbacks, latex_string] = describe_constraint();
 
         placeholder.html(html_string);
 
@@ -558,6 +566,8 @@ function setup(div_name) {
         d3.select(div_name).select("#time_option").on('change', change_time_interval_type);
         d3.select(div_name).select("#value_option").on('change', change_value_constraint_type);
 
+        placeholder_latex.html("$" + latex_string + "$");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     }
 
     function change_time_interval_type() {
