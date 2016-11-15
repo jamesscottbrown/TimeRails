@@ -225,30 +225,25 @@ function drag_resize_right(d) {
     //Max x on the left is x - width
     //Max x on the right is width of screen + (dragbarw/2)
     var dragx = Math.max(d.x + (dragbarw/2), Math.min(w, d.x + width + d3.event.dx));
-
-    drag_resize_right_inner(d.x ,dragx);
+    drag_resize_right_inner(d.x, dragx);
 }
 
-function drag_resize_right_inner(oldx, dragx) {
+function drag_resize_right_inner(oldx_left, newx_right) {
 
-    //recalculate width
-    width = dragx - oldx;
+    width = newx_right - oldx_left;
 
-    //move the right drag handle
     dragbarright
-        .attr("cx", dragx);
+        .attr("cx", newx_right);
 
-    //resize the drag rectangle
-    //as we are only resizing from the right, the x coordinate does not need to change
     dragrect
         .attr("width", width);
 
     dragbartop
-        .attr("cx", oldx + (width/2))
+        .attr("cx", oldx_left + (width/2))
         .attr("width", width - dragbarw);
 
     dragbarbottom
-        .attr("cx", oldx + (width/2))
+        .attr("cx", oldx_left + (width/2))
         .attr("width", width - dragbarw);
 
     set_edges();
@@ -418,13 +413,13 @@ function get_time_option_box(choice){
 function get_y_option_box(choice){
 
     if (choice == "between"){
-        return '<select><option selected=true">between</option><option>below</option><option>above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option selected=true">between</option><option>below</option><option>above</option><option>unconstrained</option></select>';
     } else if (choice == "below"){
-        return '<select><option>between</option><option selected=true">below</option><option>above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option selected=true">below</option><option>above</option><option>unconstrained</option></select>';
     } else if (choice == "above"){
-        return '<select><option>between</option><option>below</option><option selected=true">above</option><option>unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option>below</option><option selected=true">above</option><option>unconstrained</option></select>';
     } else if (choice == "unconstrained"){
-        return '<select><option>between</option><option>below</option><option>above</option><option selected=true">unconstrained</option></select>';
+        return '<select id="value_option" onchange="change_value_constraint_type()"><option>between</option><option>below</option><option>above</option><option selected=true">unconstrained</option></select>';
     }
 
 }
@@ -437,15 +432,15 @@ function describe_y(){
 
     // 2 bounds
     if (top_fixed && bottom_fixed) {
-        return get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "'/>" + " and " + "<input id='y_2' value='" + y_upper + "'/>";
+        return get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "' onchange='change_value_lower(this)' />" + " and " + "<input id='y_2' value='" + y_upper + "' onchange='change_value_upper(this)'/>";
     }
 
     // 1 bound
     else if (top_fixed) {
-        return get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "'/>";
+        return get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "' onchange='change_value_upper(this)'/>";
     }
     else if (bottom_fixed) {
-        return get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "'/>";
+        return get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "' onchange='change_value_lower(this)/>";
     }
 
     // 0 bounds
@@ -467,15 +462,15 @@ function describe_constraint(){
 
     // 2 bounds
     if (left_fixed && right_fixed){
-        return y_constraint + ", " + get_time_option_box("between times")  + "<input id='time_1' value='" + x_lower + "'/>" + " and " + "<input id='time_2' value='" + x_upper + "'/>";
+        return y_constraint + ", " + get_time_option_box("between times")  + "<input id='time_1' value='" + x_lower + "' onchange='change_time_value_lower(this)'/>" + " and " + "<input id='time_2' value='" + x_upper + "' onchange='change_time_value_upper(this)'/>";
     }
 
     // 1 bound
     else if (left_fixed){
-        return y_constraint + get_time_option_box("after") +  "<input id='time_1' value='" + x_lower + "'/>"
+        return y_constraint + get_time_option_box("after") +  "<input id='time_1' value='" + x_lower + "' onchange='change_time_value_lower(this)'/>"
     }
     else if (right_fixed){
-        return y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "'/>"
+        return y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + " onchange='change_time_value_upper(this)'/>"
     }
 
     // 0 bounds
@@ -490,7 +485,7 @@ function update_text(){
 
 function change_time_interval_type(){
     new_interval_type = document.getElementById("time_option").value;
-    
+
     if (new_interval_type == "between times"){
         left_fixed = true;
         right_fixed = true;
@@ -514,3 +509,40 @@ function change_time_interval_type(){
     update_text();
 }
 
+
+function change_value_constraint_type(){
+    new_interval_type = document.getElementById("value_option").value;
+
+    if (new_interval_type == "between"){
+        top_fixed = true;
+        bottom_fixed = true;
+    }
+    else if (new_interval_type == "below"){
+        top_fixed = true;
+        bottom_fixed = false;
+    }
+    else if (new_interval_type == "above"){
+        top_fixed = false;
+        bottom_fixed = true;
+    }
+
+    drag_fixed();
+    update_text();
+}
+
+
+function change_value_upper(field) {
+    drag_resize_top_inner(parseFloat(dragbartop.attr('cy')), parseFloat(field.value));
+}
+
+function change_value_lower(field) {
+    drag_resize_bottom_inner(dragrect.data()[0].y, parseFloat(field.value));
+}
+
+function change_time_value_lower(field){
+    drag_resize_left_inner(parseFloat(dragbarleft.attr('cx')), parseFloat(field.value));
+}
+
+function change_time_value_upper(field){
+    drag_resize_right_inner(dragrect.data()[0].x, parseFloat(field.value));
+}
