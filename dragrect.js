@@ -492,6 +492,7 @@ function setup(div_name) {
         else {
             // Don't convert, but keep as an easily checkable sentinel value
             latex_string = "";
+            y_callbacks = [];
             html_sting = "unconstrained";
         }
 
@@ -507,7 +508,12 @@ function setup(div_name) {
         var x_callbacks;
 
         if (y_constraint == "unconstrained") {
-            return [get_y_option_box("unconstrained"), []];
+
+            html_string = get_y_option_box("unconstrained");
+            x_callbacks = [];
+            latex_string = "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
+            return [html_string, x_callbacks, y_callbacks, latex_string];
+
         }
 
         var x_lower = parseInt(dragrect.attr("x"));
@@ -566,8 +572,17 @@ function setup(div_name) {
         d3.select(div_name).select("#time_option").on('change', change_time_interval_type);
         d3.select(div_name).select("#value_option").on('change', change_value_constraint_type);
 
+        // Update LaTeX formula
         placeholder_latex.html("$" + latex_string + "$");
         MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+
+        // Make green again if necessary
+        if (document.getElementById("value_option").value == "unconstrained") {
+            dragrect.attr("fill-opacity", 0)
+        } else {
+            dragrect.attr("fill-opacity", .25)
+        }
+
     }
 
     function change_time_interval_type() {
@@ -610,6 +625,10 @@ function setup(div_name) {
         else if (new_interval_type == "above") {
             top_fixed = false;
             bottom_fixed = true;
+        }
+        else if (new_interval_type == "unconstrained"){
+            top_fixed = false;
+            bottom_fixed = false;
         }
 
         drag_fixed();
