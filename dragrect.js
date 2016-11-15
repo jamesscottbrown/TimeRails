@@ -101,6 +101,23 @@ function setup(){
 
 }
 
+function drag_fixed(){
+    // resize so edges remain on axes if necessary
+    if (!left_fixed){
+        drag_resize_left_inner( dragrect.attr("x"), 0);
+    }
+    if (!right_fixed){
+        drag_resize_right_inner(dragrect.attr("x"), w);
+    }
+    if (!top_fixed){
+        drag_resize_top_inner(dragrect.attr("y"), 0);
+    }
+    if (!bottom_fixed){
+        drag_resize_bottom_inner(dragrect.attr("y"), h);
+    }
+
+}
+
 // Handle right-clicks on control points
 function rclick_left(){
     left_fixed = !left_fixed;
@@ -159,20 +176,7 @@ function dragmove(d) {
     dragbarbottom
         .attr("cy", function(d) { return d.y + height; });
 
-    // resize so edges remain on axes if necessary
-    if (!left_fixed){
-        drag_resize_left_inner( dragrect.attr("x"), 0);
-    }
-    if (!right_fixed){
-        drag_resize_right_inner(dragrect.attr("x"), w);
-    }
-    if (!top_fixed){
-        drag_resize_top_inner(dragrect.attr("y"), 0);
-    }
-    if (!bottom_fixed){
-        drag_resize_bottom_inner(dragrect.attr("y"), h);
-    }
-
+    drag_fixed();
     update_text();
 }
 
@@ -398,15 +402,15 @@ function set_edges() {
 function get_time_option_box(choice){
 
     if (choice == "between times"){
-        return '<select><option>between times</option><option>after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
     } else if (choice == "after"){
-        return '<select><option>between times</option><option selected=true">after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option selected=true">after</option><option>before</option><option>always</option><option>unconstrained</option></select>';
     } else if (choice == "before"){
-        return '<select><option>between times</option><option>after</option><option selected=true">before</option><option>always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option selected=true">before</option><option>always</option><option>unconstrained</option></select>';
     } else if (choice == "always"){
-        return '<select><option>between times</option><option>after</option><option>before</option><option selected=true">always</option><option>unconstrained</option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option selected=true">always</option><option>unconstrained</option></select>';
     } else if (choice == "unconstrained"){
-        return '<select><option>between times</option><option>after</option><option>before</option><option>always</option><option selected="true">unconstrained</option></option></select>';
+        return '<select id="time_option" onchange="change_time_interval_type()"><option>between times</option><option>after</option><option>before</option><option>always</option><option selected="true">unconstrained</option></option></select>';
     }
 
 }
@@ -480,6 +484,33 @@ function describe_constraint(){
     }
 }
 
-    function update_text(){
+function update_text(){
     document.getElementById("placeholder").innerHTML = describe_constraint();
 }
+
+function change_time_interval_type(){
+    new_interval_type = document.getElementById("time_option").value;
+    
+    if (new_interval_type == "between times"){
+        left_fixed = true;
+        right_fixed = true;
+
+    }
+    else if (new_interval_type == "after"){
+        left_fixed = true;
+        right_fixed = false;
+    }
+    else if (new_interval_type == "before"){
+        left_fixed = false;
+        right_fixed = true;
+    }
+
+    else if (new_interval_type == "always"){
+        left_fixed = false;
+        right_fixed = false;
+    }
+
+    drag_fixed();
+    update_text();
+}
+
