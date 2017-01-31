@@ -522,27 +522,27 @@ function setup(div_name) {
         // 2 bounds
         if (left_fixed && right_fixed) {
             html_string = y_constraint + ", " + get_time_option_box("between times") + "<input id='time_1' value='" + x_lower + "' />" + " and " + "<input id='time_2' value='" + x_upper + "' />";
-            latex_string = "\\diamond_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
+            latex_string = "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
             x_callbacks = [change_time_value_lower, change_time_value_upper];
         }
 
         // 1 bound
         else if (left_fixed) {
             html_string = y_constraint + get_time_option_box("after") + "<input id='time_1' value='" + x_lower + "' />";
-            latex_string = "\\diamond_{[" + x_lower + ", \\infty]}" + y_latex_string;
+            latex_string = "\\square_{[" + x_lower + ", \\infty]}" + y_latex_string;
             x_callbacks = [change_time_value_lower];
         }
         else if (right_fixed) {
             html_string = y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "' />";
             x_callbacks = [change_time_value_upper];
-            latex_string = "\\diamond_{[0," + x_upper + "]}" + y_latex_string;
+            latex_string = "\\square_{[0," + x_upper + "]}" + y_latex_string;
         }
 
         // 0 bounds
         else {
             html_string = y_constraint + get_time_option_box("always");
             x_callbacks = [];
-            latex_string = "\\diamond_{[0, \\infty]}" + y_latex_string;
+            latex_string = "\\square_{[0, \\infty]}" + y_latex_string;
         }
 
         return [html_string, x_callbacks, y_callbacks, latex_string];
