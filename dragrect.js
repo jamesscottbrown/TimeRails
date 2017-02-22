@@ -1,4 +1,4 @@
-function setup(div_name) {
+function setup(div_name, index) {
 
     var w = 750,
         h = 450,
@@ -557,19 +557,19 @@ function setup(div_name) {
         // 2 bounds
         if (top_fixed && bottom_fixed) {
             y_callbacks = [change_value_lower, change_value_upper];
-            latex_string = "(" + y_lower + "< x <" + y_upper + ")";
+            latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
             html_sting = get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "' />" + " and " + "<input id='y_2' value='" + y_upper + "'/>";
         }
 
         // 1 bound
         else if (top_fixed) {
             y_callbacks = [change_value_upper];
-            latex_string = "(x <" + y_upper + ")";
+            latex_string = "(x_" + index + "<" + y_upper + ")";
             html_sting = get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "'/>";
         }
         else if (bottom_fixed) {
             y_callbacks = [change_value_lower];
-            latex_string = "(" + y_lower + "< x)";
+            latex_string = "(" + y_lower + "< x_" + index + ")";
             html_sting = get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "' />";
         }
 
