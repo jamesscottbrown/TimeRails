@@ -4,9 +4,11 @@ function setup(div_name) {
         h = 450,
         r = 120;
 
-    var width = 300,
-        height = 200,
+    var width = 300 * 0.75,
+        height = 200 * 0.75,
         dragbarw = 20;
+
+    var padding = 30;
 
     var top_fixed = true;
     var bottom_fixed = true;
@@ -37,6 +39,60 @@ function setup(div_name) {
         .attr("width", w)
         .attr("height", h);
 
+    var xRange = [0, 100];
+    var xScale = d3.scale.linear()
+        .domain(xRange)
+        .range([padding, w - padding]);
+
+    var xAxis =  d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+
+    svg.append("g")
+        .call(xAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (h - padding) + ")");
+
+    var yRange = [100, 0];
+    var yScale = d3.scale.linear()
+        .domain(yRange)
+        .range([padding, h - padding]);
+
+    var yAxis =  d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+
+    svg.append("g")
+        .call(yAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(" + (padding) + ", " + 0 + ")");
+
+
+    function timeToX(time){
+        return xScale(time);
+    }
+    function XToTime(x){
+        return xScale.invert(x);
+    }
+    function valToY(val){
+        return yScale(val);
+    }
+    function YToVal(y) {
+        return yScale.invert(y);
+    }
+
+    function getY(){
+        var y;
+        dragrect.datum( function(d){ y = d.maxValue; return d;  });
+        return y;
+    }
+    function getX(){
+        var x;
+        dragrect.datum( function(d){ x = d.startTime; return d;  });
+        return x;
+    }
+
+
     var p = d3.select(div_name).append("p");
     p.text("X is");
     var placeholder = p.append("b");
@@ -44,15 +100,16 @@ function setup(div_name) {
 
 
     var newg = svg.append("g")
-        .data([{x: width / 2, y: height / 2}]);
+        .data([{startTime: (xRange[0] + xRange[1]) / 2, x: 0, y:0,  maxValue: (yRange[0] + yRange[1]) / 2}]);
+    // we need to have an x and y elements, for these to be set on the drag object
 
     var dragrect = newg.append("rect")
         .attr("id", "active")
         .attr("x", function (d) {
-            return d.x;
+            return timeToX(d.startTime);
         })
         .attr("y", function (d) {
-            return d.y;
+            return valToY(d.maxValue);
         })
         .attr("height", height)
         .attr("width", width)
@@ -63,10 +120,10 @@ function setup(div_name) {
 
     var dragbarleft = newg.append("circle")
         .attr("cx", function (d) {
-            return d.x;
+            return timeToX(d.startTime);
         })
         .attr("cy", function (d) {
-            return d.y + (height / 2);
+            return valToY(d.maxValue) + (height / 2);
         })
         .attr("id", "dragleft")
         .attr("r", dragbarw / 2)
@@ -78,10 +135,10 @@ function setup(div_name) {
 
     var dragbarright = newg.append("circle")
         .attr("cx", function (d) {
-            return d.x + width;
+            return timeToX(d.startTime) + width;
         })
         .attr("cy", function (d) {
-            return d.y + height / 2;
+            return valToY(d.maxValue) + height / 2;
         })
         .attr("id", "dragright")
         .attr("r", dragbarw / 2)
@@ -94,10 +151,10 @@ function setup(div_name) {
 
     var dragbartop = newg.append("circle")
         .attr("cx", function (d) {
-            return d.x + width / 2;
+            return timeToX(d.startTime) + width / 2;
         })
         .attr("cy", function (d) {
-            return d.y;
+            return valToY(d.maxValue);
         })
         .attr("r", dragbarw / 2)
         .attr("id", "dragleft")
@@ -110,10 +167,10 @@ function setup(div_name) {
 
     var dragbarbottom = newg.append("circle")
         .attr("cx", function (d) {
-            return d.x + (width / 2);
+            return timeToX(d.startTime) + (width / 2);
         })
         .attr("cy", function (d) {
-            return d.y + height;
+            return valToY(d.maxValue) + height;
         })
         .attr("id", "dragright")
         .attr("r", dragbarw / 2)
@@ -127,16 +184,16 @@ function setup(div_name) {
     function drag_fixed() {
         // resize so edges remain on axes if necessary
         if (!left_fixed) {
-            drag_resize_left_inner(dragrect.attr("x"), 0);
+            drag_resize_left_inner(timeToX(getX()), 0);
         }
         if (!right_fixed) {
-            drag_resize_right_inner(dragrect.attr("x"), w);
+            drag_resize_right_inner(timeToX(getX()), w);
         }
         if (!top_fixed) {
-            drag_resize_top_inner(dragrect.attr("y"), 0);
+            drag_resize_top_inner(valToY(getY()), 0);
         }
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(dragrect.attr("y"), h);
+            drag_resize_bottom_inner(valToY(getY()), h);
         }
 
     }
@@ -146,7 +203,7 @@ function setup(div_name) {
         left_fixed = !left_fixed;
 
         if (!left_fixed) {
-            drag_resize_left_inner(parseFloat(dragrect.attr("x")), 0);
+            drag_resize_left_inner(timeToX(getX()), 0);
         }
 
         set_edges();
@@ -156,7 +213,7 @@ function setup(div_name) {
     function rclick_right() {
         right_fixed = !right_fixed;
         if (!right_fixed) {
-            drag_resize_right_inner(parseFloat(dragrect.attr("x")), w);
+            drag_resize_right_inner(timeToX(getX()), w);
         }
         set_edges();
     }
@@ -164,7 +221,7 @@ function setup(div_name) {
     function rclick_top() {
         top_fixed = !top_fixed;
         if (!top_fixed) {
-            drag_resize_top_inner(parseFloat(dragrect.attr("y")), 0);
+            drag_resize_top_inner(valToY(getY()), 0);
         }
         set_edges();
     }
@@ -172,7 +229,7 @@ function setup(div_name) {
     function rclick_bottom() {
         bottom_fixed = !bottom_fixed;
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(parseFloat(dragrect.attr("y")), h);
+            drag_resize_bottom_inner(valToY(getY()), h);
         }
         set_edges();
     }
@@ -181,41 +238,52 @@ function setup(div_name) {
 // Handle dragging and resizing
     function dragmove(d) {
         dragrect
-            .attr("x", d.x = Math.max(0, Math.min(w - width, d3.event.x)));
+            .attr("x", function (d){
+                var rect_center = d3.mouse(svg.node())[0] - width/2;
+                var x = Math.max(0, Math.min(w - width, rect_center));
+                d.startTime = XToTime(x);
+                return x;
+            });
         dragbarleft
             .attr("cx", function (d) {
-                return d.x;
+                return timeToX(d.startTime);
             });
         dragbarright
             .attr("cx", function (d) {
-                return d.x + width;
+                return timeToX(d.startTime) + width;
             });
         dragbartop
             .attr("cx", function (d) {
-                return d.x + (width / 2);
+                return timeToX(d.startTime) + (width / 2);
             });
         dragbarbottom
             .attr("cx", function (d) {
-                return d.x + (width / 2);
+                return timeToX(d.startTime) + (width / 2);
             });
 
         dragrect
-            .attr("y", d.y = Math.max(0, Math.min(h - height, d3.event.y)));
+            .attr("y", function (d) {
+                var rect_center = d3.mouse(svg.node())[1] - height/2;
+
+                var y = Math.max(0, Math.min(h - height, rect_center));
+                d.maxValue = YToVal(y);
+                return y;
+            });
         dragbarleft
             .attr("cy", function (d) {
-                return d.y + (height / 2);
+                return valToY(d.maxValue) + (height / 2);
             });
         dragbarright
             .attr("cy", function (d) {
-                return d.y + (height / 2);
+                return valToY(d.maxValue) + (height / 2);
             });
         dragbartop
             .attr("cy", function (d) {
-                return d.y;
+                return valToY(d.maxValue);
             });
         dragbarbottom
             .attr("cy", function (d) {
-                return d.y + height;
+                return valToY(d.maxValue) + height;
             });
 
         drag_fixed();
@@ -223,20 +291,27 @@ function setup(div_name) {
     }
 
     function drag_resize_left(d) {
-
         if (!left_fixed) {
             return;
         }
 
-        var oldx = d.x;
+        var oldx = timeToX(d.startTime);
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
-        d.x = Math.max(0, Math.min(d.x + width - (dragbarw / 2), d3.event.x));
 
-        drag_resize_left_inner(oldx, d.x);
+        //var newx = Math.max(0, Math.min( timeToX(d.startTime) + width - (dragbarw / 2), d3.mouse(svg.node())[0]))
+        var newx = Math.max(0, Math.min( timeToX(d.startTime) + width - (dragbarw / 2), d3.mouse(svg.node())[0]))
+
+        drag_resize_left_inner(oldx, newx);
     }
 
     function drag_resize_left_inner(oldx, newx) {
+
+        dragrect.datum(function (d){
+            d.startTime = XToTime(newx);
+            return d;
+        });
+
         width = width + (oldx - newx);
 
         dragbarleft
@@ -266,8 +341,8 @@ function setup(div_name) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragx = Math.max(d.x + (dragbarw / 2), Math.min(w, d.x + width + d3.event.dx));
-        drag_resize_right_inner(d.x, dragx);
+        var dragx = Math.max( timeToX(d.startTime) + (dragbarw / 2), Math.min(w, timeToX(d.startTime) + width + d3.event.dx));
+        drag_resize_right_inner(timeToX(d.startTime), dragx);
     }
 
     function drag_resize_right_inner(oldx_left, newx_right) {
@@ -298,18 +373,25 @@ function setup(div_name) {
             return;
         }
 
-        var oldy = d.y;
+        var oldy = valToY(d.maxValue);
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        d.y = Math.max(0, Math.min(d.y + height - (dragbarw / 2), d3.event.y));
-        drag_resize_top_inner(oldy, d.y);
+        var newy = Math.max(0, Math.min(valToY(d.maxValue) + height - (dragbarw / 2), d3.mouse(svg.node())[1]));
+        drag_resize_top_inner(oldy, d.maxValue);
     }
 
     function drag_resize_top_inner(oldy, newy) {
 
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
+
+        dragrect.datum(function (d){
+            d.maxValue = YToVal(newy);
+            return d;
+        })
+
+
         height = height + (oldy - newy);
 
         dragbartop
@@ -338,9 +420,9 @@ function setup(div_name) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragy = Math.max(d.y + (dragbarw / 2), Math.min(h, d.y + height + d3.event.dy));
+        var dragy = Math.max(valToY(d.maxValue) + (dragbarw / 2), Math.min(h, valToY(d.maxValue) + height + d3.event.dy));
 
-        drag_resize_bottom_inner(d.y, dragy);
+        drag_resize_bottom_inner(valToY(d.maxValue), dragy);
     }
 
     function drag_resize_bottom_inner(oldy, newy) {
@@ -464,8 +546,11 @@ function setup(div_name) {
 
 
     function describe_y() {
-        var y_upper = parseInt(dragrect.attr("y"));
-        var y_lower = y_upper + parseInt(dragrect.attr("height"));
+        //var y_upper = parseInt(dragrect.attr("y"));
+        // var y_upper = dragrect.data("y");
+
+        var y_upper = getY();
+        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) );
 
         var html_sting, latex_string,  y_callbacks;
 
@@ -516,8 +601,9 @@ function setup(div_name) {
 
         }
 
-        var x_lower = parseInt(dragrect.attr("x"));
-        var x_upper = x_lower + parseInt(dragrect.attr("width"));
+        var x_lower = getX();
+        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) );
+
 
         // 2 bounds
         if (left_fixed && right_fixed) {
@@ -637,19 +723,20 @@ function setup(div_name) {
 
 
     function change_value_upper() {
-        drag_resize_top_inner(parseFloat(dragbartop.attr('cy')), parseFloat(this.value));
+        drag_resize_top_inner(parseFloat(dragbartop.attr('cy')), valToY(parseFloat(this.value)));
+        update_text();
     }
 
     function change_value_lower() {
-        drag_resize_bottom_inner(dragrect.data()[0].y, parseFloat(this.value));
+        drag_resize_bottom_inner(valToY(getY()), valToY(parseFloat(this.value)));
     }
 
     function change_time_value_lower() {
-        drag_resize_left_inner(parseFloat(dragbarleft.attr('cx')), parseFloat(this.value));
+        drag_resize_left_inner(parseFloat(dragbarleft.attr('cx')), timeToX(parseFloat(this.value)));
     }
 
     function change_time_value_upper() {
-        drag_resize_right_inner(dragrect.data()[0].x, parseFloat(this.value));
+        drag_resize_right_inner(timeToX(getX()), timeToX(parseFloat(this.value)));
     }
 
     set_edges();
