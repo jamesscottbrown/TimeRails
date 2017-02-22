@@ -180,6 +180,20 @@ function setup(div_name, index) {
         .call(dragbottom)
         .on("contextmenu", rclick_bottom);
 
+    var startline = newg.append("line")
+        .attr("x1", timeToX(getX()))
+        .attr("x2", timeToX(getX()))
+        .attr("y1", valToY(getY()))
+        .attr("y2", h)
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2")
+
+    function move_startline(){
+        startline.attr("x1", timeToX(getX()))
+            .attr("x2", timeToX(getX()))
+            .attr("y1", valToY(getY()))
+            .attr("y2", h)
+    }
 
     function drag_fixed() {
         // resize so edges remain on axes if necessary
@@ -288,6 +302,7 @@ function setup(div_name, index) {
 
         drag_fixed();
         update_text();
+        move_startline();
     }
 
     function drag_resize_left(d) {
@@ -331,6 +346,7 @@ function setup(div_name, index) {
 
         set_edges();
         update_text();
+        move_startline();
     }
 
 
@@ -365,6 +381,7 @@ function setup(div_name, index) {
 
         set_edges();
         update_text();
+        move_startline();
     }
 
 
@@ -410,6 +427,7 @@ function setup(div_name, index) {
 
         set_edges();
         update_text();
+        move_startline();
     }
 
 
@@ -450,6 +468,7 @@ function setup(div_name, index) {
 
         set_edges();
         update_text();
+        move_startline();
     }
 
 
@@ -513,6 +532,7 @@ function setup(div_name, index) {
         }
 
         update_text();
+        move_startline();
     }
 
 
@@ -694,6 +714,7 @@ function setup(div_name, index) {
 
         drag_fixed();
         update_text();
+        move_startline();
     }
 
 
@@ -719,12 +740,12 @@ function setup(div_name, index) {
 
         drag_fixed();
         update_text();
+        move_startline();
     }
 
 
     function change_value_upper() {
         drag_resize_top_inner(parseFloat(dragbartop.attr('cy')), valToY(parseFloat(this.value)));
-        update_text();
     }
 
     function change_value_lower() {
