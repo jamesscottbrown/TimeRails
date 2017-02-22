@@ -394,8 +394,8 @@ function setup(div_name, index) {
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        var newy = Math.max(0, Math.min(valToY(d.maxValue) + height - (dragbarw / 2), d3.mouse(svg.node())[1]));
-        drag_resize_top_inner(oldy, d.maxValue);
+        var newy = Math.max(0, Math.min(valToY(d.maxValue) + height - (dragbarw / 2),  d3.mouse(svg.node())[1]));
+        drag_resize_top_inner(oldy, newy);
     }
 
     function drag_resize_top_inner(oldy, newy) {
