@@ -8,7 +8,9 @@ function setup(div_name, index) {
         height = 200 * 0.75,
         dragbarw = 20;
 
-    var padding = 30;
+    var vertical_padding = 30;
+    var horizontal_padding = 30;
+    var track_padding = 10;
 
     var top_fixed = true;
     var bottom_fixed = true;
@@ -42,7 +44,7 @@ function setup(div_name, index) {
     var xRange = [0, 100];
     var xScale = d3.scale.linear()
         .domain(xRange)
-        .range([padding, w - padding]);
+        .range([vertical_padding, w - horizontal_padding]);
 
     var xAxis =  d3.svg.axis()
         .scale(xScale)
@@ -51,12 +53,12 @@ function setup(div_name, index) {
     svg.append("g")
         .call(xAxis)
         .attr("class", "axis")
-        .attr("transform", "translate(0," + (h - padding) + ")");
+        .attr("transform", "translate(0," + (h - vertical_padding) + ")");
 
     var yRange = [100, 0];
     var yScale = d3.scale.linear()
         .domain(yRange)
-        .range([padding, h - padding]);
+        .range([vertical_padding, h - vertical_padding]);
 
     var yAxis =  d3.svg.axis()
         .scale(yScale)
@@ -65,7 +67,7 @@ function setup(div_name, index) {
     svg.append("g")
         .call(yAxis)
         .attr("class", "axis")
-        .attr("transform", "translate(" + (padding) + ", " + 0 + ")");
+        .attr("transform", "translate(" + (horizontal_padding) + ", " + 0 + ")");
 
 
     function timeToX(time){
@@ -184,7 +186,7 @@ function setup(div_name, index) {
         .attr("x1", timeToX(getX()))
         .attr("x2", timeToX(getX()))
         .attr("y1", valToY(getY()))
-        .attr("y2", h)
+        .attr("y2", h - track_padding)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2")
 
