@@ -473,7 +473,7 @@ function setup(div_name, index) {
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_y = d3.mouse(svg.node())[1];
-        var newy = imposeLimits(0, Math.min(valToY(maxValue) + height - (dragbarw / 2), cursor_y));
+        var newy = imposeLimits(0, valToY(maxValue) + geom.height - (geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner(oldy, newy);
     }
 
