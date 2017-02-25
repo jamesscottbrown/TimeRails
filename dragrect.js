@@ -133,7 +133,12 @@ function setup(div_name, index) {
         .attr("fill-opacity", .5)
         .attr("cursor", "ew-resize")
         .call(dragleft)
-        .on("contextmenu", rclick_left);
+        .on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return left_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_left
+        }]));
 
     var dragbarright = newg.append("circle")
         .attr("cx", function (d) {
@@ -148,7 +153,12 @@ function setup(div_name, index) {
         .attr("fill-opacity", .5)
         .attr("cursor", "ew-resize")
         .call(dragright)
-        .on("contextmenu", rclick_right);
+        .on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return right_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_right
+        }]));
 
 
     var dragbartop = newg.append("circle")
@@ -164,7 +174,12 @@ function setup(div_name, index) {
         .attr("fill-opacity", .5)
         .attr("cursor", "ns-resize")
         .call(dragtop)
-        .on("contextmenu", rclick_top);
+        .on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return top_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_top
+        }]));
 
 
     var dragbarbottom = newg.append("circle")
@@ -180,7 +195,14 @@ function setup(div_name, index) {
         .attr("fill-opacity", .5)
         .attr("cursor", "ns-resize")
         .call(dragbottom)
-        .on("contextmenu", rclick_bottom);
+        .on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return bottom_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_bottom
+        }]));
+
+
 
     var startline = newg.append("line")
         .attr("x1", timeToX(getX()))

@@ -19,15 +19,50 @@
             font-size: 11px;
         }
 
+
+        .d3-context-menu {
+            position: absolute;
+            display: none;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            min-width: 150px;
+            border: 1px solid #d4d4d4;
+
+            z-index:1200;
+        }
+
+        .d3-context-menu ul {
+            list-style-type: none;
+            margin: 4px 0px;
+            padding: 0px;
+            cursor: default;
+        }
+
+        .d3-context-menu ul li {
+            padding: 4px 16px;
+        }
+
+        .d3-context-menu ul li:hover {
+            background-color: #4677f8;
+            color: #fefefe;
+        }
+
+
     </style>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+    <script type="text/javascript" src="dragrect.js"></script>
+    <script type="text/javascript" src="subplots.js"></script>
+    <script type="text/javascript" src="libs/jquery.min.js"></script>
+    <script type="text/javascript" src="libs/d3-context-menu.js"></script>
+
 </head>
 
 <body onload="setup('#constraint_diagram_1', 1);">
 
-<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
-<script type="text/javascript" src="dragrect.js"></script>
-<script type="text/javascript" src="subplots.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 
 
 <script type="text/x-mathjax-config">
