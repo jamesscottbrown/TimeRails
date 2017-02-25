@@ -884,13 +884,7 @@ function setup(div_name, index) {
             .attr("y2", base_y)
             .style("stroke", "rgb(128,128,128)")
             .style("stroke-width", "2")
-            .style("stroke-dasharray", function (){
-                if (kind == "some"){
-                    return "5,5";
-                } else {
-                    return "5,0";
-                }
-            })
+            .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0")
             .call(drag_track);
 
         var drag_left_tick = d3.behavior.drag()
