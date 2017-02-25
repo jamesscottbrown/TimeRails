@@ -1,3 +1,7 @@
+function imposeLimits(lower, upper, val){
+    return Math.max(lower, Math.min(upper, val));
+}
+
 function setup(div_name, index) {
 
     var w = 750,
@@ -274,8 +278,13 @@ function setup(div_name, index) {
         dragrect
             .attr("x", function (d){
                 var rect_center = d3.mouse(svg.node())[0] - width/2;
-                var x = Math.max(0, Math.min(w - width, rect_center));
-                d.startTime = XToTime(x);
+                var x = imposeLimits(0, w - width, rect_center);
+
+                if (timing_parent_bar) {
+                    x = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x);
+                }
+
+                startTime = XToTime(x);
                 return x;
             });
         dragbarleft
@@ -299,7 +308,7 @@ function setup(div_name, index) {
             .attr("y", function (d) {
                 var rect_center = d3.mouse(svg.node())[1] - height/2;
 
-                var y = Math.max(0, Math.min(h - height, rect_center));
+                var y = imposeLimits(0, h-height, rect_center);
                 maxValue = YToVal(y);
                 return y;
             });
@@ -334,8 +343,8 @@ function setup(div_name, index) {
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        //var newx = Math.max(0, Math.min( timeToX(d.startTime) + width - (dragbarw / 2), d3.mouse(svg.node())[0]))
-        var newx = Math.max(0, Math.min( timeToX(startTime) + width - (dragbarw / 2), d3.mouse(svg.node())[0]))
+        var cursor_x = d3.mouse(svg.node())[0];
+        var newx = imposeLimits(0, timeToX(startTime) + width - (dragbarw / 2), cursor_x);
 
         drag_resize_left_inner(oldx, newx);
     }
@@ -374,7 +383,7 @@ function setup(div_name, index) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragx = Math.max( timeToX(startTime) + (dragbarw / 2), Math.min(w, timeToX(startTime) + width + d3.event.dx));
+        var dragx = imposeLimits(timeToX(startTime) + (dragbarw / 2), w, timeToX(startTime) + width + d3.event.dx);
         drag_resize_right_inner(timeToX(startTime), dragx);
     }
 
@@ -411,7 +420,8 @@ function setup(div_name, index) {
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        var newy = Math.max(0, Math.min(valToY(maxValue) + height - (dragbarw / 2),  d3.mouse(svg.node())[1]));
+        var cursor_y = d3.mouse(svg.node())[1];
+        var newy = imposeLimits(0, Math.min(valToY(maxValue) + height - (dragbarw / 2), cursor_y));
         drag_resize_top_inner(oldy, newy);
     }
 
@@ -451,8 +461,7 @@ function setup(div_name, index) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragy = Math.max(valToY(maxValue) + (dragbarw / 2), Math.min(h, valToY(maxValue) + height + d3.event.dy));
-
+        var dragy = imposeLimits(valToY(maxValue) + (dragbarw / 2), h, valToY(maxValue) + height + d3.event.dy);
         drag_resize_bottom_inner(valToY(maxValue), dragy);
     }
 
