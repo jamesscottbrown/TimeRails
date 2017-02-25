@@ -845,6 +845,7 @@ function setup(div_name, index) {
         // draw bar
         var left_pos = horizontal_padding + 20;
         var right_pos = w - horizontal_padding - 20;
+        var base_y = h + (level-2) * track_padding ;
 
         var drag_track = d3.behavior.drag()
             .origin(Object)
@@ -879,8 +880,8 @@ function setup(div_name, index) {
         var track = newg.append("line")
             .attr("x1", left_pos)
             .attr("x2", right_pos)
-            .attr("y1", h - track_padding)
-            .attr("y2", h - track_padding)
+            .attr("y1", base_y)
+            .attr("y2", base_y)
             .style("stroke", "rgb(128,128,128)")
             .style("stroke-width", "2")
             .style("stroke-dasharray", function (){
@@ -905,8 +906,8 @@ function setup(div_name, index) {
         var left_tick = newg.append("line")
             .attr("x1", left_pos)
             .attr("x2", left_pos)
-            .attr("y1", h - track_padding - track_padding/2)
-            .attr("y2", h - track_padding + track_padding/2)
+            .attr("y1", base_y - track_padding/2)
+            .attr("y2", base_y + track_padding/2)
             .style("stroke", "rgb(128,128,128)")
             .style("stroke-width", "2")
             .call(drag_left_tick);
@@ -924,8 +925,8 @@ function setup(div_name, index) {
         var right_tick = newg.append("line")
             .attr("x1", right_pos)
             .attr("x2", right_pos)
-            .attr("y1", h - track_padding - track_padding/2)
-            .attr("y2", h - track_padding + track_padding/2)
+            .attr("y1", base_y - track_padding/2)
+            .attr("y2", base_y + track_padding/2)
             .style("stroke", "rgb(128,128,128)")
             .style("stroke-width", "2")
             .call(drag_right_tick);
