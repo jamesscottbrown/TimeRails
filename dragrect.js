@@ -21,6 +21,8 @@ function setup(div_name, index) {
     var left_fixed = true;
     var right_fixed = true;
 
+    var timing_parent_bar = false;
+
     var drag = d3.behavior.drag()
         .origin(Object)
         .on("drag", dragmove);
@@ -102,6 +104,7 @@ function setup(div_name, index) {
 
     var startTime = (xRange[0] + xRange[1]) / 2;
     var maxValue = (yRange[0] + yRange[1]) / 2;
+    var endTime;
 
     var newg = svg.append("g");
 
@@ -159,6 +162,7 @@ function setup(div_name, index) {
             },
             action: rclick_right
         }]));
+    endTime = XToTime(dragbarright.attr("cx"));
 
 
     var dragbartop = newg.append("circle")
@@ -203,6 +207,37 @@ function setup(div_name, index) {
         }]));
 
 
+    var menu = [
+        {
+            title: 'Constraint starts at fixed time',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                    timing_parent_bar = false;
+                }
+            },
+            disabled: false // optional, defaults to false
+        },
+        {
+            title: 'Constraint applies at <i>some</i> time in range',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'some');
+            }
+        },
+        {
+            title: 'Constraint applies at <i>all</i> times in range',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'all');
+            }
+        }
+    ];
+
 
     var startline = newg.append("line")
         .attr("x1", timeToX(getX()))
@@ -210,14 +245,28 @@ function setup(div_name, index) {
         .attr("y1", valToY(getY()))
         .attr("y2", h - track_padding)
         .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2")
+        .style("stroke-width", "2");
+
+    var track_circle = newg
+        .append("g")
+        .append("circle")
+        .attr("cx", timeToX(getX()))
+        .attr("cy", h - track_padding)
+        .attr("r", 5)
+        .attr("fill", "rgb(255,0,0)")
+        .attr("fill-opacity", .5)
+        .attr("id", "track_circle")
+        .on('contextmenu', d3.contextMenu(menu));
 
     function move_startline(){
         startline.attr("x1", timeToX(getX()))
             .attr("x2", timeToX(getX()))
             .attr("y1", valToY(getY()))
-            .attr("y2", h)
+            .attr("y2", h - track_padding);
+
+        track_circle.attr("cx", timeToX(getX()));
     }
+
 
     function drag_fixed() {
         // resize so edges remain on axes if necessary
@@ -285,6 +334,7 @@ function setup(div_name, index) {
                 }
 
                 startTime = XToTime(x);
+                endTime = XToTime(dragbarright.attr("cx"));
                 return x;
             });
         dragbarleft
@@ -404,6 +454,8 @@ function setup(div_name, index) {
         dragbarbottom
             .attr("cx", oldx_left + (width / 2))
             .attr("width", width - dragbarw);
+
+        endTime = XToTime(dragbarright.attr("cx"));
 
         set_edges();
         update_text();
@@ -784,5 +836,120 @@ function setup(div_name, index) {
 
     set_edges();
     describe_constraint();
+
+
+    function create_bar(level, kind){
+        // increase SVG height
+        svg.attr("height", parseInt(svg.attr("height")) + track_padding);
+
+        // draw bar
+        var left_pos = horizontal_padding + 20;
+        var right_pos = w - horizontal_padding - 20;
+
+        var drag_track = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", function(){
+
+                var track_length = track.attr("x2") - track.attr("x1");
+                var mouse_pos = d3.mouse(svg.node())[0];
+
+                var x1 = imposeLimits(0, w - horizontal_padding, mouse_pos - track_length/2);
+                var x2 = imposeLimits(0, w - horizontal_padding, mouse_pos + track_length/2);
+
+                if (x1 >= timeToX(startTime)){
+                    x1 = timeToX(startTime);
+                    x2 = track.attr("x2");
+                } else if (x2 <= timeToX(startTime)){
+                    x1 = track.attr("x1");
+                    x2 = timeToX(startTime);
+                }
+
+                track
+                .attr("x1", x1)
+                .attr("x2", x2);
+
+                left_tick.attr("x1", x1)
+                    .attr("x2", x1);
+
+                right_tick.attr("x1", x2)
+                    .attr("x2", x2);
+
+            });
+
+        var track = newg.append("line")
+            .attr("x1", left_pos)
+            .attr("x2", right_pos)
+            .attr("y1", h - track_padding)
+            .attr("y2", h - track_padding)
+            .style("stroke", "rgb(128,128,128)")
+            .style("stroke-width", "2")
+            .style("stroke-dasharray", function (){
+                if (kind == "some"){
+                    return "5,5";
+                } else {
+                    return "5,0";
+                }
+            })
+            .call(drag_track);
+
+        var drag_left_tick = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", function(){
+                var x_pos = d3.mouse(svg.node())[0];
+
+                track.attr("x1", x_pos);
+                left_tick.attr("x1", x_pos);
+                left_tick.attr("x2", x_pos);
+            });
+
+        var left_tick = newg.append("line")
+            .attr("x1", left_pos)
+            .attr("x2", left_pos)
+            .attr("y1", h - track_padding - track_padding/2)
+            .attr("y2", h - track_padding + track_padding/2)
+            .style("stroke", "rgb(128,128,128)")
+            .style("stroke-width", "2")
+            .call(drag_left_tick);
+
+        var drag_right_tick = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", function(){
+                var x_pos = d3.mouse(svg.node())[0];
+
+                track.attr("x2", x_pos);
+                right_tick.attr("x1", x_pos);
+                right_tick.attr("x2", x_pos);
+            });
+
+        var right_tick = newg.append("line")
+            .attr("x1", right_pos)
+            .attr("x2", right_pos)
+            .attr("y1", h - track_padding - track_padding/2)
+            .attr("y2", h - track_padding + track_padding/2)
+            .style("stroke", "rgb(128,128,128)")
+            .style("stroke-width", "2")
+            .call(drag_right_tick);
+
+
+        function delete_bar(){
+            // should also delete children
+
+            track.remove();
+            left_tick.remove();
+            right_tick.remove();
+            svg.attr("height", parseInt(svg.attr("height")) - track_padding);
+        }
+
+        function get_start_time(){
+            return track.attr("x1");
+        }
+
+        function get_end_time(){
+            return track.attr("x2");
+        }
+
+        return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
+            "get_end_time": get_end_time};
+    }
 
 }
