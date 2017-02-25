@@ -895,7 +895,7 @@ function setup(div_name, index) {
         var drag_left_tick = d3.behavior.drag()
             .origin(Object)
             .on("drag", function(){
-                var x_pos = d3.mouse(svg.node())[0];
+                var x_pos = imposeLimits(0, timeToX(startTime), d3.mouse(svg.node())[0]);
 
                 track.attr("x1", x_pos);
                 left_tick.attr("x1", x_pos);
@@ -914,7 +914,7 @@ function setup(div_name, index) {
         var drag_right_tick = d3.behavior.drag()
             .origin(Object)
             .on("drag", function(){
-                var x_pos = d3.mouse(svg.node())[0];
+                var x_pos = imposeLimits(timeToX(startTime), w, d3.mouse(svg.node())[0]);
 
                 track.attr("x2", x_pos);
                 right_tick.attr("x1", x_pos);
