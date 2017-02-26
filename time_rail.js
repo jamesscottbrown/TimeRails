@@ -178,12 +178,17 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
 
     function delete_bar(){
-        // should also delete children
-
         track.remove();
         left_tick.remove();
         right_tick.remove();
+        startline.remove();
+        track_circle.remove();
         svg.attr("height", parseInt(svg.attr("height")) - geom.track_padding);
+        
+        if (timing_parent_bar){
+            timing_parent_bar.delete();
+            timing_parent_bar = false;
+        }
     }
 
     function get_start_time(){
