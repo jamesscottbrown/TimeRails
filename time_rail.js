@@ -142,6 +142,27 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         }
     ];
 
+    var drag_track_circle = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", function(){
+            var x_left = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            var x_right = x_left + (track.attr("x2") - track.attr("x1"));
+
+            track.attr("x1", x_left)
+                 .attr("x2", x_right);
+
+            left_tick.attr("x1", x_left)
+                .attr("x2", x_left);
+
+            right_tick.attr("x1", x_right)
+                .attr("x2", x_right);
+
+            startline.attr("x1", x_left)
+                .attr("x2", x_left);
+
+            track_circle.attr("cx", x_left);
+        });
+
     var track_circle = newg
         .append("g")
         .append("circle")
@@ -151,7 +172,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .attr("fill", "rgb(255,0,0)")
         .attr("fill-opacity", .5)
         .attr("id", "track_circle")
-        .on('contextmenu', d3.contextMenu(menu));
+        .on('contextmenu', d3.contextMenu(menu))
+        .call(drag_track_circle);
 
 
 

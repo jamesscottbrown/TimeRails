@@ -264,6 +264,33 @@ function setup(div_name, index) {
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
 
+    var drag_track_circle = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", function(){
+            var cursor_x = d3.mouse(svg.node())[0];
+            var newx = imposeLimits(0, timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
+
+            startTime = XToTime(newx);
+
+            dragbarleft
+                .attr("cx", newx);
+
+            dragbarright
+                .attr("cx", newx + geom.width);
+
+            dragrect
+                .attr("x", newx);
+
+            dragbartop
+                .attr("cx", newx + (geom.width / 2));
+
+            dragbarbottom
+                .attr("cx", newx + (geom.width / 2));
+
+
+            move_startline();
+        });
+
     var track_circle = newg
         .append("g")
         .append("circle")
@@ -273,7 +300,8 @@ function setup(div_name, index) {
         .attr("fill", "rgb(255,0,0)")
         .attr("fill-opacity", .5)
         .attr("id", "track_circle")
-        .on('contextmenu', d3.contextMenu(menu));
+        .on('contextmenu', d3.contextMenu(menu))
+        .call(drag_track_circle);
 
     function move_startline(){
         startline.attr("x1", timeToX(getX()))
