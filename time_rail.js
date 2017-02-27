@@ -210,6 +210,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         right_tick.remove();
         startline.remove();
         track_circle.remove();
+        delay_line.remove();
         svg.attr("height", parseInt(svg.attr("height")) - geom.track_padding);
         
         if (timing_parent_bar){
