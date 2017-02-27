@@ -5,15 +5,16 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var timing_parent_bar = false;
 
     // draw bar
-    var left_pos = geom.horizontal_padding + 20;
-    var right_pos = geom.w - geom.horizontal_padding - 20;
+    var start_time_pos = geom.horizontal_padding;
+    var left_tick_pos = geom.horizontal_padding + 20;
+    var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y = geom.h + (level-2) * geom.track_padding ;
 
     var drag_track = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
 
-            var track_length = track.attr("x2") - track.attr("x1");
+            var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(svg.node())[0];
 
             var x1 = imposeLimits(0, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
@@ -21,31 +22,38 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             if (x1 >= helper_funcs.getStartX()){
                 x1 = helper_funcs.getStartX();
-                x2 = track.attr("x2");
+                x2 = right_tick_pos;
             } else if (x2 <= helper_funcs.getStartX()){
-                x1 = track.attr("x1");
+                x1 = left_tick_pos;
                 x2 = helper_funcs.getStartX();
             }
 
+            start_time_pos = start_time_pos + (x1 - left_tick_pos);
+            left_tick_pos = x1;
+            right_tick_pos = x2;
+
             track
-                .attr("x1", x1)
-                .attr("x2", x2);
+                .attr("x1", left_tick_pos)
+                .attr("x2", right_tick_pos);
 
-            left_tick.attr("x1", x1)
-                .attr("x2", x1);
+            left_tick.attr("x1", left_tick_pos)
+                .attr("x2", left_tick_pos);
 
-            right_tick.attr("x1", x2)
-                .attr("x2", x2);
+            right_tick.attr("x1", right_tick_pos)
+                .attr("x2", right_tick_pos);
 
-            startline.attr("x1", x1)
-                .attr("x2", x1);
+            startline.attr("x1", start_time_pos)
+                .attr("x2", start_time_pos);
 
-            track_circle.attr("cx", x1);
+            track_circle.attr("cx", start_time_pos);
+
+            delay_line.attr("x1", start_time_pos)
+                .attr("x2", left_tick_pos);
         });
 
     var track = newg.append("line")
-        .attr("x1", left_pos)
-        .attr("x2", right_pos)
+        .attr("x1", left_tick_pos)
+        .attr("x2", right_tick_pos)
         .attr("y1", base_y)
         .attr("y2", base_y)
         .style("stroke", "rgb(128,128,128)")
@@ -56,19 +64,18 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_left_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            var x_pos = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            left_tick_pos = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
 
-            track.attr("x1", x_pos);
-            left_tick.attr("x1", x_pos);
-            left_tick.attr("x2", x_pos);
-            startline.attr("x1", x_pos)
-                .attr("x2", x_pos);
-            track_circle.attr("cx", x_pos);
+            track.attr("x1", left_tick_pos);
+            left_tick.attr("x1", left_tick_pos)
+                     .attr("x2", left_tick_pos);
+
+            delay_line.attr("x2", left_tick_pos);
         });
 
     var left_tick = newg.append("line")
-        .attr("x1", left_pos)
-        .attr("x2", left_pos)
+        .attr("x1", left_tick_pos)
+        .attr("x2", left_tick_pos)
         .attr("y1", base_y - geom.track_padding/2)
         .attr("y2", base_y + geom.track_padding/2)
         .style("stroke", "rgb(128,128,128)")
@@ -78,16 +85,16 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_right_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            var x_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(svg.node())[0]);
+            right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(svg.node())[0]);
 
-            track.attr("x2", x_pos);
-            right_tick.attr("x1", x_pos);
-            right_tick.attr("x2", x_pos);
+            track.attr("x2", right_tick_pos);
+            right_tick.attr("x1", right_tick_pos)
+                      .attr("x2", right_tick_pos);
         });
 
     var right_tick = newg.append("line")
-        .attr("x1", right_pos)
-        .attr("x2", right_pos)
+        .attr("x1", right_tick_pos)
+        .attr("x2", right_tick_pos)
         .attr("y1", base_y - geom.track_padding/2)
         .attr("y2", base_y + geom.track_padding/2)
         .style("stroke", "rgb(128,128,128)")
@@ -95,8 +102,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .call(drag_right_tick);
 
     var startline = newg.append("line")
-        .attr("x1", left_pos)
-        .attr("x2", left_pos)
+        .attr("x1", start_time_pos)
+        .attr("x2", start_time_pos)
         .attr("y1", base_y)
         .attr("y2", base_y + geom.track_padding)
         .style("stroke", "rgb(255,0,0)")
@@ -148,27 +155,33 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
                 x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
             }
 
-            var x_right = x_left + (track.attr("x2") - track.attr("x1"));
+            left_tick_pos = left_tick_pos + (x_left - start_time_pos);
+            right_tick_pos = right_tick_pos + (x_left - start_time_pos);
+            start_time_pos = x_left;
 
-            track.attr("x1", x_left)
-                 .attr("x2", x_right);
+            track.attr("x1", left_tick_pos)
+                 .attr("x2", right_tick_pos);
 
-            left_tick.attr("x1", x_left)
-                .attr("x2", x_left);
+            left_tick.attr("x1", left_tick_pos)
+                .attr("x2", left_tick_pos);
 
-            right_tick.attr("x1", x_right)
-                .attr("x2", x_right);
+            right_tick.attr("x1", right_tick_pos)
+                .attr("x2", right_tick_pos);
 
-            startline.attr("x1", x_left)
-                .attr("x2", x_left);
+            startline.attr("x1", start_time_pos)
+                .attr("x2", start_time_pos);
 
-            track_circle.attr("cx", x_left);
+            track_circle.attr("cx", start_time_pos);
+
+            delay_line.attr("x1", start_time_pos)
+                .attr("x2", left_tick_pos);
+
         });
 
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("cx", left_pos)
+        .attr("cx", start_time_pos)
         .attr("cy", base_y + geom.track_padding)
         .attr("r", 5)
         .attr("fill", "rgb(255,0,0)")
@@ -177,6 +190,15 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 
+
+    var delay_line = newg.append("line")
+        .attr("x1", start_time_pos)
+        .attr("x2", left_tick_pos)
+        .attr("y1", base_y)
+        .attr("y2", base_y)
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2")
+        //.call(drag_track);
 
 
     function delete_bar(){
