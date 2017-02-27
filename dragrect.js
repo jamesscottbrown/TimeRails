@@ -687,8 +687,8 @@ function setup(div_name, index) {
         //var y_upper = parseInt(dragrect.attr("y"));
         // var y_upper = dragrect.data("y");
 
-        var y_upper = getY();
-        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) );
+        var y_upper = getY().toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
 
         var html_sting, latex_string,  y_callbacks;
 
@@ -739,8 +739,8 @@ function setup(div_name, index) {
 
         }
 
-        var x_lower = getX();
-        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) );
+        var x_lower = getX().toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
 
 
         // 2 bounds
