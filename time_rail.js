@@ -201,7 +201,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .attr("y2", base_y)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2")
-        //.call(drag_track);
+        .call(drag_track_circle);
 
 
     function delete_bar(){
