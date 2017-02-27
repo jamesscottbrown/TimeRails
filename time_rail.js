@@ -111,34 +111,35 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         }
     };
 
+    var append_bar = function(bar_kind){
+        return function() {
+            if (timing_parent_bar){
+                timing_parent_bar.delete();
+            }
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, newg, helper_funcs_new);
+        }
+    };
+
+    var remove_parent_bar = function() {
+            if (timing_parent_bar){
+                timing_parent_bar.delete();
+                timing_parent_bar = false;
+            }
+    };
+
     var menu = [
         {
             title: 'Constraint starts at fixed time',
-            action: function() {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                    timing_parent_bar = false;
-                }
-            },
+            action: remove_parent_bar,
             disabled: false // optional, defaults to false
         },
         {
             title: 'Constraint applies at <i>some</i> time in range',
-            action: function() {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(level + 1, 'some', geom, svg, newg, helper_funcs_new);
-            }
+            action: append_bar('some')
         },
         {
             title: 'Constraint applies at <i>all</i> times in range',
-            action: function() {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(level + 1, 'all', geom, svg, newg, helper_funcs_new);
-            }
+            action: append_bar('all')
         }
     ];
 
@@ -199,6 +200,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         return track.attr("x2");
     }
 
+    
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time};
+        "get_end_time": get_end_time, append_bar: append_bar};
 }

@@ -252,7 +252,32 @@ function setup(div_name, index) {
                 }
                 timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
             }
+        },
+
+        {
+            divider: true
+        },
+        {
+            title: 'Eventually-Always',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
+                timing_parent_bar.append_bar('some')();
+            }
+        },
+        {
+            title: 'Always-Eventually',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
+                timing_parent_bar.append_bar('all')();
+            }
         }
+
     ];
 
 
