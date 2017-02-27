@@ -150,9 +150,12 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            var x_left = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            var start_line_length = left_tick_pos - start_time_pos;
+            var track_length = right_tick_pos - left_tick_pos;
+
+            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(svg.node())[0]);
             if (timing_parent_bar) {
-                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
+                x_left = imposeLimits(timing_parent_bar.get_start_time() + start_line_length, timing_parent_bar.get_end_time(), x_left);
             }
 
             left_tick_pos = left_tick_pos + (x_left - start_time_pos);
