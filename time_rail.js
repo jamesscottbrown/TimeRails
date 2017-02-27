@@ -111,7 +111,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
     var helper_funcs_new = {
         getStartX: function () {
-            return track.attr("x1");
+            return start_time_pos;
         }
     };
 
@@ -155,7 +155,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(svg.node())[0]);
             if (timing_parent_bar) {
-                x_left = imposeLimits(timing_parent_bar.get_start_time() + start_line_length, timing_parent_bar.get_end_time(), x_left);
+                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
             }
 
             left_tick_pos = left_tick_pos + (x_left - start_time_pos);
@@ -220,11 +220,11 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     }
 
     function get_start_time(){
-        return track.attr("x1");
+        return left_tick_pos;
     }
 
     function get_end_time(){
-        return track.attr("x2");
+        return right_tick_pos;
     }
 
 
