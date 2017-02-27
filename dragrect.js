@@ -295,6 +295,10 @@ function setup(div_name, index) {
             var cursor_x = d3.mouse(svg.node())[0];
             var newx = imposeLimits(0, timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
 
+            if (timing_parent_bar) {
+                newx = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), newx);
+            }
+
             startTime = XToTime(newx);
 
             dragbarleft

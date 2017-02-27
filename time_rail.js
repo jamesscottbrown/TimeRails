@@ -102,9 +102,6 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
 
-
-    // TODO: reduce duplication of menus ?
-
     var helper_funcs_new = {
         getStartX: function () {
             return track.attr("x1");
@@ -147,6 +144,10 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .origin(Object)
         .on("drag", function(){
             var x_left = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            if (timing_parent_bar) {
+                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
+            }
+
             var x_right = x_left + (track.attr("x2") - track.attr("x1"));
 
             track.attr("x1", x_left)
@@ -200,7 +201,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         return track.attr("x2");
     }
 
-    
+
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, append_bar: append_bar};
 }
