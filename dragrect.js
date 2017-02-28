@@ -436,22 +436,13 @@ function setup(div_name, index) {
                 endTime = XToTime(dragbarright.attr("cx"));
                 return x;
             });
-        dragbarleft
-            .attr("cx", function (d) {
-                return timeToX(startTime);
-            });
-        dragbarright
-            .attr("cx", function (d) {
-                return timeToX(startTime) + geom.width;
-            });
-        dragbartop
-            .attr("cx", function (d) {
-                return timeToX(startTime) + (geom.width / 2);
-            });
-        dragbarbottom
-            .attr("cx", function (d) {
-                return timeToX(startTime) + (geom.width / 2);
-            });
+        dragbarleft.attr("cx", timeToX(startTime));
+
+        dragbarright.attr("cx", timeToX(startTime) + geom.width);
+
+        dragbartop.attr("cx", timeToX(startTime) + (geom.width / 2));
+
+        dragbarbottom.attr("cx", timeToX(startTime) + (geom.width / 2));
 
         dragrect
             .attr("y", function (d) {
@@ -461,23 +452,14 @@ function setup(div_name, index) {
                 maxValue = YToVal(y);
                 return y;
             });
-        dragbarleft
-            .attr("cy", function (d) {
-                return valToY(maxValue) + (geom.height / 2);
-            });
-        dragbarright
-            .attr("cy", function (d) {
-                return valToY(maxValue) + (geom.height / 2);
-            });
-        dragbartop
-            .attr("cy", function (d) {
-                return valToY(maxValue);
-            });
-        dragbarbottom
-            .attr("cy", function (d) {
-                return valToY(maxValue) + geom.height;
-            });
 
+        dragbarleft.attr("cy", valToY(maxValue) + (geom.height / 2));
+
+        dragbarright.attr("cy", valToY(maxValue) + (geom.height / 2));
+
+        dragbartop.attr("cy", valToY(maxValue));
+
+        dragbarbottom.attr("cy", valToY(maxValue) + geom.height);
 
         var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
         delay_line.attr("y1", delay_line_height)
