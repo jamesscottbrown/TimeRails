@@ -15,7 +15,9 @@ function setup(div_name, index) {
 
         vertical_padding: 30,
         horizontal_padding: 30,
-        track_padding: 20
+        track_padding: 20,
+
+        delay_line_length: 30
     };
 
 
@@ -286,11 +288,22 @@ function setup(div_name, index) {
 
     ];
 
+    var track_circle_pos = timeToX(getX()) - geom.delay_line_length;
+
+    var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+    var delay_line = newg.append("line")
+        .attr("x1", track_circle_pos)
+        .attr("x2", timeToX(getX()))
+        .attr("y1", delay_line_height)
+        .attr("y2", delay_line_height)
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
 
     var startline = newg.append("line")
-        .attr("x1", timeToX(getX()))
-        .attr("x2", timeToX(getX()))
-        .attr("y1", valToY(getY()))
+        .attr("x1", track_circle_pos)
+        .attr("x2", track_circle_pos)
+        .attr("y1", delay_line_height)
         .attr("y2", geom.h - geom.track_padding)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
@@ -322,6 +335,7 @@ function setup(div_name, index) {
             dragbarbottom
                 .attr("cx", newx + (geom.width / 2));
 
+            delay_line.attr("x2", newx);
 
             move_startline();
         });
@@ -329,7 +343,7 @@ function setup(div_name, index) {
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("cx", timeToX(getX()))
+        .attr("cx", track_circle_pos)
         .attr("cy", geom.h - geom.track_padding)
         .attr("r", 5)
         .attr("fill", "rgb(255,0,0)")
@@ -339,12 +353,17 @@ function setup(div_name, index) {
         .call(drag_track_circle);
 
     function move_startline(){
-        startline.attr("x1", timeToX(getX()))
-            .attr("x2", timeToX(getX()))
-            .attr("y1", valToY(getY()))
+        var track_circle_pos = timeToX(getX()) - geom.delay_line_length;
+        var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+
+        startline.attr("x1", track_circle_pos)
+            .attr("x2", track_circle_pos)
+            .attr("y1", delay_line_height)
             .attr("y2", geom.h - geom.track_padding);
 
-        track_circle.attr("cx", timeToX(getX()));
+        track_circle.attr("cx", track_circle_pos);
+
+        delay_line.attr("x1", track_circle_pos);
     }
 
 
@@ -407,7 +426,7 @@ function setup(div_name, index) {
         dragrect
             .attr("x", function (d){
                 var rect_center = d3.mouse(svg.node())[0] - geom.width/2;
-                var x = imposeLimits(0, geom.w - geom.width, rect_center);
+                var x = imposeLimits(parseFloat(startline.attr("x1")), geom.w - geom.width, rect_center);
 
                 if (timing_parent_bar) {
                     x = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x);
@@ -459,9 +478,18 @@ function setup(div_name, index) {
                 return valToY(maxValue) + geom.height;
             });
 
+
+        var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+        delay_line.attr("y1", delay_line_height)
+            .attr("y2", delay_line_height)
+            .attr("x2", timeToX(startTime));
+
+        track_circle.attr("y2", delay_line_height);
+        
+        startline.attr("y1", delay_line_height);
+
         drag_fixed();
         update_text();
-        move_startline();
     }
 
     function drag_resize_left(d) {
@@ -474,8 +502,7 @@ function setup(div_name, index) {
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_x = d3.mouse(svg.node())[0];
-        var newx = imposeLimits(0, timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
-
+        var newx = imposeLimits(parseFloat(delay_line.attr("x1")), timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
         drag_resize_left_inner(oldx, newx);
     }
 
@@ -500,9 +527,10 @@ function setup(div_name, index) {
             .attr("cx", newx + (geom.width / 2))
             .attr("width", geom.width - geom.dragbarw);
 
+        delay_line.attr("x2", newx);
+
         set_edges();
         update_text();
-        move_startline();
     }
 
 
@@ -579,6 +607,12 @@ function setup(div_name, index) {
             .attr("cy", newy + (geom.height / 2))
             .attr("height", geom.height - geom.dragbarw);
 
+        var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+        delay_line.attr("y1", delay_line_height)
+                    .attr("y2", delay_line_height);
+
+        startline.attr("y2", delay_line_height);
+
         set_edges();
         update_text();
         move_startline();
@@ -618,6 +652,10 @@ function setup(div_name, index) {
         dragbarright
             .attr("cy", oldy + (geom.height / 2))
             .attr("height", geom.height - geom.dragbarw);
+
+        var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+        delay_line.attr("y1", delay_line_height)
+            .attr("y2", delay_line_height);
 
         set_edges();
         update_text();
@@ -685,7 +723,6 @@ function setup(div_name, index) {
         }
 
         update_text();
-        move_startline();
     }
 
 
