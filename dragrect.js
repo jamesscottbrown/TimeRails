@@ -770,13 +770,17 @@ function setup(div_name, index) {
 
         var latex_string = "";
 
-        // If rectangle has a parent bar, rectangle is represented by a |Global term starting at zero
+        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
         if (timing_parent_bar){
             latex_string = timing_parent_bar.getLatex();
-            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(dragrect.attr("x")));
-            length = length.toFixed(2);
 
-            return latex_string += "\\square_{[0," + length + "]}" + y_latex_string;
+            var delay_time = XToTime(parseFloat(dragrect.attr("x"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            delay_time = delay_time.toFixed(2);
+
+            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            length = length.toFixed(2);
+            
+            return latex_string += "\\square_{[" + delay_time + "," + length + "]}" + y_latex_string;
         }
 
         // Otherwise, rectangle is represented by a Global term with a start and end time
