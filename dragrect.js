@@ -374,7 +374,7 @@ function setup(div_name, index) {
     function rclick_right() {
         right_fixed = !right_fixed;
         if (!right_fixed) {
-            drag_resize_right_inner(timeToX(getX()), w);
+            drag_resize_right_inner(timeToX(getX()), geom.w);
         }
         set_edges();
     }
@@ -390,7 +390,7 @@ function setup(div_name, index) {
     function rclick_bottom() {
         bottom_fixed = !bottom_fixed;
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(valToY(getY()), h);
+            drag_resize_bottom_inner(valToY(getY()), geom.h);
         }
         set_edges();
     }
