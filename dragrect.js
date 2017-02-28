@@ -312,7 +312,7 @@ function setup(div_name, index) {
         .origin(Object)
         .on("drag", function(){
             var cursor_x = d3.mouse(svg.node())[0];
-            var newx = imposeLimits(0, timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
+            var newx = imposeLimits(0, geom.w, cursor_x);
 
             if (timing_parent_bar) {
                 newx = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), newx);
@@ -484,7 +484,7 @@ function setup(div_name, index) {
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_x = d3.mouse(svg.node())[0];
-        var newx = imposeLimits(parseFloat(delay_line.attr("x1")), timeToX(startTime) + geom.width - (geom.dragbarw / 2), cursor_x);
+        var newx = imposeLimits(parseFloat(delay_line.attr("x1")), timeToX(startTime) + geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
     }
 
@@ -523,7 +523,7 @@ function setup(div_name, index) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragx = imposeLimits(timeToX(startTime) + (geom.dragbarw / 2), geom.w, timeToX(startTime) + geom.width + d3.event.dx);
+        var dragx = imposeLimits(timeToX(startTime), geom.w, timeToX(startTime) + geom.width + d3.event.dx);
         drag_resize_right_inner(timeToX(startTime), dragx);
     }
 
