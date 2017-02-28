@@ -779,14 +779,17 @@ function setup(div_name, index) {
 
             var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(track_circle.attr("cx")));
             length = length.toFixed(2);
-            
-            return latex_string += "\\square_{[" + delay_time + "," + length + "]}" + y_latex_string;
+
+            if (delay_time == 0 && length == 0){
+                return latex_string + y_latex_string;
+            } else {
+                return latex_string + "\\square_{[" + delay_time + "," + length + "]}" + y_latex_string;
+            }
         }
 
         // Otherwise, rectangle is represented by a Global term with a start and end time
         if (y_constraint == "unconstrained") {
-            latex_string += "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
-            return latex_string;
+            return latex_string + "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
         }
         
         var x_lower = getX().toFixed(2);
@@ -800,8 +803,7 @@ function setup(div_name, index) {
             x_lower = "0";
         }
         
-        latex_string += "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
-        return latex_string;
+        return latex_string + "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
     }
 
     function describe_y() {
