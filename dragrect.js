@@ -549,7 +549,6 @@ function setup(div_name, index) {
 
         set_edges();
         update_text();
-        move_startline();
     }
 
 
