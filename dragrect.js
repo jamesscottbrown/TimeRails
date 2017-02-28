@@ -105,12 +105,13 @@ function setup(div_name, index) {
 
     var helper_funcs = {
        // timeToX: timeToX,
-        // XToTime: XToTime,
+        XToTime: XToTime,
         //valToY: valToY,
         //YToVal: YToVal,
         //getX: getX,
         //getY: getY,
-        getStartX: getStartX
+        getStartX: getStartX,
+        update_text: update_text
     }
 
 
@@ -231,6 +232,7 @@ function setup(div_name, index) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                     timing_parent_bar = false;
+                    update_text();
                 }
             },
             disabled: false // optional, defaults to false
@@ -242,6 +244,7 @@ function setup(div_name, index) {
                     timing_parent_bar.delete();
                 }
                 timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
+                update_text();
             }
         },
         {
@@ -251,6 +254,7 @@ function setup(div_name, index) {
                     timing_parent_bar.delete();
                 }
                 timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
+                update_text();
             }
         },
 
@@ -265,6 +269,7 @@ function setup(div_name, index) {
                 }
                 timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
                 timing_parent_bar.append_bar('some')();
+                update_text();
             }
         },
         {
@@ -275,6 +280,7 @@ function setup(div_name, index) {
                 }
                 timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
                 timing_parent_bar.append_bar('all')();
+                update_text();
             }
         }
 
@@ -711,6 +717,70 @@ function setup(div_name, index) {
         }
     }
 
+    function getYLatexString(){
+
+        var y_upper = getY().toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
+
+        var latex_string;
+        
+        // 2 bounds
+        if (top_fixed && bottom_fixed) {
+            latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
+        }
+
+        // 1 bound
+        else if (top_fixed) {
+            latex_string = "(x_" + index + "<" + y_upper + ")";
+        }
+        else if (bottom_fixed) {
+            latex_string = "(" + y_lower + "< x_" + index + ")";
+        }
+
+        // 0 bounds
+        else {
+            // Don't convert, but keep as an easily checkable sentinel value
+            latex_string = "";
+        }
+
+        return latex_string;
+    }
+
+    function getLatexString(){
+        var y_latex_string = getYLatexString();
+        [y_constraint, y_callbacks] = describe_y();
+
+        var latex_string = "";
+
+        // If rectangle has a parent bar, rectangle is represented by a |Global term starting at zero
+        if (timing_parent_bar){
+            latex_string = timing_parent_bar.getLatex();
+            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(dragrect.attr("x")));
+            length = length.toFixed(2);
+
+            return latex_string += "\\square_{[0," + length + "]}" + y_latex_string;
+        }
+
+        // Otherwise, rectangle is represented by a Global term with a start and end time
+        if (y_constraint == "unconstrained") {
+            latex_string += "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
+            return latex_string;
+        }
+        
+        var x_lower = getX().toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
+        
+        if (!right_fixed){
+            x_upper = "\\infty";
+        }
+        
+        if (!left_fixed){
+            x_lower = "0";
+        }
+        
+        latex_string += "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
+        return latex_string;
+    }
 
     function describe_y() {
         //var y_upper = parseInt(dragrect.attr("y"));
@@ -719,51 +789,47 @@ function setup(div_name, index) {
         var y_upper = getY().toFixed(2);
         var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
 
-        var html_sting, latex_string,  y_callbacks;
+        var html_sting,  y_callbacks;
 
         // 2 bounds
         if (top_fixed && bottom_fixed) {
             y_callbacks = [change_value_lower, change_value_upper];
-            latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
             html_sting = get_y_option_box("between") + "<input id='y_1' value='" + y_lower + "' />" + " and " + "<input id='y_2' value='" + y_upper + "'/>";
         }
 
         // 1 bound
         else if (top_fixed) {
             y_callbacks = [change_value_upper];
-            latex_string = "(x_" + index + "<" + y_upper + ")";
             html_sting = get_y_option_box("below") + "<input id='y_1' value='" + y_upper + "'/>";
         }
         else if (bottom_fixed) {
             y_callbacks = [change_value_lower];
-            latex_string = "(" + y_lower + "< x_" + index + ")";
             html_sting = get_y_option_box("above") + "<input id='y_1' value='" + y_lower + "' />";
         }
 
         // 0 bounds
         else {
             // Don't convert, but keep as an easily checkable sentinel value
-            latex_string = "";
             y_callbacks = [];
             html_sting = "unconstrained";
         }
 
-        return [html_sting, latex_string, y_callbacks];
+        return [html_sting, y_callbacks];
     }
 
     function describe_constraint() {
         var y_constraint, y_callbacks, y_latex_string;
-        [y_constraint, y_latex_string, y_callbacks] = describe_y();
+        [y_constraint, y_callbacks] = describe_y();
 
         var html_string;
-        var latex_string;
         var x_callbacks;
+
+        var latex_string = getLatexString();
 
         if (y_constraint == "unconstrained") {
 
             html_string = get_y_option_box("unconstrained");
             x_callbacks = [];
-            latex_string = "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
             return [html_string, x_callbacks, y_callbacks, latex_string];
 
         }
@@ -775,27 +841,23 @@ function setup(div_name, index) {
         // 2 bounds
         if (left_fixed && right_fixed) {
             html_string = y_constraint + ", " + get_time_option_box("between times") + "<input id='time_1' value='" + x_lower + "' />" + " and " + "<input id='time_2' value='" + x_upper + "' />";
-            latex_string = "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
             x_callbacks = [change_time_value_lower, change_time_value_upper];
         }
 
         // 1 bound
         else if (left_fixed) {
             html_string = y_constraint + get_time_option_box("after") + "<input id='time_1' value='" + x_lower + "' />";
-            latex_string = "\\square_{[" + x_lower + ", \\infty]}" + y_latex_string;
             x_callbacks = [change_time_value_lower];
         }
         else if (right_fixed) {
             html_string = y_constraint + get_time_option_box("before") + "<input id='time_1' value='" + x_upper + "' />";
             x_callbacks = [change_time_value_upper];
-            latex_string = "\\square_{[0," + x_upper + "]}" + y_latex_string;
         }
 
         // 0 bounds
         else {
             html_string = y_constraint + get_time_option_box("always");
             x_callbacks = [];
-            latex_string = "\\square_{[0, \\infty]}" + y_latex_string;
         }
 
         return [html_string, x_callbacks, y_callbacks, latex_string];

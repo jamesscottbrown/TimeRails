@@ -49,6 +49,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             delay_line.attr("x1", start_time_pos)
                 .attr("x2", left_tick_pos);
+
+            helper_funcs.update_text();
         });
 
     var track = newg.append("line")
@@ -71,6 +73,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
                      .attr("x2", left_tick_pos);
 
             delay_line.attr("x2", left_tick_pos);
+
+            helper_funcs.update_text();
         });
 
     var left_tick = newg.append("line")
@@ -90,6 +94,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             track.attr("x2", right_tick_pos);
             right_tick.attr("x1", right_tick_pos)
                       .attr("x2", right_tick_pos);
+
+            helper_funcs.update_text();
         });
 
     var right_tick = newg.append("line")
@@ -112,7 +118,9 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var helper_funcs_new = {
         getStartX: function () {
             return start_time_pos;
-        }
+        },
+        XToTime: helper_funcs.XToTime,
+        update_text: helper_funcs.update_text
     };
 
     var append_bar = function(bar_kind){
@@ -121,6 +129,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
                 timing_parent_bar.delete();
             }
             timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, newg, helper_funcs_new);
+            helper_funcs.update_text();
         }
     };
 
@@ -129,6 +138,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
                 timing_parent_bar.delete();
                 timing_parent_bar = false;
             }
+        helper_funcs.update_text();
     };
 
     var menu = [
@@ -179,6 +189,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             delay_line.attr("x1", start_time_pos)
                 .attr("x2", left_tick_pos);
 
+            helper_funcs.update_text();
         });
 
     var track_circle = newg
@@ -227,7 +238,32 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         return right_tick_pos;
     }
 
+    function getLatex(){
+        var latex_string = "";
+        var t_lower, t_upper;
+
+        if (timing_parent_bar){
+            latex_string += timing_parent_bar.getLatex();
+
+            // start and end times are relative to te track_circle
+            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(start_time_pos);
+            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
+        } else {
+            // start and end times are absolute
+            t_lower = helper_funcs.XToTime(left_tick_pos);
+            t_upper = helper_funcs.XToTime(right_tick_pos);
+        }
+
+        t_lower = t_lower.toFixed(2);
+        t_upper = t_upper.toFixed(2);
+
+        var symbol = (kind == "some") ? "\\diamond" : "\\square";
+
+        latex_string += symbol + "_{[" + t_lower + "," + t_upper + "]}";
+        return latex_string;
+    }
+
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, append_bar: append_bar};
+        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex};
 }
