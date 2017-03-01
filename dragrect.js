@@ -19,7 +19,8 @@ function setup(div_name, index) {
 
         delay_line_length: 30,
 
-        specification_fixed: false
+        specification_fixed: false,
+        use_letters: false
     };
 
 
@@ -133,6 +134,16 @@ function setup(div_name, index) {
         .attr("value", "false")
         .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
     var constant_label = options_form.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
+    var use_letters = options_form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "use_letters_checkbox")
+        .attr("value", "false")
+        .on("change", function(){
+            geom.use_letters = !geom.use_letters;
+            update_text();
+        });
+    var use_letters_label = options_form.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
 
     var startTime = (xRange[0] + xRange[1]) / 2;
@@ -636,7 +647,7 @@ function setup(div_name, index) {
 
     function drag_resize_bottom(d) {
         if (geom.specification_fixed){ return; }
-        
+
         if (!bottom_fixed) {
             return;
         }
@@ -819,7 +830,8 @@ function setup(div_name, index) {
             if (delay_time == 0 && length == 0){
                 return latex_string + y_latex_string;
             } else {
-                return latex_string + "\\square_{[" + delay_time + "," + length + "]}" + y_latex_string;
+                var symbol = geom.use_letters ? ' G' : ' \\square';
+                return latex_string + symbol + "_{[" + delay_time + "," + length + "]}" + y_latex_string;
             }
         }
 
@@ -838,8 +850,9 @@ function setup(div_name, index) {
         if (!left_fixed){
             x_lower = "0";
         }
-        
-        return latex_string + "\\square_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
+
+        var symbol = geom.use_letters ? ' G' : ' \\square';
+        return latex_string + symbol + "_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
     }
 
     function describe_y() {

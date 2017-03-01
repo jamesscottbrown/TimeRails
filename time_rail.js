@@ -261,8 +261,16 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         t_lower = t_lower.toFixed(2);
         t_upper = t_upper.toFixed(2);
 
-        var symbol = (kind == "some") ? "\\diamond" : "\\square";
+        var symbol;
+        if (kind == "some"){
+            symbol = geom.use_letters ? ' F' : ' \\diamond';
+        } else {
+            symbol = geom.use_letters ? ' G' : ' \\square';
+        }
 
+        //         var symbol = use_letters ? ' G' : ' \\square';
+
+        
         latex_string += symbol + "_{[" + t_lower + "," + t_upper + "]}";
         return latex_string;
     }
