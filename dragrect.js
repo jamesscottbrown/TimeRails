@@ -373,13 +373,13 @@ function setup(div_name, index) {
             drag_resize_left_inner(timeToX(getX()), 0);
         }
         if (!right_fixed) {
-            drag_resize_right_inner(timeToX(getX()), w);
+            drag_resize_right_inner(timeToX(getX()), geom.w);
         }
         if (!top_fixed) {
             drag_resize_top_inner(valToY(getY()), 0);
         }
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(valToY(getY()), h);
+            drag_resize_bottom_inner(valToY(getY()), geom.h);
         }
 
     }
