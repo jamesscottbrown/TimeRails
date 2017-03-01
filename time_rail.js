@@ -14,6 +14,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .origin(Object)
         .on("drag", function(){
 
+            if (geom.specification_fixed){ return; }
+
             var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(svg.node())[0];
 
@@ -41,7 +43,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             right_tick.attr("x1", right_tick_pos)
                 .attr("x2", right_tick_pos);
-            
+
             delay_line.attr("x2", left_tick_pos);
 
             helper_funcs.update_text();
@@ -60,6 +62,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_left_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
+            if (geom.specification_fixed){ return; }
+
             left_tick_pos = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
 
             track.attr("x1", left_tick_pos);
@@ -83,6 +87,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_right_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
+            if (geom.specification_fixed){ return; }
+
             right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(svg.node())[0]);
 
             track.attr("x2", right_tick_pos);
@@ -154,6 +160,10 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
+            if (geom.specification_fixed && !timing_parent_bar){
+                return;
+            }
+
             var start_line_length = left_tick_pos - start_time_pos;
             var track_length = right_tick_pos - left_tick_pos;
 

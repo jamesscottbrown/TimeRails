@@ -17,7 +17,9 @@ function setup(div_name, index) {
         horizontal_padding: 30,
         track_padding: 20,
 
-        delay_line_length: 30
+        delay_line_length: 30,
+
+        specification_fixed: false
     };
 
 
@@ -121,6 +123,17 @@ function setup(div_name, index) {
     p.text("X is");
     var placeholder = p.append("b");
     var placeholder_latex = p.append("div");
+
+
+
+    var options_form = d3.select(div_name).append("div").append("form");
+    var constant = options_form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "constant_checkbox")
+        .attr("value", "false")
+        .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
+    var constant_label = options_form.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
 
     var startTime = (xRange[0] + xRange[1]) / 2;
     var maxValue = (yRange[0] + yRange[1]) / 2;
@@ -311,6 +324,11 @@ function setup(div_name, index) {
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
+
+            if (geom.specification_fixed && !timing_parent_bar){
+                return;
+            }
+
             var cursor_x = d3.mouse(svg.node())[0];
             var newx = imposeLimits(0, geom.w, cursor_x);
 
@@ -386,6 +404,8 @@ function setup(div_name, index) {
 
 // Handle right-clicks on control points
     function rclick_left() {
+        if (geom.specification_fixed){ return; }
+
         left_fixed = !left_fixed;
 
         if (!left_fixed) {
@@ -397,6 +417,8 @@ function setup(div_name, index) {
     }
 
     function rclick_right() {
+        if (geom.specification_fixed){ return; }
+
         right_fixed = !right_fixed;
         if (!right_fixed) {
             drag_resize_right_inner(timeToX(getX()), geom.w);
@@ -405,6 +427,8 @@ function setup(div_name, index) {
     }
 
     function rclick_top() {
+        if (geom.specification_fixed){ return; }
+
         top_fixed = !top_fixed;
         if (!top_fixed) {
             drag_resize_top_inner(valToY(getY()), 0);
@@ -413,6 +437,8 @@ function setup(div_name, index) {
     }
 
     function rclick_bottom() {
+        if (geom.specification_fixed){ return; }
+
         bottom_fixed = !bottom_fixed;
         if (!bottom_fixed) {
             drag_resize_bottom_inner(valToY(getY()), geom.h);
@@ -423,6 +449,8 @@ function setup(div_name, index) {
 
 // Handle dragging and resizing
     function dragmove(d) {
+        if (geom.specification_fixed){ return; }
+
         dragrect
             .attr("x", function (d){
                 var rect_center = d3.mouse(svg.node())[0] - geom.width/2;
@@ -475,6 +503,8 @@ function setup(div_name, index) {
     }
 
     function drag_resize_left(d) {
+        if (geom.specification_fixed){ return; }
+
         if (!left_fixed) {
             return;
         }
@@ -517,6 +547,8 @@ function setup(div_name, index) {
 
 
     function drag_resize_right(d) {
+        if (geom.specification_fixed){ return; }
+
         if (!right_fixed) {
             return;
         }
@@ -553,6 +585,8 @@ function setup(div_name, index) {
 
 
     function drag_resize_top(d) {
+        if (geom.specification_fixed){ return; }
+
         if (!top_fixed) {
             return;
         }
@@ -601,6 +635,8 @@ function setup(div_name, index) {
 
 
     function drag_resize_bottom(d) {
+        if (geom.specification_fixed){ return; }
+        
         if (!bottom_fixed) {
             return;
         }
