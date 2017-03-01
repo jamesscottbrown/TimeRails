@@ -105,7 +105,7 @@ function setup(div_name, index) {
     }
 
     function getStartX(){
-        return timeToX(startTime);
+        return track_circle.attr("cx");
     }
 
     var helper_funcs = {
@@ -343,8 +343,9 @@ function setup(div_name, index) {
             var cursor_x = d3.mouse(svg.node())[0];
             var newx = imposeLimits(0, geom.w, cursor_x);
 
+            var delay_length = parseFloat(delay_line.attr("x2")) - parseFloat(delay_line.attr("x1"));
             if (timing_parent_bar) {
-                newx = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), newx);
+                newx = imposeLimits(timing_parent_bar.get_start_time() + delay_length, timing_parent_bar.get_end_time() + delay_length, newx);
             }
 
             startTime = XToTime(newx);
