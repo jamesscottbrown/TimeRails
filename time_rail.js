@@ -41,14 +41,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             right_tick.attr("x1", right_tick_pos)
                 .attr("x2", right_tick_pos);
-
-            startline.attr("x1", start_time_pos)
-                .attr("x2", start_time_pos);
-
-            track_circle.attr("cx", start_time_pos);
-
-            delay_line.attr("x1", start_time_pos)
-                .attr("x2", left_tick_pos);
+            
+            delay_line.attr("x2", left_tick_pos);
 
             helper_funcs.update_text();
         });
