@@ -510,6 +510,8 @@ function setup(div_name, index) {
         
         startline.attr("y1", delay_line_height);
 
+        geom.delay_line_length = parseFloat(dragrect.attr("x")) - parseFloat(track_circle.attr("cx"));
+
         drag_fixed();
         update_text();
     }
