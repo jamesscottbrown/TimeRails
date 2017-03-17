@@ -61,3 +61,9 @@ def about():
     """About page."""
     form = LoginForm(request.form)
     return render_template('public/about.html', form=form)
+
+@blueprint.route('/spec/')
+def spec():
+    """View of a specification."""
+    form = LoginForm(request.form)
+    return render_template('spec.html', form=form)

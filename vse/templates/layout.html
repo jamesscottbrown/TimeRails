@@ -61,10 +61,11 @@
 {% include "footer.html" %}
 
 <!-- JavaScript at the bottom for fast page loading -->
+{% block js %}{% endblock %}
 {% assets "js_all" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
-{% block js %}{% endblock %}
+
 <!-- end scripts -->
 {% endblock %}
 </body>

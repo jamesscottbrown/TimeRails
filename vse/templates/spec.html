@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+ {% block css %}
+    {% assets "css_spec" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
+
+{% block content %}
+<div class="body-content">
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+<h1>Visual specification system</h1>
+
+<p>Number of variables <b id='num_vars_placeholder'>1</b> <button onclick="add_subplot()">+</button><button onclick="remove_subplot()">-</button></p>
+
+<div id="diagrams">
+    <div id="constraint_diagram_1"></div>
+</div>
+
+
+</div>
+{% endblock %}
+
+
+
+{% block js %}
+{% assets "js_spec" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock %}
+
+
