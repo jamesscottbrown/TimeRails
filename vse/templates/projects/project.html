@@ -1,0 +1,24 @@
+
+{% extends "layout.html" %}
+{% block content %}
+    <h1>{{project.name}}</h1>
+
+    <blockquote>{{project.description}}</blockquote>
+
+    <div><a href="/projects/{{project.id}}/edit"><i class="fa fa-pencil"></i>Edit project details</a></div>
+    <div><a href="/projects/{{project.id}}/delete"><i class="fa fa-trash-o"></i>Delete project</a></div>
+
+
+    {% for spec in project.specifications %}
+        <h2>{{ spec.name }}</h2>
+        <blockquote>{{spec.description}}</blockquote>
+
+        <div><a href="/specifications/{{spec.id}}">View specification</a></div>
+        <div><a href="/specifications/{{spec.id}}/edit"><i class="fa fa-pencil"></i>Edit specification details</a></div>
+        <div><a href="/specifications/{{spec.id}}/delete"><i class="fa fa-trash-o"></i>Delete specification</a></div>
+    {% endfor %}
+
+    <div><a href="/specifications/add?project={{project.id}}"><i class="fa fa-plus" aria-hidden="true"></i>Add a new specification to the project</a></div>
+
+{% endblock %}
+

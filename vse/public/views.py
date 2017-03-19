@@ -27,7 +27,7 @@ def home():
         if form.validate_on_submit():
             login_user(form.user)
             flash('You are logged in.', 'success')
-            redirect_url = request.args.get('next') or url_for('user.members')
+            redirect_url = request.args.get('next') or url_for('project.list_projects')
             return redirect(redirect_url)
         else:
             flash_errors(form)
@@ -61,9 +61,3 @@ def about():
     """About page."""
     form = LoginForm(request.form)
     return render_template('public/about.html', form=form)
-
-@blueprint.route('/spec/')
-def spec():
-    """View of a specification."""
-    form = LoginForm(request.form)
-    return render_template('spec.html', form=form)
