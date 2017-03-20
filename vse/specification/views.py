@@ -106,9 +106,6 @@ def view_project(specification_id):
         flash('No such specification!', 'danger')
         return redirect('.')
 
-    print current_spec, current_spec.project_id
-    print current_spec.project
-
     if current_spec.project.user != current_user:
         flash('Not your project!', 'danger')
         return redirect('.')
