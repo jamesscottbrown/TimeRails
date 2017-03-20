@@ -23,9 +23,4 @@ class SpecificationForm(Form):
         if not initial_validation:
             return False
 
-        #project = Project.query.filter_by(name=self.name.data).first()
-        #if project:
-        #    self.name.errors.append('You already have a project with that name')
-        #    return False
-
         return True
