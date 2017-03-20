@@ -96,7 +96,7 @@ function setup(div_name, index) {
     function YToVal(y) {
         return yScale.invert(y);
     }
-    
+
     var helper_funcs = {
         getStartX: function (){ return track_circle_pos; },
         XToTime: XToTime,
@@ -161,18 +161,12 @@ function setup(div_name, index) {
 
     var dragrect = newg.append("rect")
         .attr("id", "active")
-        .attr("x", start_time_pos)
-        .attr("y", rect_top)
-        .attr("height", geom.height)
-        .attr("width", geom.width)
         .attr("fill", "lightgreen")
         .attr("fill-opacity", .25)
         .attr("cursor", "move")
         .call(drag);
 
     var dragbarleft = newg.append("circle")
-        .attr("cx", start_time_pos)
-        .attr("cy", rect_top+ (geom.height / 2))
         .attr("id", "dragleft")
         .attr("r", geom.dragbarw / 2)
         .attr("fill", "lightgray")
@@ -187,8 +181,6 @@ function setup(div_name, index) {
         }]));
 
     var dragbarright = newg.append("circle")
-        .attr("cx", start_time_pos + geom.width)
-        .attr("cy", rect_top + geom.height / 2)
         .attr("id", "dragright")
         .attr("r", geom.dragbarw / 2)
         .attr("fill", "lightgray")
@@ -204,8 +196,6 @@ function setup(div_name, index) {
 
 
     var dragbartop = newg.append("circle")
-        .attr("cx", start_time_pos + geom.width / 2)
-        .attr("cy", rect_top)
         .attr("r", geom.dragbarw / 2)
         .attr("id", "dragleft")
         .attr("fill", "lightgray")
@@ -221,8 +211,6 @@ function setup(div_name, index) {
 
 
     var dragbarbottom = newg.append("circle")
-        .attr("cx", start_time_pos + (geom.width / 2))
-        .attr("cy", rect_top + geom.height)
         .attr("id", "dragright")
         .attr("r", geom.dragbarw / 2)
         .attr("fill", "lightgray")
@@ -302,19 +290,11 @@ function setup(div_name, index) {
 
     var delay_line_height = rect_top + geom.height/2;
     var delay_line = newg.append("line")
-        .attr("x1", track_circle_pos)
-        .attr("x2", start_time_pos)
-        .attr("y1", delay_line_height)
-        .attr("y2", delay_line_height)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
 
 
     var startline = newg.append("line")
-        .attr("x1", track_circle_pos)
-        .attr("x2", track_circle_pos)
-        .attr("y1", delay_line_height)
-        .attr("y2", geom.h - geom.track_padding)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
 
@@ -391,8 +371,6 @@ function setup(div_name, index) {
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("cx", track_circle_pos)
-        .attr("cy", geom.h - geom.track_padding)
         .attr("r", 5)
         .attr("fill", "rgb(255,0,0)")
         .attr("fill-opacity", .5)
@@ -999,7 +977,6 @@ function setup(div_name, index) {
         drag_resize_right_inner(start_time_pos, timeToX(parseFloat(this.value)));
     }
 
+    adjust_everything(true);
     set_edges();
-    describe_constraint();
-    
 }
