@@ -19,9 +19,14 @@ function setup(div_name, index) {
 
         delay_line_length: 30,
 
+        rect_top: 450 / 2,
+        start_time_pos: 750 / 2,
+
         specification_fixed: false,
         use_letters: false
     };
+    geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
+    geom.delay_line_height = geom.rect_top + geom.height/2;
 
 
     var top_fixed = true;
@@ -98,7 +103,7 @@ function setup(div_name, index) {
     }
 
     var helper_funcs = {
-        getStartX: function (){ return track_circle_pos; },
+        getStartX: function (){ return geom.track_circle_pos; },
         XToTime: XToTime,
         update_text: update_text
     };
@@ -152,10 +157,6 @@ function setup(div_name, index) {
             error: function (result) {}
             })
         });
-
-    var start_time_pos = timeToX((xRange[0] + xRange[1]) / 2);
-
-    var rect_top = YToVal((yRange[0] + yRange[1]) / 2);
 
     var newg = svg.append("g");
 
@@ -286,9 +287,6 @@ function setup(div_name, index) {
 
     ];
 
-    var track_circle_pos = start_time_pos - geom.delay_line_length;
-
-    var delay_line_height = rect_top + geom.height/2;
     var delay_line = newg.append("line")
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
@@ -299,43 +297,43 @@ function setup(div_name, index) {
         .style("stroke-width", "2");
 
     function adjust_everything(update_description){
-        // We rely on: geom.width, geom.height, rect_top, start_time_pos, track_circle_pos, geom.h
+        // We rely on: geom.width, geom.height, , geom.h
 
         // convenience quanities (redundant)
-        geom.delay_line_length = start_time_pos - track_circle_pos;
-        delay_line_height = rect_top + (geom.height/2);
+        geom.delay_line_length = geom.start_time_pos - geom.track_circle_pos;
+        geom.delay_line_height = geom.rect_top + (geom.height/2);
 
         // move things
-        dragbarleft.attr("cx", start_time_pos)
-            .attr("cy", delay_line_height);
+        dragbarleft.attr("cx", geom.start_time_pos)
+            .attr("cy", geom.delay_line_height);
 
-        dragbarright.attr("cx", start_time_pos + geom.width)
-            .attr("cy", delay_line_height);
+        dragbarright.attr("cx", geom.start_time_pos + geom.width)
+            .attr("cy", geom.delay_line_height);
 
-        dragbartop.attr("cx", start_time_pos + (geom.width / 2))
-            .attr("cy", rect_top);
+        dragbartop.attr("cx", geom.start_time_pos + (geom.width / 2))
+            .attr("cy", geom.rect_top);
 
-        dragbarbottom.attr("cx", start_time_pos + (geom.width / 2))
-            .attr("cy", rect_top + geom.height);
+        dragbarbottom.attr("cx", geom.start_time_pos + (geom.width / 2))
+            .attr("cy", geom.rect_top + geom.height);
 
         dragrect
-            .attr("x", start_time_pos)
-            .attr("y", rect_top)
+            .attr("x", geom.start_time_pos)
+            .attr("y", geom.rect_top)
             .attr("height", geom.height)
             .attr("width", geom.width);
 
         delay_line
-            .attr("x1", track_circle_pos)
-            .attr("x2", start_time_pos)
-            .attr("y1", delay_line_height)
-            .attr("y2", delay_line_height);
-        
-        startline.attr("x1", track_circle_pos)
-            .attr("x2", track_circle_pos)
-            .attr("y1", delay_line_height)
+            .attr("x1", geom.track_circle_pos)
+            .attr("x2", geom.start_time_pos)
+            .attr("y1", geom.delay_line_height)
+            .attr("y2", geom.delay_line_height);
+
+        startline.attr("x1", geom.track_circle_pos)
+            .attr("x2", geom.track_circle_pos)
+            .attr("y1", geom.delay_line_height)
             .attr("y2", geom.h - geom.track_padding);
 
-        track_circle.attr("cx", track_circle_pos)
+        track_circle.attr("cx", geom.track_circle_pos)
                 .attr("cy", geom.h - geom.track_padding);
 
         if (update_description){
@@ -361,9 +359,9 @@ function setup(div_name, index) {
                                     timing_parent_bar.get_end_time() + geom.delay_line_length, newx);
             }
 
-            var shift = newx - start_time_pos;
-            track_circle_pos += shift;
-            start_time_pos += shift;
+            var shift = newx - geom.start_time_pos;
+            geom.track_circle_pos += shift;
+            geom.start_time_pos += shift;
 
             adjust_everything(false);
         });
@@ -382,16 +380,16 @@ function setup(div_name, index) {
     function drag_fixed() {
         // resize so edges remain on axes if necessary
         if (!left_fixed) {
-            drag_resize_left_inner(start_time_pos, 0);
+            drag_resize_left_inner(geom.start_time_pos, 0);
         }
         if (!right_fixed) {
-            drag_resize_right_inner(start_time_pos, geom.w);
+            drag_resize_right_inner(geom.start_time_pos, geom.w);
         }
         if (!top_fixed) {
-            drag_resize_top_inner(rect_top, 0);
+            drag_resize_top_inner(geom.rect_top, 0);
         }
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(rect_top, geom.h);
+            drag_resize_bottom_inner(geom.rect_top, geom.h);
         }
 
     }
@@ -403,7 +401,7 @@ function setup(div_name, index) {
         left_fixed = !left_fixed;
 
         if (!left_fixed) {
-            drag_resize_left_inner(start_time_pos, 0);
+            drag_resize_left_inner(geom.start_time_pos, 0);
         }
 
         set_edges();
@@ -415,7 +413,7 @@ function setup(div_name, index) {
 
         right_fixed = !right_fixed;
         if (!right_fixed) {
-            drag_resize_right_inner(start_time_pos, geom.w);
+            drag_resize_right_inner(geom.start_time_pos, geom.w);
         }
         set_edges();
     }
@@ -425,7 +423,7 @@ function setup(div_name, index) {
 
         top_fixed = !top_fixed;
         if (!top_fixed) {
-            drag_resize_top_inner(rect_top, 0);
+            drag_resize_top_inner(geom.rect_top, 0);
         }
         set_edges();
     }
@@ -435,7 +433,7 @@ function setup(div_name, index) {
 
         bottom_fixed = !bottom_fixed;
         if (!bottom_fixed) {
-            drag_resize_bottom_inner(rect_top, geom.h);
+            drag_resize_bottom_inner(geom.rect_top, geom.h);
         }
         set_edges();
     }
@@ -447,13 +445,13 @@ function setup(div_name, index) {
 
         // horizontal movement
         var rect_center = d3.mouse(svg.node())[0] - geom.width/2;
-        var new_start_pos = imposeLimits(track_circle_pos, geom.w - geom.width, rect_center);
+        var new_start_pos = imposeLimits(geom.track_circle_pos, geom.w - geom.width, rect_center);
 
-        start_time_pos = new_start_pos;
+        geom.start_time_pos = new_start_pos;
 
         // vertical movement
         var rect_center = d3.mouse(svg.node())[1] - geom.height/2;
-        rect_top = imposeLimits(0, geom.h - geom.height, rect_center);
+        geom.rect_top = imposeLimits(0, geom.h - geom.height, rect_center);
         adjust_everything(true);
     }
 
@@ -464,17 +462,17 @@ function setup(div_name, index) {
             return;
         }
 
-        var oldx = start_time_pos;
+        var oldx = geom.start_time_pos;
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_x = d3.mouse(svg.node())[0];
-        var newx = imposeLimits(track_circle_pos, start_time_pos + geom.width, cursor_x);
+        var newx = imposeLimits(geom.track_circle_pos, geom.start_time_pos + geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
     }
 
     function drag_resize_left_inner(oldx, newx) {
-        start_time_pos = newx;
+        geom.start_time_pos = newx;
         geom.width = geom.width + (oldx - newx);
 
         adjust_everything(true);
@@ -491,8 +489,8 @@ function setup(div_name, index) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragx = imposeLimits(start_time_pos, geom.w, start_time_pos + geom.width + d3.event.dx);
-        drag_resize_right_inner(start_time_pos, dragx);
+        var dragx = imposeLimits(geom.start_time_pos, geom.w, geom.start_time_pos + geom.width + d3.event.dx);
+        drag_resize_right_inner(geom.start_time_pos, dragx);
     }
 
     function drag_resize_right_inner(oldx_left, newx_right) {
@@ -509,12 +507,12 @@ function setup(div_name, index) {
             return;
         }
 
-        var oldy = rect_top;
+        var oldy = geom.rect_top;
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_y = d3.mouse(svg.node())[1];
-        var newy = imposeLimits(0, rect_top + geom.height - (geom.dragbarw / 2), cursor_y);
+        var newy = imposeLimits(0, geom.rect_top + geom.height - (geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner(oldy, newy);
     }
 
@@ -522,7 +520,7 @@ function setup(div_name, index) {
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        rect_top = newy;
+        geom.rect_top = newy;
         geom.height = geom.height + (oldy - newy);
         adjust_everything(true);
 
@@ -539,8 +537,8 @@ function setup(div_name, index) {
 
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
-        var dragy = imposeLimits(rect_top + (geom.dragbarw / 2), geom.h, rect_top + geom.height + d3.event.dy);
-        drag_resize_bottom_inner(rect_top, dragy);
+        var dragy = imposeLimits(geom.rect_top + (geom.dragbarw / 2), geom.h, geom.rect_top + geom.height + d3.event.dy);
+        drag_resize_bottom_inner(geom.rect_top, dragy);
     }
 
     function drag_resize_bottom_inner(oldy, newy) {
@@ -647,11 +645,11 @@ function setup(div_name, index) {
 
     function getYLatexString(){
 
-        var y_upper = YToVal(rect_top).toFixed(2);
+        var y_upper = YToVal(geom.rect_top).toFixed(2);
         var y_lower = YToVal( valToY(y_upper) + geom.width ).toFixed(2);
 
         var latex_string;
-        
+
         // 2 bounds
         if (top_fixed && bottom_fixed) {
             latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
@@ -684,10 +682,10 @@ function setup(div_name, index) {
         if (timing_parent_bar){
             latex_string = timing_parent_bar.getLatex();
 
-            var delay_time = XToTime(start_time_pos) - XToTime(track_circle_pos);
+            var delay_time = XToTime(geom.start_time_pos) - XToTime(geom.track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(start_time_pos) + geom.width - XToTime(track_circle_pos);
+            var length =   XToTime(geom.start_time_pos) + geom.width - XToTime(geom.track_circle_pos);
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
@@ -702,14 +700,14 @@ function setup(div_name, index) {
         if (y_constraint == "unconstrained") {
             return latex_string + "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
         }
-        
-        var x_lower = XToTime(start_time_pos).toFixed(2);
+
+        var x_lower = XToTime(geom.start_time_pos).toFixed(2);
         var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
-        
+
         if (!right_fixed){
             x_upper = "\\infty";
         }
-        
+
         if (!left_fixed){
             x_lower = "0";
         }
@@ -719,7 +717,7 @@ function setup(div_name, index) {
     }
 
     function describe_y() {
-        var y_upper = YToVal(rect_top).toFixed(2);
+        var y_upper = YToVal(geom.rect_top).toFixed(2);
         var y_lower = YToVal( valToY(y_upper) + geom.height ).toFixed(2);
 
         var html_sting,  y_callbacks;
@@ -767,7 +765,7 @@ function setup(div_name, index) {
 
         }
 
-        var x_lower = XToTime(start_time_pos).toFixed(2);
+        var x_lower = XToTime(geom.start_time_pos).toFixed(2);
         var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
 
 
@@ -838,7 +836,7 @@ function setup(div_name, index) {
 
     function getYSpecString(){
 
-        var y_upper = YToVal(rect_top).toFixed(2);
+        var y_upper = YToVal(geom.rect_top).toFixed(2);
         var y_lower = YToVal( valToY(y_upper) + geom.height ).toFixed(2);
 
         var spec_string;
@@ -875,10 +873,10 @@ function setup(div_name, index) {
         if (timing_parent_bar){
             spec_string = timing_parent_bar.getSpecString();
 
-            var delay_time = XToTime(start_time_pos) - XToTime(track_circle_pos);
+            var delay_time = XToTime(geom.start_time_pos) - XToTime(geom.track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(start_time_pos + geom.width) - XToTime(track_circle_pos);
+            var length =   XToTime(geom.start_time_pos + geom.width) - XToTime(geom.track_circle_pos);
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
@@ -893,7 +891,7 @@ function setup(div_name, index) {
             return spec_string;
         }
 
-        var x_lower = XToTime(start_time_pos).toFixed(2);
+        var x_lower = XToTime(geom.start_time_pos).toFixed(2);
         var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
 
         if (!right_fixed){
@@ -962,19 +960,19 @@ function setup(div_name, index) {
 
 
     function change_value_upper() {
-        drag_resize_top_inner(rect_top, valToY(parseFloat(this.value)));
+        drag_resize_top_inner(geom.rect_top, valToY(parseFloat(this.value)));
     }
 
     function change_value_lower() {
-        drag_resize_bottom_inner(rect_top, valToY(parseFloat(this.value)));
+        drag_resize_bottom_inner(geom.rect_top, valToY(parseFloat(this.value)));
     }
 
     function change_time_value_lower() {
-        drag_resize_left_inner(start_time_pos, timeToX(parseFloat(this.value)));
+        drag_resize_left_inner(geom.start_time_pos, timeToX(parseFloat(this.value)));
     }
 
     function change_time_value_upper() {
-        drag_resize_right_inner(start_time_pos, timeToX(parseFloat(this.value)));
+        drag_resize_right_inner(geom.start_time_pos, timeToX(parseFloat(this.value)));
     }
 
     adjust_everything(true);
