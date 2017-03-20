@@ -19,8 +19,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(svg.node())[0];
 
-            var x1 = imposeLimits(0, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
-            var x2 = imposeLimits(0, geom.w - geom.horizontal_padding, mouse_pos + track_length/2);
+            var x1 = imposeLimits(start_time_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
+            var x2 = x1 + track_length;
 
             if (x1 >= helper_funcs.getStartX()){
                 x1 = helper_funcs.getStartX();
@@ -30,7 +30,6 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
                 x2 = helper_funcs.getStartX();
             }
 
-            start_time_pos = start_time_pos + (x1 - left_tick_pos);
             left_tick_pos = x1;
             right_tick_pos = x2;
 
