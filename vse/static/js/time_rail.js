@@ -63,7 +63,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .on("drag", function(){
             if (geom.specification_fixed){ return; }
 
-            left_tick_pos = imposeLimits(0, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            left_tick_pos = imposeLimits(start_time_pos, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
 
             track.attr("x1", left_tick_pos);
             left_tick.attr("x1", left_tick_pos)
