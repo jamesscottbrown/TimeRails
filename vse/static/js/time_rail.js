@@ -276,6 +276,32 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     }
 
 
+    function getSpecString(){
+        var spec_string = "";
+        var t_lower, t_upper;
+
+        if (timing_parent_bar){
+            spec_string += timing_parent_bar.getSpecString();
+
+            // start and end times are relative to te track_circle
+            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(start_time_pos);
+            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
+        } else {
+            // start and end times are absolute
+            t_lower = helper_funcs.XToTime(left_tick_pos);
+            t_upper = helper_funcs.XToTime(right_tick_pos);
+        }
+
+        t_lower = t_lower.toFixed(2);
+        t_upper = t_upper.toFixed(2);
+
+        var symbol = (kind == "some") ? "Finally" : "Globally";
+
+        spec_string += symbol + "(" + t_lower + "," + t_upper + ",";
+        return spec_string;
+    }
+
+
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex};
+        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString};
 }

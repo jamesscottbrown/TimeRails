@@ -3,11 +3,11 @@ from vse.specification.forms import SpecificationForm
 
 from vse.project.models import Project
 
-
 from vse.utils import flash_errors
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
+from urllib import unquote_plus
 
 blueprint = Blueprint('specification', __name__, url_prefix='/specifications', static_folder='../static')
 
@@ -94,6 +94,26 @@ def edit_specification(specification_id):
     else:
         flash_errors(form)
     return render_template('specifications/edit_spec.html', form=form, current_spec=current_spec)
+
+
+@blueprint.route('/<int:specification_id>/save', methods=['POST'])
+@login_required
+def save_specification(specification_id):
+    """Update actual specification string for a specification."""
+
+    current_spec = Specification.query.filter_by(id=specification_id).first()
+    if not current_spec:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    if current_spec.project.user != current_user:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    current_spec.specification = unquote_plus(request.get_data())
+    current_spec.save()
+
+    return "SUCCESS"
 
 
 @blueprint.route('/<int:specification_id>')

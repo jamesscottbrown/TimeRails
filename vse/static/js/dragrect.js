@@ -145,6 +145,29 @@ function setup(div_name, index) {
         });
     var use_letters_label = options_form.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
+    d3.select(div_name).append('button')
+        .text("Save")
+        .on("click", function(){
+            console.log(getSpecString());
+
+            $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: window.location.href + "/save",
+            dataType: 'json',
+            async: true,
+            data: getSpecString(),
+
+             beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+             },
+
+            success: function (data) {
+               console.log("Saved");
+            },
+            error: function (result) {}
+            })
+        });
 
     var startTime = (xRange[0] + xRange[1]) / 2;
     var maxValue = (yRange[0] + yRange[1]) / 2;
@@ -975,6 +998,83 @@ function setup(div_name, index) {
         }
 
     }
+
+
+    // functions for generating specification to save
+
+    function getYSpecString(){
+
+        var y_upper = getY().toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
+
+        var spec_string;
+
+        // 2 bounds
+        if (top_fixed && bottom_fixed) {
+            spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper + ")";
+        }
+
+        // 1 bound
+        else if (top_fixed) {
+            spec_string = "Inequality(lt=" + y_upper + ")";
+        }
+        else if (bottom_fixed) {
+            spec_string = "Inequality(gt=" + y_lower + ")";
+        }
+
+        // 0 bounds
+        else {
+            // Don't convert, but keep as an easily checkable sentinel value
+            spec_string = "";
+        }
+
+        return spec_string;
+    }
+
+    function getSpecString(){
+        var y_spec_string = getYSpecString();
+        [y_constraint, y_callbacks] = describe_y();
+
+        var spec_string = "";
+
+        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
+        if (timing_parent_bar){
+            spec_string = timing_parent_bar.getSpecString();
+
+            var delay_time = XToTime(parseFloat(dragrect.attr("x"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            delay_time = delay_time.toFixed(2);
+
+            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            length = length.toFixed(2);
+
+            if (delay_time == 0 && length == 0){
+                return spec_string + y_spec_string + ")";
+            } else {
+                return spec_string + "Globally(" + delay_time + "," + length + "," + y_spec_string + ")";
+            }
+        }
+
+        // Otherwise, rectangle is represented by a Global term with a start and end time
+        if (y_constraint == "unconstrained") {
+            return spec_string;
+        }
+
+        var x_lower = getX().toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
+
+        if (!right_fixed){
+            x_upper = "Inf";
+        }
+
+        if (!left_fixed){
+            x_lower = "0";
+        }
+
+        return spec_string + "Globally(" + x_lower + "," + x_upper + ", " + y_spec_string + ")";
+    }
+
+
+
 
     function change_time_interval_type() {
         var new_interval_type = document.getElementById("time_option").value;
