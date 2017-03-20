@@ -106,7 +106,7 @@ function setup(div_name, index) {
     }
 
     function getStartX(){
-        return track_circle.attr("cx");
+        return track_circle_pos;
     }
 
     var helper_funcs = {
@@ -317,7 +317,7 @@ function setup(div_name, index) {
 
     var track_circle_pos = timeToX(getX()) - geom.delay_line_length;
 
-    var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
+    var delay_line_height = valToY(getY()) + geom.height/2;
     var delay_line = newg.append("line")
         .attr("x1", track_circle_pos)
         .attr("x2", timeToX(getX()))
@@ -361,17 +361,12 @@ function setup(div_name, index) {
             .attr("height", geom.height)
             .attr("width", geom.width);
 
-
         delay_line
             .attr("x1", track_circle_pos)
             .attr("x2", timeToX(getX()))
             .attr("y1", delay_line_height)
             .attr("y2", delay_line_height);
-
-
-        //var track_circle_pos = timeToX(getX()) - geom.delay_line_length;
-        //var delay_line_height = valToY(getY()) + parseFloat(dragrect.attr("height"))/2;
-
+        
         startline.attr("x1", track_circle_pos)
             .attr("x2", track_circle_pos)
             .attr("y1", delay_line_height)
@@ -380,9 +375,6 @@ function setup(div_name, index) {
         track_circle.attr("cx", track_circle_pos)
                 .attr("cy", geom.h - geom.track_padding);
 
-
-
-        // TODO: update descriptions
         if (update_description){
           update_text();
         }
@@ -516,7 +508,7 @@ function setup(div_name, index) {
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_x = d3.mouse(svg.node())[0];
-        var newx = imposeLimits(parseFloat(delay_line.attr("x1")), start_time_pos + geom.width, cursor_x);
+        var newx = imposeLimits(track_circle_pos, start_time_pos + geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
     }
 
@@ -695,7 +687,7 @@ function setup(div_name, index) {
     function getYLatexString(){
 
         var y_upper = getY().toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + geom.width ).toFixed(2);
 
         var latex_string;
         
@@ -731,10 +723,10 @@ function setup(div_name, index) {
         if (timing_parent_bar){
             latex_string = timing_parent_bar.getLatex();
 
-            var delay_time = XToTime(parseFloat(dragrect.attr("x"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            var delay_time = XToTime(start_time_pos) - XToTime(track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            var length =   XToTime(start_time_pos) + geom.width - XToTime(track_circle_pos);
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
@@ -751,7 +743,7 @@ function setup(div_name, index) {
         }
         
         var x_lower = getX().toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
         
         if (!right_fixed){
             x_upper = "\\infty";
@@ -766,11 +758,8 @@ function setup(div_name, index) {
     }
 
     function describe_y() {
-        //var y_upper = parseInt(dragrect.attr("y"));
-        // var y_upper = dragrect.data("y");
-
         var y_upper = getY().toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + geom.height ).toFixed(2);
 
         var html_sting,  y_callbacks;
 
@@ -818,7 +807,7 @@ function setup(div_name, index) {
         }
 
         var x_lower = getX().toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
 
 
         // 2 bounds
@@ -889,7 +878,7 @@ function setup(div_name, index) {
     function getYSpecString(){
 
         var y_upper = getY().toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + parseInt(dragrect.attr("height")) ).toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + geom.height ).toFixed(2);
 
         var spec_string;
 
@@ -925,10 +914,10 @@ function setup(div_name, index) {
         if (timing_parent_bar){
             spec_string = timing_parent_bar.getSpecString();
 
-            var delay_time = XToTime(parseFloat(dragrect.attr("x"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            var delay_time = XToTime(start_time_pos) - XToTime(track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(parseFloat(dragrect.attr("x")) + parseFloat(dragrect.attr("width"))) - XToTime(parseFloat(track_circle.attr("cx")));
+            var length =   XToTime(start_time_pos + geom.width) - XToTime(track_circle_pos);
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
@@ -944,7 +933,7 @@ function setup(div_name, index) {
         }
 
         var x_lower = getX().toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + parseInt(dragrect.attr("width")) ).toFixed(2);
+        var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
 
         if (!right_fixed){
             x_upper = "Inf";
@@ -1012,19 +1001,19 @@ function setup(div_name, index) {
 
 
     function change_value_upper() {
-        drag_resize_top_inner(parseFloat(dragbartop.attr('cy')), valToY(parseFloat(this.value)));
+        drag_resize_top_inner(rect_top, valToY(parseFloat(this.value)));
     }
 
     function change_value_lower() {
-        drag_resize_bottom_inner(valToY(getY()), valToY(parseFloat(this.value)));
+        drag_resize_bottom_inner(rect_top, valToY(parseFloat(this.value)));
     }
 
     function change_time_value_lower() {
-        drag_resize_left_inner(parseFloat(dragbarleft.attr('cx')), timeToX(parseFloat(this.value)));
+        drag_resize_left_inner(start_time_pos, timeToX(parseFloat(this.value)));
     }
 
     function change_time_value_upper() {
-        drag_resize_right_inner(timeToX(getX()), timeToX(parseFloat(this.value)));
+        drag_resize_right_inner(start_time_pos, timeToX(parseFloat(this.value)));
     }
 
     set_edges();
