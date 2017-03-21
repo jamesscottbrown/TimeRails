@@ -7,6 +7,7 @@
 {% endblock %}
 
 
+{% block body_other %} onload="add_subplot_from_specification(specification_string);"{% endblock %}
 {% block content %}
 
     <h1>{{ current_spec.name }}</h1>
@@ -40,7 +41,10 @@ MathJax.Hub.Config({
 
 
 {% block js %}
-<script type="text/javascript">csrf_token = "{{ csrf_token() }}"; </script>
+<script type="text/javascript">
+    var csrf_token = "{{ csrf_token() }}";
+    var specification_string = "{{ current_spec.specification }}";
+</script>
 
 
 {% assets "js_spec" %}

@@ -2,7 +2,7 @@ function imposeLimits(lower, upper, val){
     return Math.max(lower, Math.min(upper, val));
 }
 
-function setup(div_name, index) {
+function setup(div_name, index, options) {
 
     var geom = {
         w: 750,
@@ -25,9 +25,6 @@ function setup(div_name, index) {
         specification_fixed: false,
         use_letters: false
     };
-    geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
-    geom.delay_line_height = geom.rect_top + geom.height/2;
-
 
     var top_fixed = true;
     var bottom_fixed = true;
@@ -35,6 +32,64 @@ function setup(div_name, index) {
     var right_fixed = true;
 
     var timing_parent_bar = false;
+
+    var xRange = [0, 100];
+    var xScale = d3.scale.linear()
+        .domain(xRange)
+        .range([geom.vertical_padding, geom.w - geom.horizontal_padding]);
+
+    var yRange = [100, 0];
+    var yScale = d3.scale.linear()
+        .domain(yRange)
+        .range([geom.vertical_padding, geom.h - geom.vertical_padding]);
+
+
+    if (options){
+        // geom.delay_line_length = xScale(options.delay_duration);
+
+        geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
+        geom.start_time_pos = xScale(options.start_time);
+        geom.track_circle_pos = xScale(options.track_circle_time);
+        geom.width = xScale(options.end_time) - xScale(options.start_time);
+
+        /*
+        geom.delay_line_length = xScale(options.start + options.reference) - xScale(options.reference);
+
+        if (options.hasOwnProperty('start')) {
+            geom.start_time_pos = xScale(options.start + options.reference);
+        } else {
+            left_fixed = false;
+        }
+
+        if (!options.hasOwnProperty('end')){
+            right_fixed = false;
+        }
+
+        if (options.hasOwnProperty('start') && options.hasOwnProperty('start')) {
+            geom.width = xScale(options.end) - xScale(options.start);
+        }
+        */
+
+
+        if (options.hasOwnProperty('lt')) {
+            geom.rect_top = yScale(options.lt);
+        } else {
+            top_fixed = false;
+        }
+
+        if (!options.hasOwnProperty('gt')){
+            bottom_fixed = false;
+        }
+
+        if (options.hasOwnProperty('lt') && options.hasOwnProperty('gt')) {
+            geom.height = yScale(options.gt) - yScale(options.lt);
+        }
+    }
+
+    geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
+    geom.delay_line_height = geom.rect_top + geom.height/2;
+
+
 
     var drag = d3.behavior.drag()
         .origin(Object)
@@ -60,10 +115,6 @@ function setup(div_name, index) {
         .attr("width", geom.w)
         .attr("height", geom.h);
 
-    var xRange = [0, 100];
-    var xScale = d3.scale.linear()
-        .domain(xRange)
-        .range([geom.vertical_padding, geom.w - geom.horizontal_padding]);
 
     var xAxis =  d3.svg.axis()
         .scale(xScale)
@@ -74,10 +125,6 @@ function setup(div_name, index) {
         .attr("class", "axis")
         .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
 
-    var yRange = [100, 0];
-    var yScale = d3.scale.linear()
-        .domain(yRange)
-        .range([geom.vertical_padding, geom.h - geom.vertical_padding]);
 
     var yAxis =  d3.svg.axis()
         .scale(yScale)
@@ -105,6 +152,7 @@ function setup(div_name, index) {
     var helper_funcs = {
         getStartX: function (){ return geom.track_circle_pos; },
         XToTime: XToTime,
+        TimeToX: function(time){ return xScale(time); },
         update_text: update_text
     };
 
@@ -975,6 +1023,126 @@ function setup(div_name, index) {
         drag_resize_right_inner(geom.start_time_pos, timeToX(parseFloat(this.value)));
     }
 
+    function add_timing_bar(kind, options){
+        // kind is 'some' or 'all'
+
+        if (timing_parent_bar){
+            timing_parent_bar.append_bar('kind', options)();
+        } else {
+            timing_parent_bar = create_bar(1, kind, geom, svg, newg, helper_funcs, options);
+        }
+        update_text();
+    }
+
     adjust_everything(true);
     set_edges();
+
+    return {add_bar: add_timing_bar}
+}
+
+function setup_from_specification_string(div_name, index, string){
+    string = string.toLowerCase().trim().replace(/ /g, '');
+
+    var queue = [];
+    var  args, parts, start, end;
+    var totalOffset = 0;
+
+    while (string) {
+        if (string.startsWith("globally")) {
+
+            args = string.slice(9, -1);
+            parts = args.split(',');
+
+            start = parseFloat(parts[0]);
+            end = parseFloat(parts[1]);
+            string = parts.slice(2).join(',');
+
+            totalOffset += start;
+            queue.push({type: "globally", start: start, end: end});
+
+        } else if (string.startsWith("finally")) {
+            args = string.slice(8, -1);
+            parts = args.split(',');
+
+            start = parseFloat(parts[0]);
+            end = parseFloat(parts[1]);
+            string = parts.slice(2).join(',');
+
+            totalOffset += start;
+            queue.push({type: "finally", start: start, end: end});
+
+        } else if (string.startsWith("inequality")) {
+            args = string.slice(11, -1);
+            parts = args.split(',');
+
+            var lt, gt, part, terms, name, val;
+
+            for (var i = 0; i < parts.length; i++) {
+                part = parts[i].trim();
+                terms = part.split('=');
+
+                if (terms[0] == 'lt') {
+                    lt = terms[1];
+                } else if (terms[0] == 'gt') {
+                    gt = terms[1];
+                }
+            }
+
+            break;
+        }
+    }
+
+
+    var rectangle_opts = [];
+    rectangle_opts.lt = lt;
+    rectangle_opts.gt = gt;
+
+    // handle case where constaint is an inequality alone
+    if (queue.length == 0){
+        return setup(div_name, index, rectangle_opts);
+    }
+
+
+    // handle case where innermost (non-inequality) term is 'globally'
+    var term = queue.pop();
+
+    if (term.type == "globally"){
+        rectangle_opts.lt = lt;
+        rectangle_opts.gt = gt;
+
+        if (queue.length == 0){
+            // if whole expression is simply G(., ., Inequality(.)), then
+            // shift bar, so track circle is in line with start of rectangle
+
+            rectangle_opts.track_circle_time = term.start;
+            rectangle_opts.start_time = rectangle_opts.track_circle_time;
+            rectangle_opts.end_time = term.end;
+        } else {
+            // unshifted
+            rectangle_opts.track_circle_time = totalOffset;
+            rectangle_opts.start_time = totalOffset + term.start;
+            rectangle_opts.end_time = totalOffset + term.end;
+            totalOffset -= term.start;
+        }
+
+    } else {
+        queue.push(term);
+    }
+
+    var diagram = setup(div_name, index, rectangle_opts);
+
+
+    while (queue.length > 0){
+        term = queue.pop();
+        totalOffset -= term.start;
+
+        var timing_bar_options = [];
+        timing_bar_options.start_time = totalOffset;
+        timing_bar_options.left_tick_time = term.start + totalOffset;
+        timing_bar_options.right_tick_time = term.end + totalOffset;
+
+        var kind = (term.type == "finally") ? 'some' : 'all';
+        diagram.add_bar(kind, timing_bar_options);
+
+    }
 }

@@ -1,4 +1,4 @@
-function create_bar(level, kind, geom, svg, newg, helper_funcs){
+function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
     // increase SVG height
     svg.attr("height", parseInt(svg.attr("height")) + geom.track_padding);
 
@@ -8,6 +8,12 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var left_tick_pos = geom.horizontal_padding + 20;
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y = geom.h + (level-2) * geom.track_padding ;
+
+    if (options){
+        if (options.hasOwnProperty('start_time')) { start_time_pos = helper_funcs.TimeToX(options.start_time); }
+        if (options.hasOwnProperty('left_tick_time')) { left_tick_pos = helper_funcs.TimeToX(options.left_tick_time); }
+        if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = helper_funcs.TimeToX(options.right_tick_time); }
+    }
 
     // Function that defines where each element will be positioned
     function adjust_everything(update_description){
@@ -124,15 +130,16 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             return start_time_pos;
         },
         XToTime: helper_funcs.XToTime,
+        TimeToX: helper_funcs.TimeToX,
         update_text: helper_funcs.update_text
     };
 
-    var append_bar = function(bar_kind){
+    var append_bar = function(bar_kind, options){
         return function() {
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, newg, helper_funcs_new);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, newg, helper_funcs_new, options);
             helper_funcs.update_text();
         }
     };
@@ -281,6 +288,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         return spec_string;
     }
 
+    adjust_everything(true);
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString};
