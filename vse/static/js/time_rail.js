@@ -4,12 +4,53 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
     var timing_parent_bar = false;
 
-    // draw bar
     var start_time_pos = geom.horizontal_padding;
     var left_tick_pos = geom.horizontal_padding + 20;
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y = geom.h + (level-2) * geom.track_padding ;
 
+    function adjust_everything(update_description){
+        
+        track
+            .attr("x1", left_tick_pos)
+            .attr("x2", right_tick_pos)
+            .attr("y1", base_y)
+            .attr("y2", base_y);
+        
+        left_tick
+            .attr("x1", left_tick_pos)
+            .attr("x2", left_tick_pos)
+            .attr("y1", base_y - geom.track_padding/2)
+            .attr("y2", base_y + geom.track_padding/2);
+
+        right_tick
+            .attr("x1", right_tick_pos)
+            .attr("x2", right_tick_pos)
+            .attr("y1", base_y - geom.track_padding/2)
+            .attr("y2", base_y + geom.track_padding/2);
+            
+        startline    
+            .attr("x1", start_time_pos)
+            .attr("x2", start_time_pos)
+            .attr("y1", base_y)
+            .attr("y2", base_y + geom.track_padding);
+        
+        delay_line
+            .attr("x1", start_time_pos)
+            .attr("x2", left_tick_pos)
+            .attr("y1", base_y)
+            .attr("y2", base_y);
+        
+        track_circle
+            .attr("cx", start_time_pos)
+            .attr("cy", base_y + geom.track_padding);
+        
+        if (update_description){
+            helper_funcs.update_text();
+        }
+    }
+    
+    
     var drag_track = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
@@ -33,26 +74,16 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             left_tick_pos = x1;
             right_tick_pos = x2;
 
-            track
-                .attr("x1", left_tick_pos)
-                .attr("x2", right_tick_pos);
-
-            left_tick.attr("x1", left_tick_pos)
-                .attr("x2", left_tick_pos);
 
             right_tick.attr("x1", right_tick_pos)
                 .attr("x2", right_tick_pos);
 
             delay_line.attr("x2", left_tick_pos);
 
-            helper_funcs.update_text();
+            adjust_everything(true);
         });
 
     var track = newg.append("line")
-        .attr("x1", left_tick_pos)
-        .attr("x2", right_tick_pos)
-        .attr("y1", base_y)
-        .attr("y2", base_y)
         .style("stroke", "rgb(128,128,128)")
         .style("stroke-width", "2")
         .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0")
@@ -64,21 +95,10 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             if (geom.specification_fixed){ return; }
 
             left_tick_pos = imposeLimits(start_time_pos, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
-
-            track.attr("x1", left_tick_pos);
-            left_tick.attr("x1", left_tick_pos)
-                     .attr("x2", left_tick_pos);
-
-            delay_line.attr("x2", left_tick_pos);
-
-            helper_funcs.update_text();
+            adjust_everything(true);
         });
 
     var left_tick = newg.append("line")
-        .attr("x1", left_tick_pos)
-        .attr("x2", left_tick_pos)
-        .attr("y1", base_y - geom.track_padding/2)
-        .attr("y2", base_y + geom.track_padding/2)
         .style("stroke", "rgb(128,128,128)")
         .style("stroke-width", "2")
         .call(drag_left_tick);
@@ -89,28 +109,15 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             if (geom.specification_fixed){ return; }
 
             right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(svg.node())[0]);
-
-            track.attr("x2", right_tick_pos);
-            right_tick.attr("x1", right_tick_pos)
-                      .attr("x2", right_tick_pos);
-
-            helper_funcs.update_text();
+            adjust_everything(true);
         });
 
     var right_tick = newg.append("line")
-        .attr("x1", right_tick_pos)
-        .attr("x2", right_tick_pos)
-        .attr("y1", base_y - geom.track_padding/2)
-        .attr("y2", base_y + geom.track_padding/2)
         .style("stroke", "rgb(128,128,128)")
         .style("stroke-width", "2")
         .call(drag_right_tick);
 
     var startline = newg.append("line")
-        .attr("x1", start_time_pos)
-        .attr("x2", start_time_pos)
-        .attr("y1", base_y)
-        .attr("y2", base_y + geom.track_padding)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2");
 
@@ -175,31 +182,12 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             right_tick_pos = right_tick_pos + (x_left - start_time_pos);
             start_time_pos = x_left;
 
-            track.attr("x1", left_tick_pos)
-                 .attr("x2", right_tick_pos);
-
-            left_tick.attr("x1", left_tick_pos)
-                .attr("x2", left_tick_pos);
-
-            right_tick.attr("x1", right_tick_pos)
-                .attr("x2", right_tick_pos);
-
-            startline.attr("x1", start_time_pos)
-                .attr("x2", start_time_pos);
-
-            track_circle.attr("cx", start_time_pos);
-
-            delay_line.attr("x1", start_time_pos)
-                .attr("x2", left_tick_pos);
-
-            helper_funcs.update_text();
+            adjust_everything(true);
         });
 
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("cx", start_time_pos)
-        .attr("cy", base_y + geom.track_padding)
         .attr("r", 5)
         .attr("fill", "rgb(255,0,0)")
         .attr("fill-opacity", .5)
@@ -209,10 +197,6 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
 
     var delay_line = newg.append("line")
-        .attr("x1", start_time_pos)
-        .attr("x2", left_tick_pos)
-        .attr("y1", base_y)
-        .attr("y2", base_y)
         .style("stroke", "rgb(255,0,0)")
         .style("stroke-width", "2")
         .call(drag_track_circle);
