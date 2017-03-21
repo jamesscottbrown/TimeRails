@@ -9,6 +9,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y = geom.h + (level-2) * geom.track_padding ;
 
+    // Function that defines where each element will be positioned
     function adjust_everything(update_description){
         
         track
@@ -49,8 +50,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             helper_funcs.update_text();
         }
     }
-    
-    
+
+    // Callback functions for interactions
     var drag_track = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
@@ -73,21 +74,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
 
             left_tick_pos = x1;
             right_tick_pos = x2;
-
-
-            right_tick.attr("x1", right_tick_pos)
-                .attr("x2", right_tick_pos);
-
-            delay_line.attr("x2", left_tick_pos);
-
             adjust_everything(true);
         });
-
-    var track = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
-        .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0")
-        .call(drag_track);
 
     var drag_left_tick = d3.behavior.drag()
         .origin(Object)
@@ -98,10 +86,6 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             adjust_everything(true);
         });
 
-    var left_tick = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
-        .call(drag_left_tick);
 
     var drag_right_tick = d3.behavior.drag()
         .origin(Object)
@@ -112,15 +96,29 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
             adjust_everything(true);
         });
 
-    var right_tick = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
-        .call(drag_right_tick);
+    var drag_track_circle = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", function(){
+            if (geom.specification_fixed && !timing_parent_bar){
+                return;
+            }
 
-    var startline = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
+            var start_line_length = left_tick_pos - start_time_pos;
+            var track_length = right_tick_pos - left_tick_pos;
 
+            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(svg.node())[0]);
+            if (timing_parent_bar) {
+                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
+            }
+
+            left_tick_pos = left_tick_pos + (x_left - start_time_pos);
+            right_tick_pos = right_tick_pos + (x_left - start_time_pos);
+            start_time_pos = x_left;
+            adjust_everything(true);
+        });
+
+
+    // Context menus and associated functions
     var helper_funcs_new = {
         getStartX: function () {
             return start_time_pos;
@@ -163,27 +161,32 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         }
     ];
 
-    var drag_track_circle = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", function(){
-            if (geom.specification_fixed && !timing_parent_bar){
-                return;
-            }
 
-            var start_line_length = left_tick_pos - start_time_pos;
-            var track_length = right_tick_pos - left_tick_pos;
+    // Actual visual elements
+    var track = newg.append("line")
+        .style("stroke", "rgb(128,128,128)")
+        .style("stroke-width", "2")
+        .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0")
+        .call(drag_track);
 
-            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(svg.node())[0]);
-            if (timing_parent_bar) {
-                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
-            }
+    var left_tick = newg.append("line")
+        .style("stroke", "rgb(128,128,128)")
+        .style("stroke-width", "2")
+        .call(drag_left_tick);
 
-            left_tick_pos = left_tick_pos + (x_left - start_time_pos);
-            right_tick_pos = right_tick_pos + (x_left - start_time_pos);
-            start_time_pos = x_left;
+    var right_tick = newg.append("line")
+        .style("stroke", "rgb(128,128,128)")
+        .style("stroke-width", "2")
+        .call(drag_right_tick);
 
-            adjust_everything(true);
-        });
+    var startline = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
+    var delay_line = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2")
+        .call(drag_track_circle);
 
     var track_circle = newg
         .append("g")
@@ -195,13 +198,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs){
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 
-
-    var delay_line = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2")
-        .call(drag_track_circle);
-
-
+    // Externally exposed functions
     function delete_bar(){
         track.remove();
         left_tick.remove();
