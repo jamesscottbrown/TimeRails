@@ -34,7 +34,7 @@
             <a href="/specifications/{{spec.id}}/delete"><i class="fa fa-trash-o"></i>Delete</a>)</small></h2>
         <blockquote>{{spec.description}}</blockquote>
 
-        <p>Saved specification is: <code>{{spec.specification}}</code></p>
+        <p>Saved specification is: <code id="spec_string_{{spec.id}}">{{spec.specification}}</code></p>
 
         <div id="constraint_{{spec.id}}">
             <script type="text/javascript">generate.push( function bar(x){ add_subplot_from_specification("{{spec.specification}}", "constraint_{{spec.id}}", "{{spec.id}}"); } )</script>
