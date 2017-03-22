@@ -707,7 +707,7 @@ function setup(div_name, spec_id, index, options) {
     function getYLatexString(){
 
         var y_upper = YToVal(geom.rect_top).toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + geom.width ).toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + geom.height ).toFixed(2);
 
         var latex_string;
 
