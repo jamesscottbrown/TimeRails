@@ -218,12 +218,23 @@ function setup(div_name, spec_id, index, options) {
 
     var newg = svg.append("g");
 
+    // we draw these lines before the dragrect to improve carity when rectangle is very thin
+    var delay_line = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
+
+    var startline = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
     var dragrect = newg.append("rect")
         .attr("id", "active")
         .attr("fill", "lightgreen")
         .attr("fill-opacity", .25)
         .attr("cursor", "move")
         .call(drag);
+
 
     var dragbarleft = newg.append("circle")
         .attr("id", "dragleft")
@@ -345,14 +356,6 @@ function setup(div_name, spec_id, index, options) {
 
     ];
 
-    var delay_line = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
-
-
-    var startline = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
 
     function adjust_everything(update_description){
         // We rely on: geom.width, geom.height, , geom.h
@@ -378,7 +381,7 @@ function setup(div_name, spec_id, index, options) {
             .attr("x", geom.start_time_pos)
             .attr("y", geom.rect_top)
             .attr("height", geom.height)
-            .attr("width", geom.width);
+            .attr("width", Math.max(geom.width,1));
 
         delay_line
             .attr("x1", geom.track_circle_pos)
