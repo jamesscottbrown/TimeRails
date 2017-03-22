@@ -9,7 +9,7 @@ class ProjectForm(Form):
     """Form to create new project."""
 
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=25)])
-    description = StringField('Description', validators=[DataRequired(), Length(min=6, max=40)])
+    description = StringField('Description', validators=[Length(max=40)])
     dimensionality = IntegerField('Dimensionality', validators=[DataRequired(message='required and must be an integer')])
 
     def __init__(self, *args, **kwargs):

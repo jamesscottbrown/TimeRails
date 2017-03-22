@@ -9,7 +9,7 @@ class SpecificationForm(Form):
     """Form to create new specification."""
 
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=25)])
-    description = StringField('Description', validators=[DataRequired(), Length(min=6, max=40)])
+    description = StringField('Description', validators=[Length(max=40)])
     specification = StringField('Specification', validators=[])
     project_id = HiddenField()
 
