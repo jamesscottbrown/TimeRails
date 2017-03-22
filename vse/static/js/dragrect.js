@@ -1056,6 +1056,8 @@ function setup(div_name, spec_id, index, options) {
 function setup_from_specification_string(div_name, spec_id, index, string){
     string = string.toLowerCase().trim().replace(/ /g, '');
 
+    if (!string){ return setup(div_name, spec_id, index); }
+
     var queue = [];
     var  args, parts, start, end;
     var totalOffset = 0;
