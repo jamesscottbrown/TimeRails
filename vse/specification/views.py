@@ -114,20 +114,3 @@ def save_specification(specification_id):
     current_spec.save()
 
     return "SUCCESS"
-
-
-@blueprint.route('/<int:specification_id>')
-@login_required
-def view_project(specification_id):
-    """View a specification."""
-
-    current_spec = Specification.query.filter_by(id=specification_id).first()
-    if not current_spec:
-        flash('No such specification!', 'danger')
-        return redirect('.')
-
-    if current_spec.project.user != current_user:
-        flash('Not your project!', 'danger')
-        return redirect('.')
-
-    return render_template('specifications/view_spec.html', current_spec=current_spec)
