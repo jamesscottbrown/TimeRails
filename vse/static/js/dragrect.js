@@ -2,7 +2,7 @@ function imposeLimits(lower, upper, val){
     return Math.max(lower, Math.min(upper, val));
 }
 
-function setup(div_name, index, options) {
+function setup(div_name, spec_id, index, options) {
 
     var geom = {
         w: 750,
@@ -185,12 +185,10 @@ function setup(div_name, index, options) {
     d3.select(div_name).append('button')
         .text("Save")
         .on("click", function(){
-            console.log(getSpecString());
-
             $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
-            url: window.location.href + "/save",
+            url: "http://" + window.location.host + "/specifications/" + spec_id + "/save",
             dataType: 'json',
             async: true,
             data: getSpecString(),
@@ -1040,7 +1038,7 @@ function setup(div_name, index, options) {
     return {add_bar: add_timing_bar}
 }
 
-function setup_from_specification_string(div_name, index, string){
+function setup_from_specification_string(div_name, spec_id, index, string){
     string = string.toLowerCase().trim().replace(/ /g, '');
 
     var queue = [];
@@ -1099,7 +1097,7 @@ function setup_from_specification_string(div_name, index, string){
 
     // handle case where constaint is an inequality alone
     if (queue.length == 0){
-        return setup(div_name, index, rectangle_opts);
+        return setup(div_name, spec_id, index, rectangle_opts);
     }
 
 
@@ -1129,7 +1127,7 @@ function setup_from_specification_string(div_name, index, string){
         queue.push(term);
     }
 
-    var diagram = setup(div_name, index, rectangle_opts);
+    var diagram = setup(div_name, spec_id, index, rectangle_opts);
 
 
     while (queue.length > 0){
