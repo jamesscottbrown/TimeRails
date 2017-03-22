@@ -47,10 +47,22 @@ function setup(div_name, spec_id, index, options) {
     if (options){
         // geom.delay_line_length = xScale(options.delay_duration);
 
-        geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
-        geom.start_time_pos = xScale(options.start_time);
-        geom.track_circle_pos = xScale(options.track_circle_time);
-        geom.width = xScale(options.end_time) - xScale(options.start_time);
+        if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
+            geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
+            geom.start_time_pos = xScale(options.start_time);
+            geom.track_circle_pos = xScale(options.track_circle_time);
+            geom.width = xScale(options.end_time) - xScale(options.start_time);
+        } else {
+            left_fixed = false;
+            right_fixed = false;
+
+            geom.delay_line_length = 0;
+            geom.start_time_pos = xScale(xRange[0]);
+            geom.track_circle_pos = xScale(xRange[0]);
+            geom.width = xScale(xRange[1]) - xScale(xRange[0]);
+
+        }
+
 
         /*
         geom.delay_line_length = xScale(options.start + options.reference) - xScale(options.reference);
@@ -1095,12 +1107,13 @@ function setup_from_specification_string(div_name, spec_id, index, string){
     rectangle_opts.lt = lt;
     rectangle_opts.gt = gt;
 
-    // handle case where constaint is an inequality alone
+    // handle case where constraint is an inequality alone
     if (queue.length == 0){
         return setup(div_name, spec_id, index, rectangle_opts);
     }
 
-
+    // We need to distinguish between the cases where the innermost term is Finally or Globally
+    // As 'globally' sets the rectangle width, and is not drawn as a bar
     // handle case where innermost (non-inequality) term is 'globally'
     var term = queue.pop();
 
@@ -1111,19 +1124,26 @@ function setup_from_specification_string(div_name, spec_id, index, string){
         if (queue.length == 0){
             // if whole expression is simply G(., ., Inequality(.)), then
             // shift bar, so track circle is in line with start of rectangle
-
             rectangle_opts.track_circle_time = term.start;
             rectangle_opts.start_time = rectangle_opts.track_circle_time;
             rectangle_opts.end_time = term.end;
         } else {
             // unshifted
+            totalOffset -= term.start;
+
             rectangle_opts.track_circle_time = totalOffset;
             rectangle_opts.start_time = totalOffset + term.start;
             rectangle_opts.end_time = totalOffset + term.end;
-            totalOffset -= term.start;
         }
 
     } else {
+        // a 'Finally(.,., Inequality(.,.)', so drawn as a zero width-rectangle
+        // totalOffset -= term.start; // ???
+        rectangle_opts.track_circle_time = totalOffset;
+        rectangle_opts.start_time = totalOffset;
+        rectangle_opts.end_time = totalOffset;
+
+        // push the finally term back onto queue, so that it is still drawn
         queue.push(term);
     }
 
