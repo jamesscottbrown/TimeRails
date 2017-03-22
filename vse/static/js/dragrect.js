@@ -4,6 +4,8 @@ function imposeLimits(lower, upper, val){
 
 function setup(div_name, spec_id, index, options) {
 
+    // Setting up scales and initial default positions
+    /************************************************/
     var geom = {
         w: 750,
         h: 450,
@@ -43,111 +45,6 @@ function setup(div_name, spec_id, index, options) {
         .domain(yRange)
         .range([geom.vertical_padding, geom.h - geom.vertical_padding]);
 
-
-    if (options){
-        // geom.delay_line_length = xScale(options.delay_duration);
-
-        if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
-            geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
-            geom.start_time_pos = xScale(options.start_time);
-            geom.track_circle_pos = xScale(options.track_circle_time);
-            geom.width = xScale(options.end_time) - xScale(options.start_time);
-        } else {
-            left_fixed = false;
-            right_fixed = false;
-
-            geom.delay_line_length = 0;
-            geom.start_time_pos = xScale(xRange[0]);
-            geom.track_circle_pos = xScale(xRange[0]);
-            geom.width = xScale(xRange[1]) - xScale(xRange[0]);
-
-        }
-
-
-        /*
-        geom.delay_line_length = xScale(options.start + options.reference) - xScale(options.reference);
-
-        if (options.hasOwnProperty('start')) {
-            geom.start_time_pos = xScale(options.start + options.reference);
-        } else {
-            left_fixed = false;
-        }
-
-        if (!options.hasOwnProperty('end')){
-            right_fixed = false;
-        }
-
-        if (options.hasOwnProperty('start') && options.hasOwnProperty('start')) {
-            geom.width = xScale(options.end) - xScale(options.start);
-        }
-        */
-
-
-        if (options.hasOwnProperty('lt')) {
-            geom.rect_top = yScale(options.lt);
-        } else {
-            top_fixed = false;
-        }
-
-        if (!options.hasOwnProperty('gt')){
-            bottom_fixed = false;
-        }
-
-        if (options.hasOwnProperty('lt') && options.hasOwnProperty('gt')) {
-            geom.height = yScale(options.gt) - yScale(options.lt);
-        }
-    }
-
-    geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
-    geom.delay_line_height = geom.rect_top + geom.height/2;
-
-
-
-    var drag = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", dragmove);
-
-    var dragright = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", drag_resize_right);
-
-    var dragleft = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", drag_resize_left);
-
-    var dragtop = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", drag_resize_top);
-
-    var dragbottom = d3.behavior.drag()
-        .origin(Object)
-        .on("drag", drag_resize_bottom);
-
-    var svg = d3.select(div_name).append("svg")
-        .attr("width", geom.w)
-        .attr("height", geom.h);
-
-
-    var xAxis =  d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom");
-
-    svg.append("g")
-        .call(xAxis)
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
-
-
-    var yAxis =  d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
-
-    svg.append("g")
-        .call(yAxis)
-        .attr("class", "axis")
-        .attr("transform", "translate(" + (geom.horizontal_padding) + ", " + 0 + ")");
-
-
     function timeToX(time){
         return xScale(time);
     }
@@ -168,195 +65,44 @@ function setup(div_name, spec_id, index, options) {
         update_text: update_text
     };
 
+    if (options){
+        if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
+            geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
+            geom.start_time_pos = xScale(options.start_time);
+            geom.track_circle_pos = xScale(options.track_circle_time);
+            geom.width = xScale(options.end_time) - xScale(options.start_time);
+        } else {
+            left_fixed = false;
+            right_fixed = false;
 
-    var p = d3.select(div_name).append("p");
-    p.text("X is");
-    var placeholder = p.append("b");
-    var placeholder_latex = p.append("div");
+            geom.delay_line_length = 0;
+            geom.start_time_pos = xScale(xRange[0]);
+            geom.track_circle_pos = xScale(xRange[0]);
+            geom.width = xScale(xRange[1]) - xScale(xRange[0]);
 
-
-
-    var options_form = d3.select(div_name).append("div").append("form");
-    var constant = options_form.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "constant_checkbox")
-        .attr("value", "false")
-        .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
-    var constant_label = options_form.append("label").attr("for", "constant_checkbox").text("Fix specification");
-
-    var use_letters = options_form.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "use_letters_checkbox")
-        .attr("value", "false")
-        .on("change", function(){
-            geom.use_letters = !geom.use_letters;
-            update_text();
-        });
-    var use_letters_label = options_form.append("label").attr("for", "use_letters_checkbox").text("Use letters");
-
-    d3.select(div_name).append('button')
-        .text("Save")
-        .on("click", function(){
-            $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            url: "http://" + window.location.host + "/specifications/" + spec_id + "/save",
-            dataType: 'json',
-            async: true,
-            data: getSpecString(),
-
-             beforeSend: function(xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-             },
-
-            success: function (data) {
-               console.log("Saved");
-            },
-            error: function (result) {}
-            })
-        });
-
-    var newg = svg.append("g");
-
-    // we draw these lines before the dragrect to improve carity when rectangle is very thin
-    var delay_line = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
-
-
-    var startline = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
-
-    var dragrect = newg.append("rect")
-        .attr("id", "active")
-        .attr("fill", "lightgreen")
-        .attr("fill-opacity", .25)
-        .attr("cursor", "move")
-        .call(drag);
-
-
-    var dragbarleft = newg.append("circle")
-        .attr("id", "dragleft")
-        .attr("r", geom.dragbarw / 2)
-        .attr("fill", "lightgray")
-        .attr("fill-opacity", .5)
-        .attr("cursor", "ew-resize")
-        .call(dragleft)
-        .on('contextmenu', d3.contextMenu([{
-            title: function(){
-                return left_fixed ? 'Remove limit' : 'Apply limit';
-            },
-            action: rclick_left
-        }]));
-
-    var dragbarright = newg.append("circle")
-        .attr("id", "dragright")
-        .attr("r", geom.dragbarw / 2)
-        .attr("fill", "lightgray")
-        .attr("fill-opacity", .5)
-        .attr("cursor", "ew-resize")
-        .call(dragright)
-        .on('contextmenu', d3.contextMenu([{
-            title: function(){
-                return right_fixed ? 'Remove limit' : 'Apply limit';
-            },
-            action: rclick_right
-        }]));
-
-
-    var dragbartop = newg.append("circle")
-        .attr("r", geom.dragbarw / 2)
-        .attr("id", "dragleft")
-        .attr("fill", "lightgray")
-        .attr("fill-opacity", .5)
-        .attr("cursor", "ns-resize")
-        .call(dragtop)
-        .on('contextmenu', d3.contextMenu([{
-            title: function(){
-                return top_fixed ? 'Remove limit' : 'Apply limit';
-            },
-            action: rclick_top
-        }]));
-
-
-    var dragbarbottom = newg.append("circle")
-        .attr("id", "dragright")
-        .attr("r", geom.dragbarw / 2)
-        .attr("fill", "lightgray")
-        .attr("fill-opacity", .5)
-        .attr("cursor", "ns-resize")
-        .call(dragbottom)
-        .on('contextmenu', d3.contextMenu([{
-            title: function(){
-                return bottom_fixed ? 'Remove limit' : 'Apply limit';
-            },
-            action: rclick_bottom
-        }]));
-
-
-    var menu = [
-        {
-            title: 'Constraint starts at fixed time',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                    timing_parent_bar = false;
-                    update_text();
-                }
-            },
-            disabled: false // optional, defaults to false
-        },
-        {
-            title: 'Constraint applies at <i>some</i> time in range',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
-                update_text();
-            }
-        },
-        {
-            title: 'Constraint applies at <i>all</i> times in range',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
-                update_text();
-            }
-        },
-
-        {
-            divider: true
-        },
-        {
-            title: 'Eventually-Always',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
-                timing_parent_bar.append_bar('some')();
-                update_text();
-            }
-        },
-        {
-            title: 'Always-Eventually',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
-                timing_parent_bar.append_bar('all')();
-                update_text();
-            }
         }
 
-    ];
+        if (options.hasOwnProperty('lt')) {
+            geom.rect_top = yScale(options.lt);
+        } else {
+            top_fixed = false;
+        }
+
+        if (!options.hasOwnProperty('gt')){
+            bottom_fixed = false;
+        }
+
+        if (options.hasOwnProperty('lt') && options.hasOwnProperty('gt')) {
+            geom.height = yScale(options.gt) - yScale(options.lt);
+        }
+    }
+
+    geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
+    geom.delay_line_height = geom.rect_top + geom.height/2;
 
 
+    // Function that defines where each element will be positioned
+    /************************************************/
     function adjust_everything(update_description){
         // We rely on: geom.width, geom.height, , geom.h
 
@@ -404,6 +150,8 @@ function setup(div_name, spec_id, index, options) {
     }
 
 
+    // Callback functions for interactions
+    /************************************************/
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
@@ -427,17 +175,6 @@ function setup(div_name, spec_id, index, options) {
             adjust_everything(false);
         });
 
-    var track_circle = newg
-        .append("g")
-        .append("circle")
-        .attr("r", 5)
-        .attr("fill", "rgb(255,0,0)")
-        .attr("fill-opacity", .5)
-        .attr("id", "track_circle")
-        .on('contextmenu', d3.contextMenu(menu))
-        .call(drag_track_circle);
-
-
     function drag_fixed() {
         // resize so edges remain on axes if necessary
         if (!left_fixed) {
@@ -452,55 +189,8 @@ function setup(div_name, spec_id, index, options) {
         if (!bottom_fixed) {
             drag_resize_bottom_inner(geom.rect_top, geom.h);
         }
-
     }
 
-// Handle right-clicks on control points
-    function rclick_left() {
-        if (geom.specification_fixed){ return; }
-
-        left_fixed = !left_fixed;
-
-        if (!left_fixed) {
-            drag_resize_left_inner(geom.start_time_pos, 0);
-        }
-
-        set_edges();
-        return false;
-    }
-
-    function rclick_right() {
-        if (geom.specification_fixed){ return; }
-
-        right_fixed = !right_fixed;
-        if (!right_fixed) {
-            drag_resize_right_inner(geom.start_time_pos, geom.w);
-        }
-        set_edges();
-    }
-
-    function rclick_top() {
-        if (geom.specification_fixed){ return; }
-
-        top_fixed = !top_fixed;
-        if (!top_fixed) {
-            drag_resize_top_inner(geom.rect_top, 0);
-        }
-        set_edges();
-    }
-
-    function rclick_bottom() {
-        if (geom.specification_fixed){ return; }
-
-        bottom_fixed = !bottom_fixed;
-        if (!bottom_fixed) {
-            drag_resize_bottom_inner(geom.rect_top, geom.h);
-        }
-        set_edges();
-    }
-
-
-// Handle dragging and resizing
     function dragmove(d) {
         if (geom.specification_fixed){ return; }
 
@@ -613,7 +303,288 @@ function setup(div_name, spec_id, index, options) {
     }
 
 
-// Shading edges
+    // Context menus and associated functions
+    /************************************************/
+    var menu = [
+        {
+            title: 'Constraint starts at fixed time',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                    timing_parent_bar = false;
+                    update_text();
+                }
+            },
+            disabled: false // optional, defaults to false
+        },
+        {
+            title: 'Constraint applies at <i>some</i> time in range',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
+                update_text();
+            }
+        },
+        {
+            title: 'Constraint applies at <i>all</i> times in range',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
+                update_text();
+            }
+        },
+
+        {
+            divider: true
+        },
+        {
+            title: 'Eventually-Always',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'all', geom, svg, newg, helper_funcs);
+                timing_parent_bar.append_bar('some')();
+                update_text();
+            }
+        },
+        {
+            title: 'Always-Eventually',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+                timing_parent_bar = create_bar(1, 'some', geom, svg, newg, helper_funcs);
+                timing_parent_bar.append_bar('all')();
+                update_text();
+            }
+        }
+
+    ];
+
+    function rclick_left() {
+        if (geom.specification_fixed){ return; }
+
+        left_fixed = !left_fixed;
+
+        if (!left_fixed) {
+            drag_resize_left_inner(geom.start_time_pos, 0);
+        }
+
+        set_edges();
+        return false;
+    }
+
+    function rclick_right() {
+        if (geom.specification_fixed){ return; }
+
+        right_fixed = !right_fixed;
+        if (!right_fixed) {
+            drag_resize_right_inner(geom.start_time_pos, geom.w);
+        }
+        set_edges();
+    }
+
+    function rclick_top() {
+        if (geom.specification_fixed){ return; }
+
+        top_fixed = !top_fixed;
+        if (!top_fixed) {
+            drag_resize_top_inner(geom.rect_top, 0);
+        }
+        set_edges();
+    }
+
+    function rclick_bottom() {
+        if (geom.specification_fixed){ return; }
+
+        bottom_fixed = !bottom_fixed;
+        if (!bottom_fixed) {
+            drag_resize_bottom_inner(geom.rect_top, geom.h);
+        }
+        set_edges();
+    }
+
+
+    // Actually create visual elements
+    /************************************************/
+
+    var svg = d3.select(div_name).append("svg")
+        .attr("width", geom.w)
+        .attr("height", geom.h);
+
+
+    var xAxis =  d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+
+    svg.append("g")
+        .call(xAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
+
+    var yAxis =  d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+
+    svg.append("g")
+        .call(yAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(" + (geom.horizontal_padding) + ", " + 0 + ")");
+
+    var p = d3.select(div_name).append("p");
+    p.text("X is");
+    var placeholder = p.append("b");
+    var placeholder_latex = p.append("div");
+
+    var options_form = d3.select(div_name).append("div").append("form");
+    var constant = options_form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "constant_checkbox")
+        .attr("value", "false")
+        .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
+    var constant_label = options_form.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
+    var use_letters = options_form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "use_letters_checkbox")
+        .attr("value", "false")
+        .on("change", function(){
+            geom.use_letters = !geom.use_letters;
+            update_text();
+        });
+    var use_letters_label = options_form.append("label").attr("for", "use_letters_checkbox").text("Use letters");
+
+    d3.select(div_name).append('button')
+        .text("Save")
+        .on("click", function(){
+            $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "http://" + window.location.host + "/specifications/" + spec_id + "/save",
+            dataType: 'json',
+            async: true,
+            data: getSpecString(),
+
+             beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+             },
+
+            success: function (data) {
+               console.log("Saved");
+            },
+            error: function (result) {}
+            })
+        });
+
+    var newg = svg.append("g");
+
+    // we draw these lines before the dragrect to improve carity when rectangle is very thin
+    var delay_line = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
+    var startline = newg.append("line")
+        .style("stroke", "rgb(255,0,0)")
+        .style("stroke-width", "2");
+
+    var dragrect = newg.append("rect")
+        .attr("id", "active")
+        .attr("fill", "lightgreen")
+        .attr("fill-opacity", .25)
+        .attr("cursor", "move")
+        .call(d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragmove));
+
+    var dragbarleft = newg.append("circle")
+        .attr("id", "dragleft")
+        .attr("r", geom.dragbarw / 2)
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ew-resize")
+        .call(
+            d3.behavior.drag()
+            .origin(Object)
+            .on("drag", drag_resize_left)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return left_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_left
+        }]));
+
+    var dragbarright = newg.append("circle")
+        .attr("id", "dragright")
+        .attr("r", geom.dragbarw / 2)
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ew-resize")
+        .call(
+            d3.behavior.drag()
+            .origin(Object)
+            .on("drag", drag_resize_right)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return right_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_right
+        }]));
+
+
+    var dragbartop = newg.append("circle")
+        .attr("r", geom.dragbarw / 2)
+        .attr("id", "dragtop")
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ns-resize")
+        .call(
+            d3.behavior.drag()
+            .origin(Object)
+            .on("drag", drag_resize_top)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return top_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_top
+        }]));
+
+
+    var dragbarbottom = newg.append("circle")
+        .attr("id", "dragbottom")
+        .attr("r", geom.dragbarw / 2)
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ns-resize")
+        .call( d3.behavior.drag()
+        .origin(Object)
+        .on("drag", drag_resize_bottom)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return bottom_fixed ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_bottom
+        }]));
+
+    var track_circle = newg
+        .append("g")
+        .append("circle")
+        .attr("r", 5)
+        .attr("fill", "rgb(255,0,0)")
+        .attr("fill-opacity", .5)
+        .attr("id", "track_circle")
+        .on('contextmenu', d3.contextMenu(menu))
+        .call(drag_track_circle);
+
+
+
+
+    // Shading edges of rectangle
+    /************************************************/
 
     function set_edges() {
 
@@ -676,7 +647,9 @@ function setup(div_name, spec_id, index, options) {
     }
 
 
-// Describing selected region
+    // Describing selected region
+    /************************************************/
+
     function get_time_option_box(choice) {
 
         if (choice == "between times") {
