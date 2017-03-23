@@ -763,7 +763,7 @@ function setup(div_name, spec_id, index, options) {
             var delay_time = XToTime(geom.start_time_pos) - XToTime(geom.track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(geom.start_time_pos) + geom.width - XToTime(geom.track_circle_pos);
+            var length =   XToTime(geom.start_time_pos + geom.width) - XToTime(geom.track_circle_pos);
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
@@ -780,7 +780,7 @@ function setup(div_name, spec_id, index, options) {
         }
 
         var x_lower = XToTime(geom.start_time_pos).toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
+        var x_upper = XToTime(geom.start_time_pos + geom.width ).toFixed(2);
 
         if (!right_fixed){
             x_upper = "\\infty";
