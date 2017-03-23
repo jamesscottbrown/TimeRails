@@ -24,3 +24,8 @@ class Project(SurrogatePK, Model):
     def __repr__(self):
         """Represent instance as a unique string."""
         return '<Project({name})>'.format(name=self.name)
+
+    @staticmethod
+    def get_variables(project_id):
+        project = Project.query.filter_by(id=project_id).first()
+        return map(lambda x: x.strip(), project.variables.split(","))

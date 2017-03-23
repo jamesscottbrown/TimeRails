@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, HiddenField
+from wtforms import StringField, SelectField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Length
 
 from .models import Specification
@@ -11,6 +11,7 @@ class SpecificationForm(Form):
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=25)])
     description = StringField('Description', validators=[Length(max=40)])
     specification = StringField('Specification', validators=[])
+    variable = SelectField('Variable')
     project_id = HiddenField()
 
     def __init__(self, *args, **kwargs):

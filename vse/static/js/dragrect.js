@@ -2,7 +2,7 @@ function imposeLimits(lower, upper, val){
     return Math.max(lower, Math.min(upper, val));
 }
 
-function setup(svg, div_name, spec_id, index, options) {
+function setup(svg, div_name, spec_id, index, variable_name, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var geom = {
@@ -14,7 +14,7 @@ function setup(svg, div_name, spec_id, index, options) {
         dragbarw: 20,
 
         vertical_padding: 30,
-        horizontal_padding: 30,
+        horizontal_padding: 60,
         track_padding: 20,
 
         delay_line_length: 30,
@@ -36,7 +36,7 @@ function setup(svg, div_name, spec_id, index, options) {
     var xRange = [0, 100];
     var xScale = d3.scale.linear()
         .domain(xRange)
-        .range([geom.vertical_padding, geom.w - geom.horizontal_padding]);
+        .range([geom.horizontal_padding, geom.w - geom.horizontal_padding]);
 
     var yRange = [100, 0];
     var yScale = d3.scale.linear()
@@ -419,6 +419,15 @@ function setup(svg, div_name, spec_id, index, options) {
         .call(xAxis)
         .attr("class", "axis")
         .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
+
+    svg
+        .append("text")
+        .attr('x', -geom.h/2)
+        .attr("y", 6)
+
+        .attr("transform", "rotate(-90)")
+        .attr("dy", ".75em")
+        .text(variable_name);
 
     var yAxis =  d3.svg.axis()
         .scale(yScale)
@@ -1063,10 +1072,10 @@ function setup(svg, div_name, spec_id, index, options) {
     return {add_bar: add_timing_bar}
 }
 
-function setup_from_specification_string(svg, div_name, spec_id, index, string){
+function setup_from_specification_string(svg, div_name, spec_id, index, variable_name, string){
     string = string.toLowerCase().trim().replace(/ /g, '');
 
-    if (!string){ return setup(svg, div_name, spec_id, index); }
+    if (!string){ return setup(svg, div_name, spec_id, index, variable_name); }
 
     var queue = [];
     var  args, parts, start, end;
@@ -1124,7 +1133,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, string){
 
     // handle case where constraint is an inequality alone
     if (queue.length == 0){
-        return setup(svg, div_name, spec_id, index, rectangle_opts);
+        return setup(svg, div_name, spec_id, index, variable_name, rectangle_opts);
     }
 
     // We need to distinguish between the cases where the innermost term is Finally or Globally
@@ -1162,7 +1171,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, string){
         queue.push(term);
     }
 
-    var diagram = setup(svg, div_name, spec_id, index, rectangle_opts);
+    var diagram = setup(svg, div_name, spec_id, index, variable_name, rectangle_opts);
 
     while (queue.length > 0){
         term = queue.pop();
@@ -1180,12 +1189,12 @@ function setup_from_specification_string(svg, div_name, spec_id, index, string){
 }
 
 
-function add_subplot_from_specification(specification_string, div_name, spec_id){
+function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
     d3.select("#diagrams").append('div').attr("id", div_name);
     var svg = d3.select('#' + div_name).append("svg")
         .attr("width", 750)
         .attr("height", 450);
 
-    setup_from_specification_string(svg, "#" + div_name, spec_id, 1, specification_string);
+    setup_from_specification_string(svg, "#" + div_name, spec_id, 1, variable_name, specification_string);
 }
 

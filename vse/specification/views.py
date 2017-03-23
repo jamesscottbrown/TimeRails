@@ -24,6 +24,10 @@ def new_project():
     """Add new specification to project."""
 
     form = SpecificationForm(request.form)
+    project_id = request.args.get("project")
+    variables = Project.get_variables(project_id)
+    form.variable.choices = zip(variables, variables)
+
     if form.validate_on_submit():
 
         project_id = form.project_id.data
@@ -38,7 +42,7 @@ def new_project():
             return redirect('.')
 
         Specification.create(name=form.name.data, description=form.description.data, specification=form.specification.data,
-                             project_id=project_id)
+                             variable=form.variable.data, project_id=project_id)
         flash('New specification created.', 'success')
         return redirect('/projects/' + project_id)
     else:
@@ -89,6 +93,9 @@ def edit_specification(specification_id):
     project_id = current_spec.project_id
 
     form = SpecificationForm(request.form)
+    variables = Project.get_variables(project_id)
+    form.variable.choices = zip(variables, variables)
+
     if form.validate_on_submit():
         form.populate_obj(current_spec)
         current_spec.project_id = project_id # ensure project_id is unchanged
@@ -97,6 +104,8 @@ def edit_specification(specification_id):
         return redirect('projects/' + str(project_id))
     else:
         flash_errors(form)
+
+    form.variable.data = current_spec.variable
     return render_template('specifications/edit_spec.html', form=form, current_spec=current_spec)
 
 

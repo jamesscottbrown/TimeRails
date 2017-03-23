@@ -11,13 +11,15 @@ class Specification(SurrogatePK, Model):
     name = Column(db.String(80), unique=True, nullable=False)
     description = Column(db.Text, unique=False, nullable=True)
     specification = Column(db.Text, unique=False, nullable=True)
+    variable = Column(db.String(80), unique=False, nullable=True)
 
-    #project_id = reference_col('projects', nullable=True)
+    project_id = reference_col('projects', nullable=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
 
-    def __init__(self, name, description, specification, project_id, **kwargs):
+    def __init__(self, name, description, specification, project_id, variable, **kwargs):
         """Create instance."""
-        db.Model.__init__(self, name=name, description=description, specification=specification, project_id=project_id, **kwargs)
+        db.Model.__init__(self, name=name, description=description, specification=specification, variable=variable,
+                          project_id=project_id, **kwargs)
 
     def __repr__(self):
         """Represent instance as a unique string."""
