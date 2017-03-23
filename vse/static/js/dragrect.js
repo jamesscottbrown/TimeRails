@@ -436,6 +436,9 @@ function setup(div_name, spec_id, index, options) {
         .attr("class", "axis")
         .attr("transform", "translate(" + (geom.horizontal_padding) + ", " + 0 + ")");
 
+    var example_trajctory_g = svg.append("g")
+        .attr("id", "example_trajectory");
+
     var p = d3.select(div_name).append("p");
     p.text("X is");
     var placeholder = p.append("b");
@@ -481,6 +484,46 @@ function setup(div_name, spec_id, index, options) {
             error: function (result, textStatus) { }
             })
         });
+
+    d3.select(div_name).append('button')
+        .text("Plot example trajectory")
+        .on("click", function(){
+            var new_spec_string = getSpecString();
+            $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "http://" + window.location.host + "/specifications/example",
+            dataType: 'html',
+            async: true,
+            data: {"specification_string": new_spec_string, "t_max": xRange[1]},
+
+             beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+             },
+
+            success: function (data) {
+                example_trajctory_g
+                    .append("g")
+                    .selectAll(".dot")
+                    .data(JSON.parse(data))
+                    .enter()
+                    .append("circle")
+                    .attr("class", "dot")
+                    .attr("r", 3.5)
+                    .attr("cx", function (d){return xScale(d.x)})
+                    .attr("cy", function (d){return yScale(d.y)});
+            },
+            error: function (result, textStatus) { }
+            })
+        });
+
+    d3.select(div_name).append('button')
+        .text("Delete example trajectory")
+        .on("click", function(){
+            example_trajctory_g.selectAll(".dot").remove();
+        });
+
+
 
     var newg = svg.append("g");
 

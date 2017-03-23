@@ -3,11 +3,15 @@ from vse.specification.forms import SpecificationForm
 
 from vse.project.models import Project
 
+from vse import smt
+
 from vse.utils import flash_errors
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
 from urllib import unquote_plus
+
+import json
 
 blueprint = Blueprint('specification', __name__, url_prefix='/specifications', static_folder='../static')
 
@@ -114,3 +118,19 @@ def save_specification(specification_id):
     current_spec.save()
 
     return "SUCCESS"
+
+
+@blueprint.route('/example')
+@login_required
+def generate_example_trajectory():
+    """Compute an example trajectory satisfying a specification."""
+    spec = smt.parse_spec_string(request.args.get("specification_string"))
+
+    rectangle_set = smt.solve_system([spec], 1, request.args.get("t_max"))
+    x, y = rectangle_set.get_signal()
+
+    points = []
+    for pair in zip(x,y):
+        points.append({"x": pair[0], "y": pair[1]})
+
+    return json.dumps(points)
