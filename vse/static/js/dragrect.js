@@ -2,14 +2,12 @@ function imposeLimits(lower, upper, val){
     return Math.max(lower, Math.min(upper, val));
 }
 
-function setup(div_name, spec_id, index, options) {
-
+function setup(svg, div_name, spec_id, index, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var geom = {
-        w: 750,
-        h: 450,
-        r: 120,
+        w: parseInt(svg.attr("width")),
+        h: parseInt(svg.attr("height")),
 
         width: 300 * 0.75,
         height: 200 * 0.75,
@@ -412,11 +410,6 @@ function setup(div_name, spec_id, index, options) {
 
     // Actually create visual elements
     /************************************************/
-
-    var svg = d3.select(div_name).append("svg")
-        .attr("width", geom.w)
-        .attr("height", geom.h);
-
 
     var xAxis =  d3.svg.axis()
         .scale(xScale)
@@ -1070,10 +1063,10 @@ function setup(div_name, spec_id, index, options) {
     return {add_bar: add_timing_bar}
 }
 
-function setup_from_specification_string(div_name, spec_id, index, string){
+function setup_from_specification_string(svg, div_name, spec_id, index, string){
     string = string.toLowerCase().trim().replace(/ /g, '');
 
-    if (!string){ return setup(div_name, spec_id, index); }
+    if (!string){ return setup(svg, div_name, spec_id, index); }
 
     var queue = [];
     var  args, parts, start, end;
@@ -1131,7 +1124,7 @@ function setup_from_specification_string(div_name, spec_id, index, string){
 
     // handle case where constraint is an inequality alone
     if (queue.length == 0){
-        return setup(div_name, spec_id, index, rectangle_opts);
+        return setup(svg, div_name, spec_id, index, rectangle_opts);
     }
 
     // We need to distinguish between the cases where the innermost term is Finally or Globally
@@ -1169,8 +1162,7 @@ function setup_from_specification_string(div_name, spec_id, index, string){
         queue.push(term);
     }
 
-    var diagram = setup(div_name, spec_id, index, rectangle_opts);
-
+    var diagram = setup(svg, div_name, spec_id, index, rectangle_opts);
 
     while (queue.length > 0){
         term = queue.pop();
@@ -1186,3 +1178,14 @@ function setup_from_specification_string(div_name, spec_id, index, string){
 
     }
 }
+
+
+function add_subplot_from_specification(specification_string, div_name, spec_id){
+    d3.select("#diagrams").append('div').attr("id", div_name);
+    var svg = d3.select('#' + div_name).append("svg")
+        .attr("width", 750)
+        .attr("height", 450);
+
+    setup_from_specification_string(svg, "#" + div_name, spec_id, 1, specification_string);
+}
+
