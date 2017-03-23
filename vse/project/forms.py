@@ -10,7 +10,7 @@ class ProjectForm(Form):
 
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=25)])
     description = StringField('Description', validators=[Length(max=40)])
-    dimensionality = IntegerField('Dimensionality', validators=[DataRequired(message='required and must be an integer')])
+    variables = StringField('Variables', validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
