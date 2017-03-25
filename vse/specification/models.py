@@ -8,7 +8,7 @@ class Specification(SurrogatePK, Model):
     """A specification, part of a project."""
 
     __tablename__ = 'specifications'
-    name = Column(db.String(80), unique=True, nullable=False)
+    name = Column(db.String(80), unique=False, nullable=False)
     description = Column(db.Text, unique=False, nullable=True)
     specification = Column(db.Text, unique=False, nullable=True)
     variable = Column(db.String(80), unique=False, nullable=True)

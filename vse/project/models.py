@@ -8,7 +8,7 @@ class Project(SurrogatePK, Model):
     """A project, owned by a user."""
 
     __tablename__ = 'projects'
-    name = Column(db.String(80), unique=True, nullable=False)
+    name = Column(db.String(80), unique=False, nullable=False)
     description = Column(db.Text, unique=False, nullable=True)
     variables = Column(db.Text, unique=False, nullable=True)
     public = Column(db.Boolean)
