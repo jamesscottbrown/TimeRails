@@ -24,11 +24,9 @@
     </ul>
     {% if current_user and current_user.is_authenticated %}
     <ul class="nav navbar-nav navbar-right">
-        <li>
-            <p class="navbar-text"><a class="navbar-link" href="/projects"> {{ current_user.username }}'s projects</a></p>
-        </li>
+        <li><p class="navbar-text"><a class="navbar-link" href="/projects"> {{ current_user.username }}'s projects</a></p></li>
+        <li><p class="navbar-text"><a class="navbar-link" href="/projects/new"><i class="fa fa-plus" aria-hidden="true"></i> Create project</a></p></li>
         <li><a class="navbar-link" href="{{ url_for('public.logout') }}"><i class="fa fa-sign-out"></i></a></li>
-
     </ul>
     {% elif form %}
     <ul class="nav navbar-nav navbar-right">
