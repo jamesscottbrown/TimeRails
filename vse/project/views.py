@@ -73,7 +73,7 @@ def new_project():
     form = ProjectForm(request.form)
     if form.validate_on_submit():
         Project.create(name=form.name.data, description=form.description.data, variables=form.variables.data,
-                       user_id=current_user.id, public=public)
+                       user_id=current_user.id, public=form.public.data)
         flash('New project created.', 'success')
         return redirect(url_for('project.list_projects'))
     else:
