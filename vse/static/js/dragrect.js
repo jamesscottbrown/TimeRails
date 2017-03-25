@@ -522,6 +522,11 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
                     .attr("r", 3.5)
                     .attr("cx", function (d){return xScale(d.x)})
                     .attr("cy", function (d){return yScale(d.y)});
+
+                d3.select(div_name)
+                    .select("#delete_trajectory_button")
+                    .style("visibility", "visible");
+
             },
             error: function (result, textStatus) { }
             })
@@ -531,7 +536,10 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .text("Delete example trajectory")
         .on("click", function(){
             example_trajctory_g.selectAll(".dot").remove();
-        });
+            d3.select(this).style("visibility", "hidden");
+        })
+        .attr("id", "delete_trajectory_button")
+        .style("visibility", "hidden");
 
 
 
