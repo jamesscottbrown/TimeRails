@@ -39,8 +39,11 @@
         <div id="constraint_{{spec.id}}">
             <script type="text/javascript">generate.push( function bar(x){ add_subplot_from_specification("{{spec.specification}}", "constraint_{{spec.id}}", "{{spec.id}}", "{{spec.variable}}"); } )</script>
         </div>
-
     {% endfor %}
+
+    {% if project.specifications %}
+        <div><a href="/specifications/add?project={{project.id}}"><i class="fa fa-plus" aria-hidden="true"></i>Add a new specification to the project</a></div>
+    {% endif %}
 
 {% endblock %}
 
