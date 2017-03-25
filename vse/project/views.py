@@ -17,12 +17,11 @@ def list_projects():
 
 
 @blueprint.route('/<int:project_id>')
-@login_required
 def project(project_id):
     """List details of a project."""
     current_project = Project.query.filter_by(id=project_id).first()
 
-    if current_project.user != current_user:
+    if not current_project.public and current_project.user != current_user:
         flash('Not your project!', 'danger')
         return redirect('.')
 
@@ -73,7 +72,8 @@ def new_project():
     """Add new project."""
     form = ProjectForm(request.form)
     if form.validate_on_submit():
-        Project.create(name=form.name.data, description=form.description.data, variables=form.variables.data, user_id=current_user.id)
+        Project.create(name=form.name.data, description=form.description.data, variables=form.variables.data,
+                       user_id=current_user.id, public=public)
         flash('New project created.', 'success')
         return redirect(url_for('project.list_projects'))
     else:
