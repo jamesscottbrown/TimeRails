@@ -2,6 +2,14 @@ function imposeLimits(lower, upper, val){
     return Math.max(lower, Math.min(upper, val));
 }
 
+function sum (x){
+    var total = 0;
+    for (var i=0; i< x.length; i++){
+        total += x[i];
+    }
+    return total;
+}
+
 function setup(svg, div_name, spec_id, index, variable_name, options) {
     // Setting up scales and initial default positions
     /************************************************/
@@ -1078,8 +1086,9 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
     if (!string){ return setup(svg, div_name, spec_id, index, variable_name); }
 
     var queue = [];
-    var  args, parts, start, end;
+    var args, parts, start, end;
     var totalOffset = 0;
+    var widths = [0]; // offset for top-level element is 0
 
     while (string) {
         if (string.startsWith("globally")) {
@@ -1092,6 +1101,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
             string = parts.slice(2).join(',');
 
             totalOffset += start;
+            widths.push(end - start);
             queue.push({type: "globally", start: start, end: end});
 
         } else if (string.startsWith("finally")) {
@@ -1103,6 +1113,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
             string = parts.slice(2).join(',');
 
             totalOffset += start;
+            widths.push(end - start);
             queue.push({type: "finally", start: start, end: end});
 
         } else if (string.startsWith("inequality")) {
@@ -1128,6 +1139,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
 
 
     var rectangle_opts = [];
+    var pos;
     rectangle_opts.lt = lt;
     rectangle_opts.gt = gt;
 
@@ -1154,18 +1166,24 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
         } else {
             // unshifted
             totalOffset -= term.start;
+            widths.pop(); // discard top element of widths, a Global corresponding to rectangle width
 
-            rectangle_opts.track_circle_time = totalOffset;
-            rectangle_opts.start_time = totalOffset + term.start;
-            rectangle_opts.end_time = totalOffset + term.end;
+            pos = totalOffset + sum(widths)/2;
+            widths.pop();
+
+            rectangle_opts.track_circle_time = pos;
+            rectangle_opts.start_time = pos + term.start;
+            rectangle_opts.end_time = pos + term.end;
         }
 
     } else {
         // a 'Finally(.,., Inequality(.,.)', so drawn as a zero width-rectangle
-        // totalOffset -= term.start; // ???
-        rectangle_opts.track_circle_time = totalOffset;
-        rectangle_opts.start_time = totalOffset;
-        rectangle_opts.end_time = totalOffset;
+        pos = totalOffset + sum(widths)/2;
+        widths.pop();
+
+        rectangle_opts.track_circle_time = pos;
+        rectangle_opts.start_time = pos;
+        rectangle_opts.end_time = pos;
 
         // push the finally term back onto queue, so that it is still drawn
         queue.push(term);
@@ -1177,10 +1195,13 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
         term = queue.pop();
         totalOffset -= term.start;
 
+        pos = totalOffset + sum(widths)/2;
+        widths.pop();
+
         var timing_bar_options = [];
-        timing_bar_options.start_time = totalOffset;
-        timing_bar_options.left_tick_time = term.start + totalOffset;
-        timing_bar_options.right_tick_time = term.end + totalOffset;
+        timing_bar_options.start_time = pos;
+        timing_bar_options.left_tick_time = term.start + pos;
+        timing_bar_options.right_tick_time = term.end + pos;
 
         var kind = (term.type == "finally") ? 'some' : 'all';
         diagram.add_bar(kind, timing_bar_options);
