@@ -1,4 +1,4 @@
-function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
+function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs, options){
     // increase SVG height
     svg.attr("height", parseInt(svg.attr("height")) + geom.track_padding);
 
@@ -17,12 +17,12 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
 
     // Function that defines where each element will be positioned
     function adjust_everything(update_description){
-        
         track
             .attr("x1", left_tick_pos)
             .attr("x2", right_tick_pos)
             .attr("y1", base_y)
-            .attr("y2", base_y);
+            .attr("y2", base_y)
+            .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0");
         
         left_tick
             .attr("x1", left_tick_pos)
@@ -131,7 +131,8 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
         },
         XToTime: helper_funcs.XToTime,
         TimeToX: helper_funcs.TimeToX,
-        update_text: helper_funcs.update_text
+        update_text: helper_funcs.update_text,
+        update_formula: helper_funcs.update_formula
     };
 
     var append_bar = function(bar_kind, options){
@@ -139,7 +140,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, newg, helper_funcs_new, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, placeholder_form, newg, helper_funcs_new, options);
             helper_funcs.update_text();
         }
     };
@@ -173,7 +174,6 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
     var track = newg.append("line")
         .style("stroke", "rgb(128,128,128)")
         .style("stroke-width", "2")
-        .style("stroke-dasharray", kind == "some" ? "5,5" : "5,0")
         .call(drag_track);
 
     var left_tick = newg.append("line")
@@ -222,7 +222,7 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
     }
 
     function get_start_time(){
-        return left_tick_pos;
+        return left_tick_pos; // TODO: fix confusing naming here
     }
 
     function get_end_time(){
@@ -288,8 +288,70 @@ function create_bar(level, kind, geom, svg, newg, helper_funcs, options){
         return spec_string;
     }
 
+    function describe_constraint (){
+
+        var time_number;
+        if (timing_parent_bar) {
+            time_number = timing_parent_bar.describe_constraint();
+        } else {
+            time_number = 0;
+        }
+
+        var newDiv = placeholder_form.append("div");
+
+        newDiv.append("text").text("For");
+
+        getSomeAllSelect(newDiv);
+
+        var s1 = " t_ " + (time_number + 1) + " between ";
+        var s2 = (time_number > 0) ? "t_" + time_number + "+" : "";
+
+        newDiv.append("text").text(s1 + s2);
+
+        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(start_time_pos);
+
+        newDiv.append("input")
+            .attr("value", start_time.toFixed(2))
+            .on("change", function (){
+                left_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(start_time_pos));
+                adjust_everything();
+            });
+
+        newDiv.append("text").text(" and " + s2);
+
+        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
+        newDiv.append("input")
+            .attr("value", end_time.toFixed(2))
+            .on("change", function (){
+                right_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(start_time_pos));
+                adjust_everything();
+            });
+
+        return time_number + 1;
+    }
+
+    function getSomeAllSelect (newDiv){
+        var select = newDiv.append("select");
+
+        var some_time = select.append("option").text("some time");
+        var all_time = select.append("option").text("all times");
+
+        if (kind == "some"){
+            some_time.attr("selected", "selected");
+        } else {
+            all_time.attr("selected", "selected");
+        }
+
+        select.on("change", function(){
+            kind = this.value.startsWith("all") ? "all" : "some";
+            adjust_everything();
+            helper_funcs.update_formula();
+        });
+    }
+
     adjust_everything(true);
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString};
+        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString,
+        describe_constraint: describe_constraint};
 }
