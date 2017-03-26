@@ -31,13 +31,14 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         start_time_pos: 750 / 2,
 
         specification_fixed: false,
-        use_letters: false
+        use_letters: false,
+        
+        top_fixed: true,
+        bottom_fixed: true,
+        left_fixed: true,
+        right_fixed: true
     };
 
-    var top_fixed = true;
-    var bottom_fixed = true;
-    var left_fixed = true;
-    var right_fixed = true;
 
     var timing_parent_bar = false;
 
@@ -79,8 +80,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             geom.track_circle_pos = xScale(options.track_circle_time);
             geom.width = xScale(options.end_time) - xScale(options.start_time);
         } else {
-            left_fixed = false;
-            right_fixed = false;
+            geom.left_fixed = false;
+            geom.right_fixed = false;
 
             geom.delay_line_length = 0;
             geom.start_time_pos = xScale(xRange[0]);
@@ -92,11 +93,11 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         if (options.hasOwnProperty('lt')) {
             geom.rect_top = yScale(options.lt);
         } else {
-            top_fixed = false;
+            geom.top_fixed = false;
         }
 
         if (!options.hasOwnProperty('gt')){
-            bottom_fixed = false;
+            geom.bottom_fixed = false;
         }
 
         if (options.hasOwnProperty('lt') && options.hasOwnProperty('gt')) {
@@ -184,16 +185,16 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
     function drag_fixed() {
         // resize so edges remain on axes if necessary
-        if (!left_fixed) {
+        if (!geom.left_fixed) {
             drag_resize_left_inner(geom.start_time_pos, 0);
         }
-        if (!right_fixed) {
+        if (!geom.right_fixed) {
             drag_resize_right_inner(geom.start_time_pos, geom.w);
         }
-        if (!top_fixed) {
+        if (!geom.top_fixed) {
             drag_resize_top_inner(geom.rect_top, 0);
         }
-        if (!bottom_fixed) {
+        if (!geom.bottom_fixed) {
             drag_resize_bottom_inner(geom.rect_top, geom.h);
         }
     }
@@ -216,7 +217,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function drag_resize_left(d) {
         if (geom.specification_fixed){ return; }
 
-        if (!left_fixed) {
+        if (!geom.left_fixed) {
             return;
         }
 
@@ -240,7 +241,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function drag_resize_right(d) {
         if (geom.specification_fixed){ return; }
 
-        if (!right_fixed) {
+        if (!geom.right_fixed) {
             return;
         }
 
@@ -259,7 +260,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function drag_resize_top(d) {
         if (geom.specification_fixed){ return; }
 
-        if (!top_fixed) {
+        if (!geom.top_fixed) {
             return;
         }
 
@@ -285,7 +286,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function drag_resize_bottom(d) {
         if (geom.specification_fixed){ return; }
 
-        if (!bottom_fixed) {
+        if (!geom.bottom_fixed) {
             return;
         }
 
@@ -371,9 +372,9 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function rclick_left() {
         if (geom.specification_fixed){ return; }
 
-        left_fixed = !left_fixed;
+        geom.left_fixed = !geom.left_fixed;
 
-        if (!left_fixed) {
+        if (!geom.left_fixed) {
             drag_resize_left_inner(geom.start_time_pos, 0);
         }
 
@@ -384,8 +385,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function rclick_right() {
         if (geom.specification_fixed){ return; }
 
-        right_fixed = !right_fixed;
-        if (!right_fixed) {
+        geom.right_fixed = !geom.right_fixed;
+        if (!geom.right_fixed) {
             drag_resize_right_inner(geom.start_time_pos, geom.w);
         }
         set_edges();
@@ -394,8 +395,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function rclick_top() {
         if (geom.specification_fixed){ return; }
 
-        top_fixed = !top_fixed;
-        if (!top_fixed) {
+        geom.top_fixed = !geom.top_fixed;
+        if (!geom.top_fixed) {
             drag_resize_top_inner(geom.rect_top, 0);
         }
         set_edges();
@@ -404,8 +405,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     function rclick_bottom() {
         if (geom.specification_fixed){ return; }
 
-        bottom_fixed = !bottom_fixed;
-        if (!bottom_fixed) {
+        geom.bottom_fixed = !geom.bottom_fixed;
+        if (!geom.bottom_fixed) {
             drag_resize_bottom_inner(geom.rect_top, geom.h);
         }
         set_edges();
@@ -570,7 +571,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             .on("drag", drag_resize_left)
         ).on('contextmenu', d3.contextMenu([{
             title: function(){
-                return left_fixed ? 'Remove limit' : 'Apply limit';
+                return geom.left_fixed ? 'Remove limit' : 'Apply limit';
             },
             action: rclick_left
         }]));
@@ -587,7 +588,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             .on("drag", drag_resize_right)
         ).on('contextmenu', d3.contextMenu([{
             title: function(){
-                return right_fixed ? 'Remove limit' : 'Apply limit';
+                return geom.right_fixed ? 'Remove limit' : 'Apply limit';
             },
             action: rclick_right
         }]));
@@ -605,7 +606,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             .on("drag", drag_resize_top)
         ).on('contextmenu', d3.contextMenu([{
             title: function(){
-                return top_fixed ? 'Remove limit' : 'Apply limit';
+                return geom.top_fixed ? 'Remove limit' : 'Apply limit';
             },
             action: rclick_top
         }]));
@@ -622,7 +623,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .on("drag", drag_resize_bottom)
         ).on('contextmenu', d3.contextMenu([{
             title: function(){
-                return bottom_fixed ? 'Remove limit' : 'Apply limit';
+                return geom.bottom_fixed ? 'Remove limit' : 'Apply limit';
             },
             action: rclick_bottom
         }]));
@@ -651,47 +652,47 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         // As a rectangle has 4 sides, there are 2^4 = 16 cases to handle.
 
         // 4 edges:
-        if (top_fixed && bottom_fixed && left_fixed && right_fixed) {
+        if (geom.top_fixed && geom.bottom_fixed && geom.left_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [geom.width + geom.height + geom.width + geom.height].join(','));
         }
 
         // 3 edges
-        else if (top_fixed && bottom_fixed && right_fixed) {
+        else if (geom.top_fixed && geom.bottom_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [geom.width + geom.height + geom.width, geom.height].join(','));
-        } else if (top_fixed && bottom_fixed && left_fixed) {
+        } else if (geom.top_fixed && geom.bottom_fixed && geom.left_fixed) {
             dragrect.style("stroke-dasharray", [geom.width, geom.height, geom.width + geom.height].join(','));
-        } else if (top_fixed && left_fixed && right_fixed) {
+        } else if (geom.top_fixed && geom.left_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [geom.width + geom.height, geom.width, geom.height].join(','));
-        } else if (bottom_fixed && left_fixed && right_fixed) {
+        } else if (geom.bottom_fixed && geom.left_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [0, (geom.width), geom.height + geom.width + geom.height].join(','));
         }
 
         // 2 edges
-        else if (top_fixed && bottom_fixed) {
+        else if (geom.top_fixed && geom.bottom_fixed) {
             dragrect.style("stroke-dasharray", [geom.width, geom.height, geom.width, geom.height].join(','));
-        } else if (top_fixed && left_fixed) {
+        } else if (geom.top_fixed && geom.left_fixed) {
             dragrect.style("stroke-dasharray", [geom.width, geom.height + geom.width, geom.height].join(','));
-        } else if (top_fixed && right_fixed) {
+        } else if (geom.top_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [geom.width + geom.height, geom.width + geom.height].join(','));
-        } else if (bottom_fixed && left_fixed) {
+        } else if (geom.bottom_fixed && geom.left_fixed) {
             dragrect.style("stroke-dasharray", [0, geom.width + geom.height, geom.width + geom.height].join(','));
-        } else if (bottom_fixed && right_fixed) {
+        } else if (geom.bottom_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [0, geom.width, geom.height + geom.width, geom.height].join(','));
-        } else if (left_fixed && right_fixed) {
+        } else if (geom.left_fixed && geom.right_fixed) {
             dragrect.style("stroke-dasharray", [0, geom.width, geom.height, geom.width, geom.height].join(','));
         }
 
         // 1 edges
-        else if (top_fixed) {
+        else if (geom.top_fixed) {
             dragrect.style("stroke-dasharray", [geom.width, (geom.height + geom.width + geom.height)].join(','));
         }
-        else if (bottom_fixed) {
+        else if (geom.bottom_fixed) {
             dragrect.style("stroke-dasharray", [0, (geom.width + geom.height), geom.width, geom.height].join(','));
         }
-        else if (left_fixed) {
+        else if (geom.left_fixed) {
             dragrect.style("stroke-dasharray", [0, (geom.width + geom.height + geom.width), geom.height].join(','));
         }
-        else if (right_fixed) {
+        else if (geom.right_fixed) {
             dragrect.style("stroke-dasharray", [0, (geom.width + geom.height + geom.width), geom.height].join(','));
         }
 
@@ -715,15 +716,15 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         var latex_string;
 
         // 2 bounds
-        if (top_fixed && bottom_fixed) {
+        if (geom.top_fixed && geom.bottom_fixed) {
             latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
         }
 
         // 1 bound
-        else if (top_fixed) {
+        else if (geom.top_fixed) {
             latex_string = "(x_" + index + "<" + y_upper + ")";
         }
-        else if (bottom_fixed) {
+        else if (geom.bottom_fixed) {
             latex_string = "(" + y_lower + "< x_" + index + ")";
         }
 
@@ -764,18 +765,18 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         }
 
         // Otherwise, rectangle is represented by a Global term with a start and end time
-        if (!top_fixed && !bottom_fixed) {
+        if (!geom.top_fixed && !geom.bottom_fixed) {
             return latex_string + "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
         }
 
         var x_lower = XToTime(geom.start_time_pos).toFixed(2);
         var x_upper = XToTime(geom.start_time_pos + geom.width ).toFixed(2);
 
-        if (!right_fixed){
+        if (!geom.right_fixed){
             x_upper = "\\infty";
         }
 
-        if (!left_fixed){
+        if (!geom.left_fixed){
             x_lower = "0";
         }
 
@@ -784,182 +785,18 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     }
 
     function update_text() {
-        describe_constraint();
+        var update_functions = {
+            YToVal: YToVal,
+            valToY: valToY,
+            XToTime: XToTime,
+            timeToX: timeToX,
+            drag_fixed: drag_fixed,
+            update_text: update_text,
+            adjust_everything: adjust_everything
+        };
+        describe_constraint(timing_parent_bar, variable_name, placeholder_form, geom, update_functions);
+
         update_formula();
-    }
-
-    function describe_constraint (){
-        placeholder_form.selectAll('div').remove();
-
-        var time_number;
-        if (timing_parent_bar) {
-            time_number = timing_parent_bar.describe_constraint();
-        } else {
-            time_number = 0;
-        }
-        var newDiv = placeholder_form.append("div");
-
-        getInequalityDurationOption(newDiv);
-
-        var time_offset = (time_number > 0) ? " t_" + time_number + " + " : "";
-
-        if (left_fixed && right_fixed){
-            addStartTimeValue(newDiv, time_offset);
-            newDiv.append("text").text("and");
-            addEndTimeValue(newDiv, time_offset);
-        } else if (!left_fixed && right_fixed) {
-            addEndTimeValue(newDiv, time_offset);
-        } else if (left_fixed && !right_fixed){
-            addStartTimeValue(newDiv, time_offset);
-        }
-
-        newDiv.append("text").text(", " + variable_name + " is ");
-
-        getInequalityOption(newDiv);
-
-        // values
-        if (top_fixed && bottom_fixed){
-            addMinValue(newDiv);
-            newDiv.append("text").text(" and ");
-            addMaxValue(newDiv);
-        } else if (!top_fixed && bottom_fixed) {
-            addMinValue(newDiv);
-        } else if (top_fixed && !bottom_fixed){
-            addMaxValue(newDiv);
-        }
-
-    }
-
-    function addMinValue(newDiv){
-         newDiv.append("input")
-            .attr("value", YToVal(geom.rect_top + geom.height).toFixed(2))
-            .on("change", function (){
-                geom.height = valToY(parseFloat(this.value)) - geom.rect_top;
-                adjust_everything();
-            });
-    }
-
-    function addMaxValue(newDiv){
-        newDiv.append("input")
-            .attr("value", YToVal(geom.rect_top).toFixed(2))
-            .on("change", function (){
-                geom.rect_top = valToY(parseFloat(this.value));
-                adjust_everything();
-            });
-    }
-
-    function addStartTimeValue(newDiv, time_offset){
-        var start = XToTime(geom.start_time_pos) - XToTime(geom.track_circle_pos);
-
-        newDiv.append("text").text(time_offset);
-        newDiv.append("input")
-        .attr("value", start.toFixed(2))
-        .on("change", function (){
-            geom.start_time_pos = timeToX(parseFloat(this.value) + XToTime(geom.track_circle_pos));
-            adjust_everything();
-        });
-    }
-
-    function addEndTimeValue(newDiv, time_offset){
-        var time = XToTime(geom.start_time_pos + geom.width) - XToTime(geom.track_circle_pos);
-
-        newDiv.append("text").text(time_offset);
-        newDiv.append("input")
-        .attr("value", time.toFixed(2))
-        .on("change", function (){
-            //geom.width = timeToX(parseFloat(this.value)  - XToTime(geom.start_time_pos)); // FIXME
-            geom.width = timeToX(parseFloat(this.value) + XToTime(geom.track_circle_pos)) - geom.start_time_pos;
-            adjust_everything();
-        });
-    }
-
-    function getInequalityDurationOption(newDiv){
-
-        var select = newDiv.append("select");
-
-        var between = select.append("option").text("between");
-        var after = select.append("option").text("after");
-        var before = select.append("option").text("before");
-        var selected = select.append("option").text("always");
-
-        if (left_fixed && right_fixed ){
-            between.attr("selected", "selected");
-        } else if (!left_fixed && right_fixed ){
-            before.attr("selected", "selected");
-        } else if (left_fixed && !right_fixed ){
-            after.attr("selected", "selected");
-        } else {
-            selected.attr("selected", "selected");
-        }
-
-        select.on("change", function(){
-            var new_interval_type = this.value;
-
-            if (new_interval_type == "between") {
-                left_fixed = true;
-                right_fixed = true;
-
-            }
-            else if (new_interval_type == "after") {
-                left_fixed = true;
-                right_fixed = false;
-            }
-            else if (new_interval_type == "before") {
-                left_fixed = false;
-                right_fixed = true;
-            }
-            else if (new_interval_type == "always") {
-                left_fixed = false;
-                right_fixed = false;
-            }
-
-            drag_fixed();
-            update_text();
-        });
-    }
-
-    function getInequalityOption(newDiv){
-        var select = newDiv.append("select");
-
-        var between = select.append("option").text("between");
-        var below = select.append("option").text("below");
-        var above = select.append("option").text("above");
-        var unconstrained = select.append("option").text("unconstrained");
-
-
-        if (top_fixed && bottom_fixed){
-            between.attr("selected", "selected");
-        } else if (top_fixed && !bottom_fixed){
-            below.attr("selected", "selected");
-        } else if (!top_fixed && bottom_fixed){
-            above.attr("selected", "selected");
-        } else {
-            unconstrained.attr("selected", "selected");
-        }
-
-        select.on("change", function(){
-            var new_interval_type = this.value;
-
-            if (new_interval_type == "between") {
-                top_fixed = true;
-                bottom_fixed = true;
-            }
-            else if (new_interval_type == "below") {
-                top_fixed = true;
-                bottom_fixed = false;
-            }
-            else if (new_interval_type == "above") {
-                top_fixed = false;
-                bottom_fixed = true;
-            }
-            else if (new_interval_type == "unconstrained"){
-                top_fixed = false;
-                bottom_fixed = false;
-            }
-
-            drag_fixed();
-            update_text();
-        });
     }
 
 
@@ -973,15 +810,15 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         var spec_string;
 
         // 2 bounds
-        if (top_fixed && bottom_fixed) {
+        if (geom.top_fixed && geom.bottom_fixed) {
             spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper + ")";
         }
 
         // 1 bound
-        else if (top_fixed) {
+        else if (geom.top_fixed) {
             spec_string = "Inequality(lt=" + y_upper + ")";
         }
-        else if (bottom_fixed) {
+        else if (geom.bottom_fixed) {
             spec_string = "Inequality(gt=" + y_lower + ")";
         }
 
@@ -1016,18 +853,18 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         }
 
         // Otherwise, rectangle is represented by a Global term with a start and end time
-        if (!top_fixed && !bottom_fixed) {
+        if (!geom.top_fixed && !geom.bottom_fixed) {
             return spec_string;
         }
 
         var x_lower = XToTime(geom.start_time_pos).toFixed(2);
         var x_upper = XToTime( timeToX(x_lower) + geom.width ).toFixed(2);
 
-        if (!right_fixed){
+        if (!geom.right_fixed){
             x_upper = "Inf";
         }
 
-        if (!left_fixed){
+        if (!geom.left_fixed){
             x_lower = "0";
         }
 
