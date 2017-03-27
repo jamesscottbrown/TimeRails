@@ -785,6 +785,12 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     }
 
     function update_text() {
+
+        function create_initial_bar (kind){
+            timing_parent_bar = create_bar(1, kind, geom, svg, placeholder_form, newg, helper_funcs);
+            update_text();
+        }
+
         var update_functions = {
             YToVal: YToVal,
             valToY: valToY,
@@ -792,7 +798,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             timeToX: timeToX,
             drag_fixed: drag_fixed,
             update_text: update_text,
-            adjust_everything: adjust_everything
+            adjust_everything: adjust_everything,
+            create_initial_bar: create_initial_bar
         };
         describe_constraint(timing_parent_bar, variable_name, placeholder_form, geom, update_functions);
 

@@ -353,7 +353,11 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
     adjust_everything(true);
 
+    function getTimingParentBar (){
+        return timing_parent_bar;
+    }
+
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString,
-        describe_constraint: describe_constraint};
+        describe_constraint: describe_constraint, getTimingParentBar: getTimingParentBar};
 }

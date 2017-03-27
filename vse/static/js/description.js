@@ -2,6 +2,8 @@
 function describe_constraint (timing_parent_bar, variable_name, placeholder_form, geom, funcs) {
     placeholder_form.selectAll('div').remove();
 
+    addNewRailOption();
+
     var time_number;
     if (timing_parent_bar) {
         time_number = timing_parent_bar.describe_constraint();
@@ -39,6 +41,48 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
         addMaxValue(newDiv);
     }
 
+    function addNewRailOption(){
+        var initialDiv = placeholder_form.append("div");
+        var new_rail_select = initialDiv.append("select");
+
+        new_rail_select.append("option")
+            .text(" ")
+            .attr("selected", "selected");
+
+        new_rail_select.append("option")
+            .text("For all times");
+
+        new_rail_select.append("option")
+            .text("For some times");
+
+
+        new_rail_select.on("click", function(){
+            var kind = false;
+            if (this.value == "For all times"){
+                kind = "all";
+            } else if (this.value == "For some times"){
+                kind = "some";
+            }
+
+            if (kind){
+                var bar = timing_parent_bar;
+
+                if (bar) {
+                    // case where there is alreayd a time-rail
+                    while (bar.getTimingParentBar()) {
+                        console.log("BAR: ", bar)
+
+                        bar = bar.getTimingParentBar();
+                    }
+                    console.log("FINAL BAR");
+                    console.log(bar)
+                    bar.append_bar(kind)();
+                } else {
+                    funcs.create_initial_bar(kind)
+                }
+            }
+        });
+    }
 
     function addMinValue(newDiv) {
         newDiv.append("input")
