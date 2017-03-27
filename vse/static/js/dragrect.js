@@ -818,15 +818,15 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
         // 2 bounds
         if (geom.top_fixed && geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper + ")";
+            spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper;
         }
 
         // 1 bound
         else if (geom.top_fixed) {
-            spec_string = "Inequality(lt=" + y_upper + ")";
+            spec_string = "Inequality(lt=" + y_upper;
         }
         else if (geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower + ")";
+            spec_string = "Inequality(gt=" + y_lower;
         }
 
         // 0 bounds
@@ -853,10 +853,17 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
-                return spec_string + y_spec_string + ")";
+                spec_string += y_spec_string;
             } else {
-                return spec_string + "Globally(" + delay_time + "," + length + "," + y_spec_string + ")";
+                spec_string += "Globally(" + delay_time + "," + length + "," + y_spec_string;
             }
+
+            var numLeftParens = 0;
+            for (var i=0; i<spec_string.length; i++){
+                if (spec_string[i] == "("){ numLeftParens++; }
+            }
+
+            return spec_string + ")".repeat(numLeftParens);
         }
 
         // Otherwise, rectangle is represented by a Global term with a start and end time
@@ -945,7 +952,9 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
             queue.push({type: "finally", start: start, end: end});
 
         } else if (string.startsWith("inequality")) {
-            args = string.slice(11, -1);
+            string = string.replace(/\)/g, ''); // remove all closing parens
+            args = string.slice(11);
+            
             parts = args.split(',');
 
             var lt, gt, part, terms, name, val;
