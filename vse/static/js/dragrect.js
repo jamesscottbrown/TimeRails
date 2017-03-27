@@ -446,11 +446,11 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     var example_trajctory_g = svg.append("g")
         .attr("id", "example_trajectory");
 
-    var textual_div = d3.select(div_name);
-    var placeholder_form = textual_div.append("div").attr("id", "placeholder_form");
-    var placeholder_latex = textual_div.append("div");
+    var textual_div = d3.select(div_name).classed("space-div", true);
+    var placeholder_form = textual_div.append("div").style("width", geom.w + "px").classed("placeholder-form", true);
+    var placeholder_latex = textual_div.append("div").classed("space-div", true);
 
-    var options_form = d3.select(div_name).append("div").append("form");
+    var options_form = d3.select(div_name).append("div").classed("space-div", true).append("form");
     var constant = options_form.append("input")
         .attr("type", "checkbox")
         .attr("id", "constant_checkbox")

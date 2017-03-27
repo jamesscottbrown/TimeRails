@@ -43,6 +43,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     function addMinValue(newDiv) {
         newDiv.append("input")
             .attr("value", funcs.YToVal(geom.rect_top + geom.height).toFixed(2))
+            .attr("size", "6")
             .on("change", function () {
                 geom.height = funcs.valToY(parseFloat(this.value)) - geom.rect_top;
                 funcs.adjust_everything();
@@ -52,6 +53,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     function addMaxValue(newDiv) {
         newDiv.append("input")
             .attr("value", funcs.YToVal(geom.rect_top).toFixed(2))
+            .attr("size", "6")
             .on("change", function () {
                 geom.rect_top = funcs.valToY(parseFloat(this.value));
                 funcs.adjust_everything();
@@ -64,6 +66,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
         newDiv.append("text").text(time_offset);
         newDiv.append("input")
             .attr("value", start.toFixed(2))
+            .attr("size", "6")
             .on("change", function () {
                 geom.start_time_pos = funcs.timeToX(parseFloat(this.value) + funcs.XToTime(geom.track_circle_pos));
                 funcs.adjust_everything();
@@ -76,6 +79,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
         newDiv.append("text").text(time_offset);
         newDiv.append("input")
             .attr("value", time.toFixed(2))
+            .attr("size", "6")
             .on("change", function () {
                 geom.width = funcs.timeToX(parseFloat(this.value) + funcs.XToTime(geom.track_circle_pos)) - geom.start_time_pos;
                 funcs.adjust_everything();

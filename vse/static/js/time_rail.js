@@ -299,7 +299,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
         var newDiv = placeholder_form.append("div");
 
-        newDiv.append("text").text("For");
+        newDiv.append("text").text("For ");
 
         getSomeAllSelect(newDiv);
 
@@ -312,6 +312,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
         newDiv.append("input")
             .attr("value", start_time.toFixed(2))
+            .attr("size", "6")
             .on("change", function (){
                 left_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(start_time_pos));
                 adjust_everything();
@@ -322,6 +323,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
         newDiv.append("input")
             .attr("value", end_time.toFixed(2))
+            .attr("size", "6")
             .on("change", function (){
                 right_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(start_time_pos));
                 adjust_everything();
