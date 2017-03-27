@@ -351,7 +351,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
                     timing_parent_bar.delete();
                 }
                 timing_parent_bar = create_bar(1, 'all', geom, svg, placeholder_form, newg, helper_funcs);
-                timing_parent_bar.append_bar('some')();
+                timing_parent_bar.set_parent_bar('some')();
                 update_text();
             }
         },
@@ -362,7 +362,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
                     timing_parent_bar.delete();
                 }
                 timing_parent_bar = create_bar(1, 'some', geom, svg, placeholder_form, newg, helper_funcs);
-                timing_parent_bar.append_bar('all')();
+                timing_parent_bar.set_parent_bar('all')();
                 update_text();
             }
         }
@@ -799,7 +799,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             drag_fixed: drag_fixed,
             update_text: update_text,
             adjust_everything: adjust_everything,
-            create_initial_bar: create_initial_bar
+            append_timing_bar: append_timing_bar
         };
         describe_constraint(timing_parent_bar, variable_name, placeholder_form, geom, update_functions);
 
@@ -879,18 +879,33 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     }
 
     function add_timing_bar(kind, options){
+        // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
 
         if (timing_parent_bar){
-            timing_parent_bar.append_bar(kind, options)();
+            timing_parent_bar.set_parent_bar(kind, options)();
         } else {
             timing_parent_bar = create_bar(1, kind, geom, svg, placeholder_form, newg, helper_funcs, options);
         }
         update_text();
     }
 
+    function append_timing_bar(kind, options){
+        // create a new bar as the parent of all parents of rectangle
+
+        if (!timing_parent_bar){
+            add_timing_bar(kind, options);
+        } else {
+            var bar = timing_parent_bar;
+            while (bar.getTimingParentBar()) {
+                bar = bar.getTimingParentBar();
+            }
+            bar.set_parent_bar(kind, options)();
+        }
+    }
+
     adjust_everything(true);
-    return {add_bar: add_timing_bar}
+    return {add_bar: append_timing_bar}
 }
 
 function setup_from_specification_string(svg, div_name, spec_id, index, variable_name, string){

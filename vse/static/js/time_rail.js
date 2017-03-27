@@ -135,7 +135,9 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         update_formula: helper_funcs.update_formula
     };
 
-    var append_bar = function(bar_kind, options){
+    var set_parent_bar = function(bar_kind, options){
+        // set the immediate parent of this bar
+
         return function() {
             if (timing_parent_bar){
                 timing_parent_bar.delete();
@@ -161,11 +163,11 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         },
         {
             title: 'Constraint applies at <i>some</i> time in range',
-            action: append_bar('some')
+            action: set_parent_bar('some')
         },
         {
             title: 'Constraint applies at <i>all</i> times in range',
-            action: append_bar('all')
+            action: set_parent_bar('all')
         }
     ];
 
@@ -358,6 +360,6 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
     }
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, append_bar: append_bar, getLatex: getLatex, getSpecString: getSpecString,
+        "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
         describe_constraint: describe_constraint, getTimingParentBar: getTimingParentBar};
 }

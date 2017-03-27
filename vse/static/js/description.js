@@ -56,31 +56,14 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
             .text("For some times");
 
 
-        new_rail_select.on("click", function(){
+        new_rail_select.on("change", function(){
             var kind = false;
             if (this.value == "For all times"){
                 kind = "all";
             } else if (this.value == "For some times"){
                 kind = "some";
             }
-
-            if (kind){
-                var bar = timing_parent_bar;
-
-                if (bar) {
-                    // case where there is alreayd a time-rail
-                    while (bar.getTimingParentBar()) {
-                        console.log("BAR: ", bar)
-
-                        bar = bar.getTimingParentBar();
-                    }
-                    console.log("FINAL BAR");
-                    console.log(bar)
-                    bar.append_bar(kind)();
-                } else {
-                    funcs.create_initial_bar(kind)
-                }
-            }
+            funcs.append_timing_bar(kind)
         });
     }
 
