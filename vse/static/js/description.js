@@ -84,7 +84,10 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
             .attr("value", funcs.YToVal(geom.rect_top).toFixed(2))
             .attr("size", "6")
             .on("change", function () {
-                geom.rect_top = funcs.valToY(parseFloat(this.value));
+                var new_top = funcs.valToY(parseFloat(this.value));
+
+                geom.height += (geom.rect_top - new_top);
+                geom.rect_top = new_top;
                 funcs.adjust_everything();
             });
     }
