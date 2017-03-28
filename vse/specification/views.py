@@ -133,9 +133,9 @@ def save_specification(specification_id):
 @login_required
 def generate_example_trajectory():
     """Compute an example trajectory satisfying a specification."""
-    spec = smt.parse_spec_string(request.args.get("specification_string"))
+    specs = smt.parse_spec_strings(request.args.getlist("specification_string[]"))
 
-    rectangle_set = smt.solve_system([spec], 1, request.args.get("t_max"))
+    rectangle_set = smt.solve_system(specs, 1, request.args.get("t_max"))
     x, y = rectangle_set.get_signal()
 
     points = []

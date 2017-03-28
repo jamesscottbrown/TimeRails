@@ -37,7 +37,11 @@
         <p>Saved specification is: <code id="spec_string_{{spec.id}}">{{spec.specification}}</code> for <code>{{spec.variable}}</code></p>
 
         <div id="constraint_{{spec.id}}">
-            <script type="text/javascript">generate.push( function bar(x){ add_subplot_from_specification("{{spec.specification}}", "constraint_{{spec.id}}", "{{spec.id}}", "{{spec.variable}}"); } )</script>
+            <script type="text/javascript">generate.push( function bar(x){
+                var diagram = add_subplot_from_specification("{{spec.specification}}", "constraint_{{spec.id}}", "{{spec.id}}", "{{spec.variable}}");
+                diagrams.push(diagram);
+            })
+            </script>
         </div>
     {% endfor %}
 
@@ -51,6 +55,7 @@
 {% block js %}
 <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 <script type="text/javascript">
+    var diagrams = [];
     var csrf_token = "{{ csrf_token() }}";
 </script>
 

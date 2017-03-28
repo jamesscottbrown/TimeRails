@@ -491,42 +491,66 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             })
         });
 
-    d3.select(div_name).append('button')
-        .text("Plot example trajectory")
-        .on("click", function(){
-            var new_spec_string = getSpecString();
+    function plotExampleTrajectory(applyAllConstraints){
+
+        return function() {
+            var spec_strings = [];
+
+            if (applyAllConstraints) {
+                for (var i = 0; i < diagrams.length; i++) {
+                    spec_strings.push(diagrams[i].getSpecString());
+                }
+            } else {
+                spec_strings.push(getSpecString());
+            }
+
             $.ajax({
-            type: "GET",
-            contentType: "application/json; charset=utf-8",
-            url: "http://" + window.location.host + "/specifications/example",
-            dataType: 'html',
-            async: true,
-            data: {"specification_string": new_spec_string, "t_max": xRange[1]},
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: "http://" + window.location.host + "/specifications/example",
+                dataType: 'html',
+                async: true,
+                data: {"specification_string": spec_strings, "t_max": xRange[1]},
 
-             beforeSend: function(xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-             },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                },
 
-            success: function (data) {
-                example_trajctory_g
-                    .append("g")
-                    .selectAll(".dot")
-                    .data(JSON.parse(data))
-                    .enter()
-                    .append("circle")
-                    .attr("class", "dot")
-                    .attr("r", 3.5)
-                    .attr("cx", function (d){return xScale(d.x)})
-                    .attr("cy", function (d){return yScale(d.y)});
+                success: function (data) {
+                    example_trajctory_g
+                        .append("g")
+                        .selectAll(".dot")
+                        .data(JSON.parse(data))
+                        .enter()
+                        .append("circle")
+                        .attr("class", "dot")
+                        .attr("r", 3.5)
+                        .attr("cx", function (d) {
+                            return xScale(d.x)
+                        })
+                        .attr("cy", function (d) {
+                            return yScale(d.y)
+                        });
 
-                d3.select(div_name)
-                    .select("#delete_trajectory_button")
-                    .style("visibility", "visible");
+                    d3.select(div_name)
+                        .select("#delete_trajectory_button")
+                        .style("visibility", "visible");
 
-            },
-            error: function (result, textStatus) { }
+                },
+                error: function (result, textStatus) {
+                }
             })
-        });
+        }
+    }
+
+    d3.select(div_name).append('button')
+        .text("Plot trajectory satisfying this constraint")
+        .on("click", plotExampleTrajectory(false));
+
+    d3.select(div_name).append('button')
+        .text("Plot trajectory satisfying all constraints")
+        .on("click", plotExampleTrajectory(true));
+
 
     d3.select(div_name).append('button')
         .text("Delete example trajectory")
@@ -912,7 +936,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     }
 
     adjust_everything(true);
-    return {add_bar: append_timing_bar}
+    return {add_bar: append_timing_bar, getSpecString: getSpecString}
 }
 
 function setup_from_specification_string(svg, div_name, spec_id, index, variable_name, string){
@@ -1042,8 +1066,8 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
 
         var kind = (term.type == "finally") ? 'some' : 'all';
         diagram.add_bar(kind, timing_bar_options);
-
     }
+    return diagram;
 }
 
 
@@ -1053,6 +1077,6 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         .attr("width", 750)
         .attr("height", 450);
 
-    setup_from_specification_string(svg, "#" + div_name, spec_id, 1, variable_name, specification_string);
+    return setup_from_specification_string(svg, "#" + div_name, spec_id, 1, variable_name, specification_string);
 }
 
