@@ -2,7 +2,7 @@
 """The app module, containing the app factory function."""
 from flask import Flask, render_template
 
-from vse import commands, public, user, project, specification
+from vse import commands, public, user, project, specification, data
 from vse.assets import assets
 from vse.extensions import bcrypt, cache, csrf_protect, db, debug_toolbar, login_manager, migrate
 from vse.settings import ProdConfig
@@ -42,6 +42,7 @@ def register_blueprints(app):
     app.register_blueprint(user.views.blueprint)
     app.register_blueprint(project.views.blueprint)
     app.register_blueprint(specification.views.blueprint)
+    app.register_blueprint(data.views.blueprint)
     return None
 
 

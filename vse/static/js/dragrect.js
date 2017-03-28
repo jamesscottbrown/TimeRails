@@ -224,6 +224,9 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         geom.height = bottom_pos - convertY(geom.rect_top);
         geom.rect_top = convertY(geom.rect_top);
 
+        d3.selectAll('.data-circle')
+            .attr("cx", function(d){ return new_xScale(d.time); })
+            .attr("cy", function(d){ return new_yScale(d.value); });
 
         if (timing_parent_bar){
             timing_parent_bar.adjust_scales(new_xScale);
@@ -610,6 +613,28 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
     var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
 
+
+    var experimental_data_div = diagram_option.append("div");
+
+
+    function hide_data(dataset_name){
+        return function (){
+            svg.selectAll(".data-circle")
+                .filter(function(d){ return d.dataset == dataset_name })
+                .style("visibility",  this.checked ? 'visible' : 'hidden');
+        }
+    }
+
+    for (var i=0; i <  dataset_names.length; i++){
+        experimental_data_div.append("label").attr("for", "dataset_" + [i] + "_input").text(dataset_names[i]);
+
+        experimental_data_div.append("input")
+            .attr("id", "dataset_" + [i] + "_input")
+            .attr("type", "checkbox")
+            .attr("checked", "true")
+            .on("change", hide_data(dataset_names[i]) );
+    }
+
     var axis_range_div = diagram_option.append("div");
     var time_max_label = axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
     var time_max_input = axis_range_div.append("input")
@@ -769,6 +794,21 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 
+    // Plotting saved datasets
+    d3.json(window.location + "/data", function(error, data){
+            var circles = svg.append('g')
+                .selectAll('circle')
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", function (d) { return timeToX(d.time)})
+                .attr("cy", function (d) { return valToY(d.value)})
+                .attr("r", 2)
+                .classed("data-circle", true);
+
+            circles.filter(function(d){return d.variable != variable_name})
+                .remove();
+    });
 
 
 
