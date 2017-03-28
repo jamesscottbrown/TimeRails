@@ -24,7 +24,7 @@ class Project(SurrogatePK, Model):
 
     def __repr__(self):
         """Represent instance as a unique string."""
-        return '<Project({name})>'.format(name=self.name)
+        return '<Project({name}, {id})>'.format(name=self.name, id=self.id)
 
     @staticmethod
     def get_variables(project_id):

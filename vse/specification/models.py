@@ -23,4 +23,4 @@ class Specification(SurrogatePK, Model):
 
     def __repr__(self):
         """Represent instance as a unique string."""
-        return '<Specification({name})>'.format(name=self.name)
+        return '<Specification({name}, {id})>'.format(name=self.name, id=self.id)

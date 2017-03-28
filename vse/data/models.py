@@ -20,4 +20,4 @@ class Data(SurrogatePK, Model):
 
     def __repr__(self):
         """Represent instance as a unique string."""
-        return '<Dataset({name})>'.format(name=self.name)
+        return '<Dataset({name}, {id})>'.format(name=self.name, id=self.id)
