@@ -10,7 +10,7 @@ function sum (x){
     return total;
 }
 
-function drawAxes(geom, xScale, yScale){
+function drawAxes(svg, geom, xScale, yScale, variable_name){
     var xAxis =  d3.svg.axis()
         .scale(xScale)
         .orient("bottom");
@@ -234,7 +234,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         yScale = new_yScale;
 
         // Redraw
-        drawAxes(geom, xScale, yScale);
+        drawAxes(svg, geom, xScale, yScale, variable_name);
         adjust_everything();
     }
 
@@ -496,7 +496,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
     // Actually create visual elements
     /************************************************/
-    drawAxes(geom, xScale, yScale);
+    drawAxes(svg, geom, xScale, yScale, variable_name);
 
     var example_trajctory_g = svg.append("g")
         .attr("id", "example_trajectory");
