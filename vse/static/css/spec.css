@@ -38,10 +38,23 @@
  .placeholder-form {
      margin-top: 10px;
      background-color: #f7f7f9;
-    border: 1px solid #e1e1e8;
+     border: 1px solid #e1e1e8;
      border-radius: 4px;
  }
 
  .space-div {
      margin-top: 10px;
  }
+
+ .spec_menu {
+     color: #555;
+     background-color: #fff;
+     background-image: none;
+     border: 1px solid #ccc;
+     border-radius: 4px;
+     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+ }
+
+.spec-row {
+         margin-top: 5px;
+}

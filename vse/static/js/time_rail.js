@@ -299,7 +299,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
             time_number = 0;
         }
 
-        var newDiv = placeholder_form.append("div");
+        var newDiv = placeholder_form.append("div").classed("spec-row", true);
 
         newDiv.append("text").text("For ");
 
@@ -313,6 +313,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(start_time_pos);
 
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", start_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
@@ -324,6 +325,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
         var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", end_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
@@ -335,7 +337,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
     }
 
     function getSomeAllSelect (newDiv){
-        var select = newDiv.append("select");
+        var select = newDiv.append("select").classed("spec_menu", true);
 
         var some_time = select.append("option").text("some time");
         var all_time = select.append("option").text("all times");

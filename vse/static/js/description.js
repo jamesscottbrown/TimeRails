@@ -10,7 +10,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     } else {
         time_number = 0;
     }
-    var newDiv = placeholder_form.append("div");
+    var newDiv = placeholder_form.append("div").classed("spec-row", true);
 
     getInequalityDurationOption(newDiv);
 
@@ -42,8 +42,8 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     }
 
     function addNewRailOption(){
-        var initialDiv = placeholder_form.append("div");
-        var new_rail_select = initialDiv.append("select");
+        var initialDiv = placeholder_form.append("div").classed("spec-row", true);
+        var new_rail_select = initialDiv.append("select").classed("spec_menu", true);
 
         new_rail_select.append("option")
             .text(" ")
@@ -69,6 +69,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
 
     function addMinValue(newDiv) {
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", funcs.YToVal(geom.rect_top + geom.height).toFixed(2))
             .attr("size", "6")
             .on("change", function () {
@@ -79,6 +80,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
 
     function addMaxValue(newDiv) {
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", funcs.YToVal(geom.rect_top).toFixed(2))
             .attr("size", "6")
             .on("change", function () {
@@ -92,6 +94,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
 
         newDiv.append("text").text(time_offset);
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", start.toFixed(2))
             .attr("size", "6")
             .on("change", function () {
@@ -105,6 +108,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
 
         newDiv.append("text").text(time_offset);
         newDiv.append("input")
+            .classed("spec_menu", true)
             .attr("value", time.toFixed(2))
             .attr("size", "6")
             .on("change", function () {
@@ -115,7 +119,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
 
     function getInequalityDurationOption(newDiv) {
 
-        var select = newDiv.append("select");
+        var select = newDiv.append("select").classed("spec_menu", true);
 
         var between = select.append("option").text("between");
         var after = select.append("option").text("after");
@@ -159,7 +163,7 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     }
 
     function getInequalityOption(newDiv) {
-        var select = newDiv.append("select");
+        var select = newDiv.append("select").classed("spec_menu", true);
 
         var between = select.append("option").text("between");
         var below = select.append("option").text("below");
