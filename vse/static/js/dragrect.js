@@ -447,18 +447,18 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .attr("id", "example_trajectory");
 
     var textual_div = d3.select(div_name).classed("space-div", true);
-    var placeholder_form = textual_div.append("div").style("width", geom.w + "px").classed("placeholder-form", true);
-    var placeholder_latex = textual_div.append("div").classed("space-div", true);
+
+    var placeholder_form = textual_div.append("div")
+        .style("width", geom.w + "px")
+        .classed("placeholder-form", true);
+
+    var placeholder_latex = textual_div.append("div")
+        .style("width", geom.w + "px")
+        .classed("placeholder-latex", true);
+    var placeholder_latex_formula = placeholder_latex.append("div");
 
     var options_form = d3.select(div_name).append("div").classed("space-div", true).append("form");
-    var constant = options_form.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "constant_checkbox")
-        .attr("value", "false")
-        .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
-    var constant_label = options_form.append("label").attr("for", "constant_checkbox").text("Fix specification");
-
-    var use_letters = options_form.append("input")
+    var use_letters = placeholder_latex.append("input")
         .attr("type", "checkbox")
         .attr("id", "use_letters_checkbox")
         .attr("value", "false")
@@ -466,7 +466,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             geom.use_letters = !geom.use_letters;
             update_text();
         });
-    var use_letters_label = options_form.append("label").attr("for", "use_letters_checkbox").text("Use letters");
+    var use_letters_label = placeholder_latex.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
     d3.select(div_name).append('button')
         .text("Save")
@@ -543,16 +543,28 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         }
     }
 
-    d3.select(div_name).append('button')
+
+    var diagram_option = d3.select(div_name)
+                            .select(".diagram-div")
+                            .append("div");
+
+    var constant = diagram_option.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "constant_checkbox")
+        .attr("value", "false")
+        .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
+    var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
+    var example_plot_buttons_div = diagram_option.append("div");
+    example_plot_buttons_div.append('button')
         .text("Plot trajectory satisfying this constraint")
         .on("click", plotExampleTrajectory(false));
 
-    d3.select(div_name).append('button')
+    example_plot_buttons_div.append('button')
         .text("Plot trajectory satisfying all constraints")
         .on("click", plotExampleTrajectory(true));
 
-
-    d3.select(div_name).append('button')
+    example_plot_buttons_div.append('button')
         .text("Delete example trajectory")
         .on("click", function(){
             example_trajctory_g.selectAll(".dot").remove();
@@ -763,7 +775,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
     function update_formula(){
         var latex_string =  get_latex_string();
-        placeholder_latex.html("$" + latex_string + "$");
+        placeholder_latex_formula.html("$" + latex_string + "$");
         MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     }
 
@@ -1072,8 +1084,11 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
 
 
 function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
-    d3.select("#diagrams").append('div').attr("id", div_name);
-    var svg = d3.select('#' + div_name).append("svg")
+   // d3.select("#diagrams").append('div').attr("id", div_name);
+
+    var diagram_div = d3.select('#' + div_name).append('div').classed("diagram-div", true);
+
+    var svg = diagram_div.append("svg")
         .attr("width", 750)
         .attr("height", 450);
 

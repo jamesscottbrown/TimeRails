@@ -42,6 +42,13 @@
      border-radius: 4px;
  }
 
+ .placeholder-latex {
+     margin-top: 10px;
+     background-color: #f7f7f9;
+     border: 1px solid #e1e1e8;
+     border-radius: 4px;
+ }
+
  .space-div {
      margin-top: 10px;
  }
