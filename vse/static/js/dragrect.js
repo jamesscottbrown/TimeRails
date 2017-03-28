@@ -10,6 +10,40 @@ function sum (x){
     return total;
 }
 
+function drawAxes(geom, xScale, yScale){
+    var xAxis =  d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+
+    svg.selectAll('.axis').remove();
+    svg.selectAll('.axis-label').remove();
+
+    svg.append("g")
+        .call(xAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
+
+    svg
+        .append("text")
+        .classed("axis-label", true)
+        .attr('x', -geom.h/2)
+        .attr("y", 6)
+
+        .attr("transform", "rotate(-90)")
+        .attr("dy", ".75em")
+        .text(variable_name);
+
+    var yAxis =  d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+
+    svg.append("g")
+        .call(yAxis)
+        .attr("class", "axis")
+        .attr("transform", "translate(" + (geom.horizontal_padding) + ", " + 0 + ")");
+}
+
+
 function setup(svg, div_name, spec_id, index, variable_name, options) {
     // Setting up scales and initial default positions
     /************************************************/
@@ -155,6 +189,53 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
           update_text();
         }
         set_edges();
+    }
+
+    function adjust_scales(){
+
+        // Create new scales
+        var new_xScale = d3.scale.linear()
+            .domain(xRange)
+            .range([geom.horizontal_padding, geom.w - geom.horizontal_padding]);
+
+        var new_yScale = d3.scale.linear()
+        .domain(yRange)
+        .range([geom.vertical_padding, geom.h - geom.vertical_padding]);
+
+
+        function convertX(x){
+            return new_xScale(xScale.invert(x));
+        }
+
+        function convertY(y){
+            return new_yScale(yScale.invert(y));
+        }
+
+        // Adjust positions
+        geom.track_circle_pos = convertX(geom.track_circle_pos);
+
+        var rightPos = convertX(geom.start_time_pos + geom.width);
+        geom.width =  rightPos - convertX(geom.start_time_pos);
+        geom.start_time_pos = convertX(geom.start_time_pos);
+
+
+        geom.delay_line_height = convertY(geom.delay_line_height);
+        var bottom_pos =  convertY(geom.height + geom.rect_top);
+        geom.height = bottom_pos - convertY(geom.rect_top);
+        geom.rect_top = convertY(geom.rect_top);
+
+
+        if (timing_parent_bar){
+            timing_parent_bar.adjust_scales(new_xScale);
+        }
+
+        // switch scales
+        xScale = new_xScale;
+        yScale = new_yScale;
+
+        // Redraw
+        drawAxes(geom, xScale, yScale);
+        adjust_everything();
     }
 
 
@@ -415,33 +496,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
     // Actually create visual elements
     /************************************************/
-
-    var xAxis =  d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom");
-
-    svg.append("g")
-        .call(xAxis)
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + (geom.h - geom.vertical_padding) + ")");
-
-    svg
-        .append("text")
-        .attr('x', -geom.h/2)
-        .attr("y", 6)
-
-        .attr("transform", "rotate(-90)")
-        .attr("dy", ".75em")
-        .text(variable_name);
-
-    var yAxis =  d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
-
-    svg.append("g")
-        .call(yAxis)
-        .attr("class", "axis")
-        .attr("transform", "translate(" + (geom.horizontal_padding) + ", " + 0 + ")");
+    drawAxes(geom, xScale, yScale);
 
     var example_trajctory_g = svg.append("g")
         .attr("id", "example_trajectory");
@@ -554,6 +609,46 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .attr("value", "false")
         .on("change", function(){ geom.specification_fixed = !geom.specification_fixed;});
     var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
+    var axis_range_div = diagram_option.append("div");
+    var time_max_label = axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
+    var time_max_input = axis_range_div.append("input")
+        .attr("id", "time_max")
+        .attr("value", xRange[1])
+        .attr("length", "6")
+        .on("change", function(){
+            var val = parseFloat(this.value);
+            if (val){
+                xRange[1] = parseFloat(this.value);
+                adjust_scales();
+            }
+        });
+
+    var y_min_label = axis_range_div.append("label").attr("for", "y_min_input").text(" Min " + variable_name);
+    var y_min_input = axis_range_div.append("input")
+        .attr("id", "y_max")
+        .attr("value", yRange[1])
+        .attr("length", "6")
+        .on("change", function(){
+            var val = parseFloat(this.value);
+            if (val){
+                yRange[1] = parseFloat(this.value);
+                adjust_scales();
+            }
+        });
+
+    var y_max_label = axis_range_div.append("label").attr("for", "y_max_input").text(" Max " + variable_name);
+    var y_max_input = axis_range_div.append("input")
+        .attr("id", "y_min")
+        .attr("value", yRange[0])
+        .attr("length", "6")
+        .on("change", function(){
+            var val = parseFloat(this.value);
+            if (val){
+                yRange[0] = parseFloat(this.value);
+                adjust_scales();
+            }
+        });
 
     var example_plot_buttons_div = diagram_option.append("div");
     example_plot_buttons_div.append('button')

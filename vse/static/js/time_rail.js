@@ -57,6 +57,23 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         }
     }
 
+    function adjust_scales(new_xScale){
+
+        function convertX(x){
+            return new_xScale(helper_funcs.XToTime(x));
+        }
+
+        start_time_pos = convertX(start_time_pos);
+        left_tick_pos = convertX(left_tick_pos);
+        right_tick_pos = convertX(right_tick_pos);
+
+        adjust_everything();
+
+        if (timing_parent_bar) {
+            timing_parent_bar.adjust_scales(new_xScale);
+        }
+    }
+
     // Callback functions for interactions
     var drag_track = d3.behavior.drag()
         .origin(Object)
@@ -363,5 +380,5 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
-        describe_constraint: describe_constraint, getTimingParentBar: getTimingParentBar};
+        describe_constraint: describe_constraint, getTimingParentBar: getTimingParentBar, adjust_scales: adjust_scales};
 }
