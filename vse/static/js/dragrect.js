@@ -124,19 +124,18 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
         }
 
-        if (options.hasOwnProperty('lt')) {
-            geom.rect_top = yScale(options.lt);
-        } else {
+        if (!options.hasOwnProperty('lt') || !options.lt) {
             geom.top_fixed = false;
+            options.lt = yScale(yRange[1]);
         }
+        geom.rect_top = yScale(options.lt);
 
-        if (!options.hasOwnProperty('gt')){
+        if (!options.hasOwnProperty('gt') || !options.gt){
             geom.bottom_fixed = false;
+            options.lt = yScale(yRange[0]);
         }
 
-        if (options.hasOwnProperty('lt') && options.hasOwnProperty('gt')) {
-            geom.height = yScale(options.gt) - yScale(options.lt);
-        }
+        geom.height = yScale(options.gt) - yScale(options.lt);
     }
 
     geom.track_circle_pos = geom.start_time_pos - geom.delay_line_length;
