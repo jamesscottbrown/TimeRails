@@ -17,13 +17,13 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
     var time_offset = (time_number > 0) ? " t_" + time_number + " + " : "";
 
     if (geom.left_fixed && geom.right_fixed) {
-        addStartTimeValue(newDiv, time_offset);
+        addStartTimeValue(newDiv, time_offset, timing_parent_bar);
         newDiv.append("text").text("and");
-        addEndTimeValue(newDiv, time_offset);
+        addEndTimeValue(newDiv, time_offset, timing_parent_bar);
     } else if (!geom.left_fixed && geom.right_fixed) {
-        addEndTimeValue(newDiv, time_offset);
+        addEndTimeValue(newDiv, time_offset, timing_parent_bar);
     } else if (geom.left_fixed && !geom.right_fixed) {
-        addStartTimeValue(newDiv, time_offset);
+        addStartTimeValue(newDiv, time_offset, timing_parent_bar);
     }
 
     newDiv.append("text").text(", " + variable_name + " is ");
@@ -92,32 +92,64 @@ function describe_constraint (timing_parent_bar, variable_name, placeholder_form
             });
     }
 
-    function addStartTimeValue(newDiv, time_offset) {
-        var start = funcs.XToTime(geom.start_time_pos) - funcs.XToTime(geom.track_circle_pos);
+    function addStartTimeValue(newDiv, time_offset, timing_parent_bar) {
 
         newDiv.append("text").text(time_offset);
-        newDiv.append("input")
+        var input = newDiv.append("input")
             .classed("spec_menu", true)
-            .attr("value", start.toFixed(2))
-            .attr("size", "6")
-            .on("change", function () {
-                geom.start_time_pos = funcs.timeToX(parseFloat(this.value) + funcs.XToTime(geom.track_circle_pos));
+            .attr("size", "6");
+
+        var start;
+        if (timing_parent_bar){
+            start = funcs.XToTime(geom.start_time_pos) - funcs.XToTime(geom.track_circle_pos);
+
+            input.on("change", function () {
+                var new_start_time_pos = funcs.timeToX(parseFloat(this.value) + funcs.XToTime(geom.track_circle_pos));
+                geom.width += (geom.start_time_pos - new_start_time_pos);
+                geom.start_time_pos = new_start_time_pos;
                 funcs.adjust_everything();
             });
+
+        } else {
+            start = funcs.XToTime(geom.start_time_pos);
+
+            input.on("change", function () {
+                var new_start_time_pos = funcs.timeToX(parseFloat(this.value));
+                geom.width += (geom.start_time_pos - new_start_time_pos);
+                geom.start_time_pos = new_start_time_pos;
+                funcs.adjust_everything();
+            });
+        }
+        input.attr("value", start.toFixed(2));
     }
 
-    function addEndTimeValue(newDiv, time_offset) {
-        var time = funcs.XToTime(geom.start_time_pos + geom.width) - funcs.XToTime(geom.track_circle_pos);
+    function addEndTimeValue(newDiv, time_offset, timing_parent_bar) {
 
         newDiv.append("text").text(time_offset);
-        newDiv.append("input")
+        var input = newDiv.append("input")
             .classed("spec_menu", true)
-            .attr("value", time.toFixed(2))
-            .attr("size", "6")
-            .on("change", function () {
+            .attr("size", "6");
+
+        var end;
+        if (timing_parent_bar){
+            end = funcs.XToTime(geom.start_time_pos + geom.width) - funcs.XToTime(geom.track_circle_pos);
+
+            input.on("change", function () {
                 geom.width = funcs.timeToX(parseFloat(this.value) + funcs.XToTime(geom.track_circle_pos)) - geom.start_time_pos;
                 funcs.adjust_everything();
             });
+
+        } else {
+            end = funcs.XToTime(geom.start_time_pos + geom.width);
+
+            input.on("change", function () {
+                geom.width = funcs.timeToX(parseFloat(this.value)) - geom.start_time_pos;
+                funcs.adjust_everything();
+            });
+
+        }
+        input.attr("value", end.toFixed(2));
+
     }
 
     function getInequalityDurationOption(newDiv) {
