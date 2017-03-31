@@ -642,7 +642,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .attr("length", "6")
         .on("change", function(){
             var val = parseFloat(this.value);
-            if (val){
+            if (!isNaN(val)){
                 xRange[1] = parseFloat(this.value);
                 adjust_scales();
             }
@@ -655,7 +655,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .attr("length", "6")
         .on("change", function(){
             var val = parseFloat(this.value);
-            if (val){
+            if (!isNaN(val)){
                 yRange[1] = parseFloat(this.value);
                 adjust_scales();
             }
@@ -668,7 +668,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .attr("length", "6")
         .on("change", function(){
             var val = parseFloat(this.value);
-            if (val){
+            if (!isNaN(val)){
                 yRange[0] = parseFloat(this.value);
                 adjust_scales();
             }
