@@ -141,10 +141,6 @@ def get_dataset(project_id):
 
     data_sets = []
     for dataset in current_project.data:
-        for datum in json.loads(dataset.data):
-            datum["dataset"] = dataset.name
-            data_sets.append(datum)
-
-        #data_sets.append({"name": dataset.name, "value": dataset.data})
+        data_sets.append({"name": dataset.name, "value": json.loads(dataset.data)})
 
     return json.dumps(data_sets)

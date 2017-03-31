@@ -99,6 +99,10 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         return yScale.invert(y);
     }
 
+    var data_line_generator = d3.svg.line()
+        .x(function (d) { return timeToX(d.time); })
+        .y(function (d) { return valToY(d.value); });
+
     var helper_funcs = {
         getStartX: function (){ return geom.track_circle_pos; },
         XToTime: XToTime,
@@ -234,6 +238,9 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         // switch scales
         xScale = new_xScale;
         yScale = new_yScale;
+
+        d3.selectAll(".data-path")
+            .attr("d", function(d){ return data_line_generator(d); });
 
         // Redraw
         drawAxes(svg, geom, xScale, yScale, variable_name);
@@ -794,19 +801,43 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .call(drag_track_circle);
 
     // Plotting saved datasets
-    d3.json(window.location + "/data", function(error, data){
-            var circles = svg.append('g')
-                .selectAll('circle')
-                .data(data)
-                .enter()
-                .append("circle")
-                .attr("cx", function (d) { return timeToX(d.time)})
-                .attr("cy", function (d) { return valToY(d.value)})
-                .attr("r", 2)
-                .classed("data-circle", true);
+    d3.json(window.location + "/data", function(error, all_data){
 
-            circles.filter(function(d){return d.variable != variable_name})
-                .remove();
+            for (var i=0; i<all_data.length; i++) {
+
+                var data = all_data[i].value;
+
+                var circles = svg.append('g')
+                    .selectAll('circle')
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return timeToX(d.time)
+                    })
+                    .attr("cy", function (d) {
+                        return valToY(d.value)
+                    })
+                    .attr("r", 2)
+                    .classed("data-circle", true);
+
+                svg
+                    .append("path")
+                    .classed("data-path", true)
+                    .datum(data.filter(function (d) { return d.variable == variable_name; }))
+                    .attr("fill", "none")
+                    .attr("stroke", "steelblue")
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", data_line_generator);
+
+                circles.filter(function (d) {
+                    return d.variable != variable_name
+                })
+                    .remove();
+
+            }
     });
 
 
