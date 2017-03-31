@@ -630,6 +630,11 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             svg.selectAll(".data-circle")
                 .filter(function(d){ return d.dataset == dataset_name })
                 .style("visibility",  this.checked ? 'visible' : 'hidden');
+
+            svg.selectAll(".data-path")
+                .filter(function(d){ return d[0].dataset == dataset_name })
+                .style("visibility",  this.checked ? 'visible' : 'hidden');
+
         }
     }
 
