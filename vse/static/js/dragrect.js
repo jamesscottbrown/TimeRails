@@ -86,6 +86,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         .domain(yRange)
         .range([geom.vertical_padding, geom.h - geom.vertical_padding]);
 
+    var colorScale = d3.scale.category10();
+
     function timeToX(time){
         return xScale(time);
     }
@@ -632,7 +634,9 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     }
 
     for (var i=0; i <  dataset_names.length; i++){
-        experimental_data_div.append("label").attr("for", "dataset_" + [i] + "_input").text(dataset_names[i]);
+        experimental_data_div.append("label")
+            .attr("for", "dataset_" + [i] + "_input").text(dataset_names[i])
+            .style("color", colorScale(i));
 
         experimental_data_div.append("input")
             .attr("id", "dataset_" + [i] + "_input")
@@ -826,7 +830,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
                     .classed("data-path", true)
                     .datum(data.filter(function (d) { return d.variable == variable_name; }))
                     .attr("fill", "none")
-                    .attr("stroke", "steelblue")
+                    .attr("stroke", colorScale(i))
                     .attr("stroke-linejoin", "round")
                     .attr("stroke-linecap", "round")
                     .attr("stroke-width", 1.5)
