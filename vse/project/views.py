@@ -131,12 +131,11 @@ def add_dataset(project_id):
 
 
 @blueprint.route('/<int:project_id>/data', methods=['GET', 'POST'])
-@login_required
 def get_dataset(project_id):
     """View data from a project."""
     current_project = Project.query.filter_by(id=project_id).first()
 
-    if current_project.user != current_user:
+    if not current_project.public and current_project.user != current_user:
         flash('Not your project!', 'danger')
         return redirect('.')
 
