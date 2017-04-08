@@ -123,7 +123,7 @@ def add_dataset(project_id):
                     data=json.dumps(data))
 
         flash('Data added to project.', 'success')
-        return redirect(url_for('project.project', data=data, project_id=project_id))
+        return redirect(url_for('project.project', project_id=project_id))
     else:
         flash_errors(form)
     return render_template('data/new_data.html', form=form)
