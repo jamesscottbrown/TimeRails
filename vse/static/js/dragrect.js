@@ -229,9 +229,23 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         geom.height = bottom_pos - convertY(geom.rect_top);
         geom.rect_top = convertY(geom.rect_top);
 
-        d3.selectAll('.data-circle')
+        d3.select(div_name).selectAll('.data-circle')
             .attr("cx", function(d){ return new_xScale(d.time); })
             .attr("cy", function(d){ return new_yScale(d.value); });
+
+        d3.select(div_name).selectAll(".example_line")
+            .attr("x1", function(d){ return new_xScale(d.t1) })
+            .attr("x2", function(d){ return new_xScale(d.t2) })
+            .attr("y1", function(d){ return new_yScale(d.y) })
+            .attr("y2", function(d){ return new_yScale(d.y) });
+
+        d3.select(div_name).selectAll(".example_circle")
+            .attr("cx", function (d) {
+                return new_xScale(d.t1)
+            })
+            .attr("cy", function (d) {
+                return new_yScale(d.y)
+            });
 
         if (timing_parent_bar){
             timing_parent_bar.adjust_scales(new_xScale);
@@ -241,7 +255,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
         xScale = new_xScale;
         yScale = new_yScale;
 
-        d3.selectAll(".data-path")
+        d3.select(div_name).selectAll(".data-path")
             .attr("d", function(d){ return data_line_generator(d); });
 
         // Redraw
@@ -583,20 +597,40 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
                 },
 
                 success: function (data) {
+                    data = JSON.parse(data);
+                    var line_data = data.filter(function (d){ return d.t2 > d.t1; });
+                    var circle_data = data.filter(function (d){ return d.t2 == d.t1; });
+
                     example_trajctory_g
                         .append("g")
-                        .selectAll(".dot")
-                        .data(JSON.parse(data))
+                        .selectAll(".example_line")
+                        .data(data)
+                        .enter()
+                        .append("line")
+                        .attr("x1", function(d){ return timeToX(d.t1) })
+                        .attr("x2", function(d){ return timeToX(d.t2) })
+                        .attr("y1", function(d){ return valToY(d.y) })
+                        .attr("y2", function(d){ return valToY(d.y) })
+                        .attr("stroke-width", "2")
+                        .attr("stroke", "rgb(0,0,0)")
+                        .attr("class", "example_line");
+
+
+                    example_trajctory_g
+                        .append("g")
+                        .selectAll(".example_circle")
+                        .data(data)
                         .enter()
                         .append("circle")
-                        .attr("class", "dot")
+                        .attr("class", "example_circle")
                         .attr("r", 3.5)
                         .attr("cx", function (d) {
-                            return xScale(d.x)
+                            return timeToX(d.t1)
                         })
                         .attr("cy", function (d) {
-                            return yScale(d.y)
+                            return valToY(d.y)
                         });
+
 
                     d3.select(div_name)
                         .select("#delete_trajectory_button")
@@ -702,7 +736,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     example_plot_buttons_div.append('button')
         .text("Delete example trajectory")
         .on("click", function(){
-            example_trajctory_g.selectAll(".dot").remove();
+            example_trajctory_g.selectAll(".example_line").remove();
+            example_trajctory_g.selectAll(".example_circle").remove();
             d3.select(this).style("visibility", "hidden");
         })
         .attr("id", "delete_trajectory_button")
