@@ -526,15 +526,10 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     var example_trajctory_g = svg.append("g")
         .attr("id", "example_trajectory");
 
-    var textual_div = d3.select(div_name).classed("space-div", true);
+    d3.select(div_name).select(".space-div").style("width", geom.w + "px");
 
-    var placeholder_form = textual_div.append("div")
-        .style("width", geom.w + "px")
-        .classed("placeholder-form", true);
-
-    var placeholder_latex = textual_div.append("div")
-        .style("width", geom.w + "px")
-        .classed("placeholder-latex", true);
+    var placeholder_form = d3.select(div_name).select(".placeholder-form");
+    var placeholder_latex = d3.select(div_name).select(".placeholder-latex");
     var placeholder_latex_formula = placeholder_latex.append("div");
 
     var options_form = d3.select(div_name).append("div").classed("space-div", true).append("form");
@@ -1295,7 +1290,7 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
 function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
    // d3.select("#diagrams").append('div').attr("id", div_name);
 
-    var diagram_div = d3.select('#' + div_name).append('div').classed("diagram-div", true);
+    var diagram_div = d3.select('#' + div_name).select(".svg-container").append('div').classed("diagram-div", true);
 
     var svg = diagram_div.append("svg")
         .attr("width", 750)
