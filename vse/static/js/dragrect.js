@@ -721,10 +721,12 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
     var example_plot_buttons_div = diagram_option.append("div");
     example_plot_buttons_div.append('button')
+        .classed("btn", true).classed("btn-default", true).attr("type", "button")
         .text("Plot trajectory satisfying this constraint")
         .on("click", plotExampleTrajectory(false));
 
     example_plot_buttons_div.append('button')
+        .classed("btn", true).classed("btn-default", true)
         .text("Plot trajectory satisfying all constraints")
         .on("click", plotExampleTrajectory(true));
 
@@ -736,6 +738,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             d3.select(this).style("visibility", "hidden");
         })
         .attr("id", "delete_trajectory_button")
+        .classed("btn", true).classed("btn-danger", true)
         .style("visibility", "hidden");
 
 
