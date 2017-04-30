@@ -759,6 +759,11 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             .origin(Object)
             .on("drag", dragmove));
 
+    dragrect.on('contextmenu', d3.contextMenu([{
+            title: 'Adjust values',
+            action: adjust_rect_values
+        }]));
+
     var dragbarleft = newg.append("circle")
         .attr("id", "dragleft")
         .attr("r", geom.dragbarw / 2)
@@ -1147,6 +1152,83 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
             bar.set_parent_bar(kind, options)();
         }
     }
+
+
+
+    function adjust_rect_values(){
+        d3.select("#paramModal").remove();
+        var modal_contents = d3.select(div_name).append("div")
+            .attr("id", "paramModal")
+            .classed("modal", true)
+            .classed("fade", true)
+
+            .append("div")
+            .classed("modal-dialog", true)
+
+            .append("div")
+            .classed("modal-content", true);
+
+        var modalHeader = modal_contents.append("div").classed("modal-header", true);
+        var modalBody = modal_contents.append("div").classed("modal-body", true);
+        var modalFooter = modal_contents.append("div").classed("modal-footer", true);
+
+        modalHeader.append("button")
+            .classed("close", true)
+            .attr("data-dismiss", "modal") // ???
+            .attr("type", "button")
+            .attr("aria-hidden", true)
+            .text('×');
+
+
+        modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
+
+        var start, end;
+        if (timing_parent_bar){
+            start = XToTime(geom.start_time_pos) - XToTime(geom.track_circle_pos);
+            end = XToTime(geom.start_time_pos + geom.width) - XToTime(geom.track_circle_pos);
+        } else {
+            start = XToTime(geom.start_time_pos);
+            end = XToTime(geom.start_time_pos + geom.width);
+        }
+
+
+        var timeDiv = modalBody.append("div");
+        timeDiv.append("text").text("From ");
+        var startTimeBox = timeDiv.append("input").attr("value",  start.toFixed(2)).node();
+        timeDiv.append("text").text(" to ");
+        var endTimeBox = timeDiv.append("input").attr("value",  end.toFixed(2)).node();
+
+        var valDiv = modalBody.append("div");
+        valDiv.append("text").text("Value is between");
+        var minValBox = valDiv.append("input").attr("value", YToVal(geom.rect_top + geom.height).toFixed(2)).node();
+        valDiv.append("text").text(" and ");
+        var maxValBox = valDiv.append("input").attr("value", YToVal(geom.rect_top).toFixed(2)).node();
+
+
+        modalFooter.append("button").text("Save").on("click", function(){
+
+            if (timing_parent_bar){
+                geom.width = timeToX(parseFloat(endTimeBox.value)) - timeToX(parseFloat(startTimeBox.value));
+                geom.start_time_pos =  timeToX(parseFloat(startTimeBox.value) + XToTime(geom.track_circle_pos));
+            } else {
+                geom.width = timeToX(parseFloat(endTimeBox.value)) - timeToX(parseFloat(startTimeBox.value));
+                geom.start_time_pos =  timeToX(parseFloat(startTimeBox.value));
+
+                geom.track_circle_pos = geom.start_time_pos;
+            }
+
+            geom.height = valToY(parseFloat(minValBox.value)) - valToY(parseFloat(maxValBox.value));
+            geom.rect_top = valToY(parseFloat(maxValBox.value));
+
+            adjust_everything(true);
+        })
+
+        .attr("data-dismiss", "modal");
+        modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
+
+        $('#paramModal').modal('toggle');
+    }
+
 
     adjust_everything(true);
     return {add_bar: append_timing_bar, getSpecString: getSpecString}

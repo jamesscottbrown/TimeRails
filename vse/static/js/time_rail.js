@@ -185,6 +185,13 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         {
             title: 'Constraint applies at <i>all</i> times in range',
             action: set_parent_bar('all')
+        },
+        {
+				divider: true
+        },
+        {
+            title: 'Adjust values',
+            action: adjust_rail_values
         }
     ];
 
@@ -360,6 +367,56 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
         });
     }
 
+    function adjust_rail_values(){
+        d3.select("#paramModal").remove();
+
+        var modal_contents = placeholder_form.append("div")
+            .attr("id", "paramModal")
+            .classed("modal", true)
+            .classed("fade", true)
+
+            .append("div")
+            .classed("modal-dialog", true)
+
+            .append("div")
+            .classed("modal-content", true);
+
+        var modalHeader = modal_contents.append("div").classed("modal-header", true);
+        var modalBody = modal_contents.append("div").classed("modal-body", true);
+        var modalFooter = modal_contents.append("div").classed("modal-footer", true);
+
+        modalHeader.append("button")
+            .classed("close", true)
+            .attr("data-dismiss", "modal") // ???
+            .attr("type", "button")
+            .attr("aria-hidden", true)
+            .text('×');
+
+        modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
+
+        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(start_time_pos);
+        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(start_time_pos);
+
+        var timeDiv = modalBody.append("div");
+        timeDiv.append("text").text("From ");
+        var startTimeBox = timeDiv.append("input").attr("value",  start_time.toFixed(2)).node();
+        timeDiv.append("text").text(" to ");
+        var endTimeBox = timeDiv.append("input").attr("value",  end_time.toFixed(2)).node();
+
+
+        modalFooter.append("button").text("Save").on("click", function(){
+            left_tick_pos = helper_funcs.TimeToX(parseFloat(startTimeBox.value) + helper_funcs.XToTime(start_time_pos));
+            right_tick_pos = helper_funcs.TimeToX(parseFloat(endTimeBox.value) + helper_funcs.XToTime(start_time_pos));
+            adjust_everything();
+        })
+
+        .attr("data-dismiss", "modal");
+        modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
+
+        $('#paramModal').modal('toggle');
+    }
+
+    
     adjust_everything(true);
 
     function getTimingParentBar (){
