@@ -65,3 +65,18 @@
 .spec-row {
          margin-top: 5px;
 }
+
+.red-line {
+    stroke: rgb(255,0,0);
+    stroke-width: 3px;
+}
+
+.grey-line {
+    stroke: rgb(128,128,128);
+    stroke-width: 3px;
+}
+
+.track_circle {
+     fill: rgb(255,0,0);
+    fill-opacity: 0.5;
+}

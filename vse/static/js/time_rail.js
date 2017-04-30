@@ -190,37 +190,25 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
 
 
     // Actual visual elements
-    var track = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
+    var track = newg.append("line").classed("grey-line", true)
         .call(drag_track);
 
-    var left_tick = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
+    var left_tick = newg.append("line").classed("grey-line", true)
         .call(drag_left_tick);
 
-    var right_tick = newg.append("line")
-        .style("stroke", "rgb(128,128,128)")
-        .style("stroke-width", "2")
+    var right_tick = newg.append("line").classed("grey-line", true)
         .call(drag_right_tick);
 
-    var startline = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
+    var startline = newg.append("line").classed("red-line", true);
 
-    var delay_line = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2")
+    var delay_line = newg.append("line").classed("red-line", true)
         .call(drag_track_circle);
 
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("r", 5)
-        .attr("fill", "rgb(255,0,0)")
-        .attr("fill-opacity", .5)
-        .attr("id", "track_circle")
+        .attr("r", 7)
+        .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 

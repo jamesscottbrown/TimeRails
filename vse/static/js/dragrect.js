@@ -746,13 +746,9 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     var newg = svg.append("g");
 
     // we draw these lines before the dragrect to improve carity when rectangle is very thin
-    var delay_line = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
+    var delay_line = newg.append("line").classed("red-line", true);
 
-    var startline = newg.append("line")
-        .style("stroke", "rgb(255,0,0)")
-        .style("stroke-width", "2");
+    var startline = newg.append("line").classed("red-line", true);
 
     var dragrect = newg.append("rect")
         .attr("id", "active")
@@ -835,10 +831,8 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     var track_circle = newg
         .append("g")
         .append("circle")
-        .attr("r", 5)
-        .attr("fill", "rgb(255,0,0)")
-        .attr("fill-opacity", .5)
-        .attr("id", "track_circle")
+        .attr("r", 7)
+        .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 
