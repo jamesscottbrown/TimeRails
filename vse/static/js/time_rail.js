@@ -370,7 +370,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
     function adjust_rail_values(){
         d3.select("#paramModal").remove();
 
-        var modal_contents = placeholder_form.append("div")
+        var modal_contents = d3.select(placeholder_form.node().parentNode.parentNode).append("div")
             .attr("id", "paramModal")
             .classed("modal", true)
             .classed("fade", true)
