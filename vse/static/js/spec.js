@@ -250,7 +250,9 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         div_name: div_name,
         spec_id: spec_id,
         index: index,
-        variable_name: variable_name
+        variable_name: variable_name,
+
+        drawAxes: drawAxes
     };
 
     common_geom.xScale = d3.scale.linear()
@@ -390,6 +392,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         diagram.add_bar(kind, timing_bar_options);
     }
 
+    drawAxes(common_geom);
     addCommonElements(common_geom, diagram);
     return diagram;
 }

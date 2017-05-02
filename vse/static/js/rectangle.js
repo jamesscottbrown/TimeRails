@@ -192,7 +192,7 @@ function Rectangle(common_geom, options) {
             .attr("d", function(d){ return data_line_generator(d); });
 
         // Redraw
-        drawAxes(common_geom);
+        common_geom.drawAxes(common_geom);
         adjust_everything();
     }
 
@@ -454,8 +454,6 @@ function Rectangle(common_geom, options) {
 
     // Actually create visual elements
     /************************************************/
-    drawAxes(common_geom);
-
     var example_trajctory_g = common_geom.svg.append("g")
         .attr("id", "example_trajectory");
 
