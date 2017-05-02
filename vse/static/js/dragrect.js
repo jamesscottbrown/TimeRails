@@ -66,7 +66,7 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
 
         specification_fixed: false,
         use_letters: false,
-        
+
         top_fixed: true,
         bottom_fixed: true,
         left_fixed: true,
@@ -1234,8 +1234,19 @@ function setup(svg, div_name, spec_id, index, variable_name, options) {
     return {add_bar: append_timing_bar, getSpecString: getSpecString}
 }
 
-function setup_from_specification_string(svg, div_name, spec_id, index, variable_name, string){
-    string = string.toLowerCase().trim().replace(/ /g, '');
+function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
+   // d3.select("#diagrams").append('div').attr("id", div_name);
+
+    var diagram_div = d3.select('#' + div_name).select(".svg-container").append('div').classed("diagram-div", true);
+
+    var svg = diagram_div.append("svg")
+        .attr("width", 750)
+        .attr("height", 450);
+
+    var index = 1;
+    div_name = "#" + div_name;
+
+    var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
     if (!string){ return setup(svg, div_name, spec_id, index, variable_name); }
 
@@ -1364,17 +1375,3 @@ function setup_from_specification_string(svg, div_name, spec_id, index, variable
     }
     return diagram;
 }
-
-
-function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
-   // d3.select("#diagrams").append('div').attr("id", div_name);
-
-    var diagram_div = d3.select('#' + div_name).select(".svg-container").append('div').classed("diagram-div", true);
-
-    var svg = diagram_div.append("svg")
-        .attr("width", 750)
-        .attr("height", 450);
-
-    return setup_from_specification_string(svg, "#" + div_name, spec_id, 1, variable_name, specification_string);
-}
-
