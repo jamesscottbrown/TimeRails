@@ -44,7 +44,7 @@ function drawAxes(svg, common_geom, xScale, yScale, variable_name){
 }
 
 
-function setup(svg, common_geom, div_name, spec_id, index, variable_name, options) {
+function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
@@ -1249,7 +1249,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
     var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
-    if (!string){ return setup(svg, common_geom, div_name, spec_id, index, variable_name); }
+    if (!string){ return Rectangle(svg, common_geom, div_name, spec_id, index, variable_name); }
 
     var queue = [];
     var args, parts, start, end;
@@ -1313,7 +1313,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
     // handle case where constraint is an inequality alone
     if (queue.length == 0){
-        return setup(svg, common_geom, div_name, spec_id, index, variable_name, rectangle_opts);
+        return Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, rectangle_opts);
     }
 
     // We need to distinguish between the cases where the innermost term is Finally or Globally
@@ -1357,7 +1357,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         queue.push(term);
     }
 
-    var diagram = setup(svg, common_geom, div_name, spec_id, index, variable_name, rectangle_opts);
+    var diagram = Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, rectangle_opts);
 
     while (queue.length > 0){
         term = queue.pop();
