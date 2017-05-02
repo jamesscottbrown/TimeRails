@@ -1,5 +1,7 @@
-function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs, options){
+function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, options){
     // increase SVG height
+    var svg = geom.svg;
+
     svg.attr("height", parseInt(svg.attr("height")) + geom.track_padding);
 
     var timing_parent_bar = false;
@@ -159,7 +161,7 @@ function create_bar(level, kind, geom, svg, placeholder_form, newg, helper_funcs
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, svg, placeholder_form, newg, helper_funcs_new, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, placeholder_form, newg, helper_funcs_new, options);
             helper_funcs.update_text();
         }
     };

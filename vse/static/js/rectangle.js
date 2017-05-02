@@ -1,5 +1,5 @@
 
-function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, options) {
+function Rectangle(common_geom, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
@@ -20,30 +20,18 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
 
     var timing_parent_bar = false;
-
-    var xRange = [0, 100];
-    var xScale = d3.scale.linear()
-        .domain(xRange)
-        .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
-
-    var yRange = [100, 0];
-    var yScale = d3.scale.linear()
-        .domain(yRange)
-        .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
-
-    var colorScale = d3.scale.category10();
-
+    
     function timeToX(time){
-        return xScale(time);
+        return common_geom.xScale(time);
     }
     function XToTime(x){
-        return xScale.invert(x);
+        return common_geom.xScale.invert(x);
     }
     function valToY(val){
-        return yScale(val);
+        return common_geom.yScale(val);
     }
     function YToVal(y) {
-        return yScale.invert(y);
+        return common_geom.yScale.invert(y);
     }
 
     var data_line_generator = d3.svg.line()
@@ -53,40 +41,40 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
     var helper_funcs = {
         getStartX: function (){ return rect_geom.track_circle_pos; },
         XToTime: XToTime,
-        TimeToX: function(time){ return xScale(time); },
+        TimeToX: function(time){ return common_geom.xScale(time); },
         update_text: update_text,
         update_formula: update_formula
     };
 
     if (options){
         if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
-            rect_geom.delay_line_length = xScale(options.start_time) - xScale(options.track_circle_time);
-            rect_geom.start_time_pos = xScale(options.start_time);
-            rect_geom.track_circle_pos = xScale(options.track_circle_time);
-            rect_geom.width = xScale(options.end_time) - xScale(options.start_time);
+            rect_geom.delay_line_length = common_geom.xScale(options.start_time) - common_geom.xScale(options.track_circle_time);
+            rect_geom.start_time_pos = common_geom.xScale(options.start_time);
+            rect_geom.track_circle_pos = common_geom.xScale(options.track_circle_time);
+            rect_geom.width = common_geom.xScale(options.end_time) - common_geom.xScale(options.start_time);
         } else {
             rect_geom.left_fixed = false;
             rect_geom.right_fixed = false;
 
             rect_geom.delay_line_length = 0;
-            rect_geom.start_time_pos = xScale(xRange[0]);
-            rect_geom.track_circle_pos = xScale(xRange[0]);
-            rect_geom.width = xScale(xRange[1]) - xScale(xRange[0]);
+            rect_geom.start_time_pos = common_geom.xScale(common_geom.xRange[0]);
+            rect_geom.track_circle_pos = common_geom.xScale(common_geom.xRange[0]);
+            rect_geom.width = common_geom.xScale(common_geom.xRange[1]) - common_geom.xScale(common_geom.xRange[0]);
 
         }
 
         if (!options.hasOwnProperty('lt') || !options.lt) {
             rect_geom.top_fixed = false;
-            options.lt = yScale(yRange[1]);
+            options.lt = common_geom.yScale(common_geom.yRange[1]);
         }
-        rect_geom.rect_top = yScale(options.lt);
+        rect_geom.rect_top = common_geom.yScale(options.lt);
 
         if (!options.hasOwnProperty('gt') || !options.gt){
             rect_geom.bottom_fixed = false;
-            options.lt = yScale(yRange[0]);
+            options.lt = common_geom.yScale(common_geom.yRange[0]);
         }
 
-        rect_geom.height = yScale(options.gt) - yScale(options.lt);
+        rect_geom.height = common_geom.yScale(options.gt) - common_geom.yScale(options.lt);
     }
 
     rect_geom.track_circle_pos = rect_geom.start_time_pos - rect_geom.delay_line_length;
@@ -145,20 +133,20 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
         // Create new scales
         var new_xScale = d3.scale.linear()
-            .domain(xRange)
+            .domain(common_geom.xRange)
             .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
 
         var new_yScale = d3.scale.linear()
-        .domain(yRange)
+        .domain(common_geom.yRange)
         .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
 
 
         function convertX(x){
-            return new_xScale(xScale.invert(x));
+            return new_xScale(common_geom.xScale.invert(x));
         }
 
         function convertY(y){
-            return new_yScale(yScale.invert(y));
+            return new_yScale(common_geom.yScale.invert(y));
         }
 
         // Adjust positions
@@ -174,17 +162,17 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         rect_geom.height = bottom_pos - convertY(rect_geom.rect_top);
         rect_geom.rect_top = convertY(rect_geom.rect_top);
 
-        d3.select(div_name).selectAll('.data-circle')
+        d3.select(common_geom.div_name).selectAll('.data-circle')
             .attr("cx", function(d){ return new_xScale(d.time); })
             .attr("cy", function(d){ return new_yScale(d.value); });
 
-        d3.select(div_name).selectAll(".example_line")
+        d3.select(common_geom.div_name).selectAll(".example_line")
             .attr("x1", function(d){ return new_xScale(d.t1) })
             .attr("x2", function(d){ return new_xScale(d.t2) })
             .attr("y1", function(d){ return new_yScale(d.y) })
             .attr("y2", function(d){ return new_yScale(d.y) });
 
-        d3.select(div_name).selectAll(".example_circle")
+        d3.select(common_geom.div_name).selectAll(".example_circle")
             .attr("cx", function (d) {
                 return new_xScale(d.t1)
             })
@@ -197,14 +185,14 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         }
 
         // switch scales
-        xScale = new_xScale;
-        yScale = new_yScale;
+        common_geom.xScale = new_xScale;
+        common_geom.yScale = new_yScale;
 
-        d3.select(div_name).selectAll(".data-path")
+        d3.select(common_geom.div_name).selectAll(".data-path")
             .attr("d", function(d){ return data_line_generator(d); });
 
         // Redraw
-        drawAxes(svg, common_geom, xScale, yScale, variable_name);
+        drawAxes(common_geom);
         adjust_everything();
     }
 
@@ -219,7 +207,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                 return;
             }
 
-            var cursor_x = d3.mouse(svg.node())[0];
+            var cursor_x = d3.mouse(common_geom.svg.node())[0];
             var newx = imposeLimits(0, common_geom.w, cursor_x);
 
             if (timing_parent_bar) {
@@ -254,13 +242,13 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         if (common_geom.specification_fixed){ return; }
 
         // horizontal movement
-        var rect_center = d3.mouse(svg.node())[0] - rect_geom.width/2;
+        var rect_center = d3.mouse(common_geom.svg.node())[0] - rect_geom.width/2;
         var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.w - rect_geom.width, rect_center);
 
         rect_geom.start_time_pos = new_start_pos;
 
         // vertical movement
-        var rect_center = d3.mouse(svg.node())[1] - rect_geom.height/2;
+        var rect_center = d3.mouse(common_geom.svg.node())[1] - rect_geom.height/2;
         rect_geom.rect_top = imposeLimits(0, common_geom.h - rect_geom.height, rect_center);
         adjust_everything(true);
     }
@@ -276,7 +264,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        var cursor_x = d3.mouse(svg.node())[0];
+        var cursor_x = d3.mouse(common_geom.svg.node())[0];
         var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
     }
@@ -319,7 +307,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
-        var cursor_y = d3.mouse(svg.node())[1];
+        var cursor_y = d3.mouse(common_geom.svg.node())[1];
         var newy = imposeLimits(0, rect_geom.rect_top + rect_geom.height - (rect_geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner(oldy, newy);
     }
@@ -377,7 +365,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, svg, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             }
         },
@@ -387,7 +375,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, svg, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             }
         },
@@ -401,7 +389,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, svg, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('some')();
                 update_text();
             }
@@ -412,7 +400,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, svg, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('all')();
                 update_text();
             }
@@ -466,18 +454,18 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
     // Actually create visual elements
     /************************************************/
-    drawAxes(svg, common_geom, xScale, yScale, variable_name);
+    drawAxes(common_geom);
 
-    var example_trajctory_g = svg.append("g")
+    var example_trajctory_g = common_geom.svg.append("g")
         .attr("id", "example_trajectory");
 
-    d3.select(div_name).select(".space-div").style("width", common_geom.w + "px");
+    d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.w + "px");
 
-    var placeholder_form = d3.select(div_name).select(".placeholder-form");
-    var placeholder_latex = d3.select(div_name).select(".placeholder-latex");
+    var placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form");
+    var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
     var placeholder_latex_formula = placeholder_latex.append("div");
 
-    var options_form = d3.select(div_name).append("div").classed("space-div", true).append("form");
+    var options_form = d3.select(common_geom.div_name).append("div").classed("space-div", true).append("form");
     var use_letters = placeholder_latex.append("input")
         .attr("type", "checkbox")
         .attr("id", "use_letters_checkbox")
@@ -488,14 +476,14 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         });
     var use_letters_label = placeholder_latex.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
-    d3.select(div_name).append('button')
+    d3.select(common_geom.div_name).append('button')
         .text("Save")
         .on("click", function(){
             var new_spec_string = getSpecString();
             $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
-            url: "http://" + window.location.host + "/specifications/" + spec_id + "/save",
+            url: "http://" + window.location.host + "/specifications/" + common_geom.spec_id + "/save",
             dataType: 'html',
             async: true,
             data: new_spec_string,
@@ -505,190 +493,13 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
              },
 
             success: function (data) {
-                d3.select("#spec_string_" + spec_id).text(new_spec_string)
+                d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
             },
             error: function (result, textStatus) { }
             })
         });
 
-    function plotExampleTrajectory(applyAllConstraints){
-
-        return function() {
-            var spec_strings = [];
-
-            if (applyAllConstraints) {
-                for (var i = 0; i < diagrams.length; i++) {
-                    spec_strings.push(diagrams[i].getSpecString());
-                }
-            } else {
-                spec_strings.push(getSpecString());
-            }
-
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "http://" + window.location.host + "/specifications/example",
-                dataType: 'html',
-                async: true,
-                data: {"specification_string": spec_strings, "t_max": xRange[1]},
-
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
-                },
-
-                success: function (data) {
-                    data = JSON.parse(data);
-                    var line_data = data.filter(function (d){ return d.t2 > d.t1; });
-                    var circle_data = data.filter(function (d){ return d.t2 == d.t1; });
-
-                    example_trajctory_g
-                        .append("g")
-                        .selectAll(".example_line")
-                        .data(data)
-                        .enter()
-                        .append("line")
-                        .attr("x1", function(d){ return timeToX(d.t1) })
-                        .attr("x2", function(d){ return timeToX(d.t2) })
-                        .attr("y1", function(d){ return valToY(d.y) })
-                        .attr("y2", function(d){ return valToY(d.y) })
-                        .attr("stroke-width", "2")
-                        .attr("stroke", "rgb(0,0,0)")
-                        .attr("class", "example_line");
-
-
-                    example_trajctory_g
-                        .append("g")
-                        .selectAll(".example_circle")
-                        .data(data)
-                        .enter()
-                        .append("circle")
-                        .attr("class", "example_circle")
-                        .attr("r", 3.5)
-                        .attr("cx", function (d) {
-                            return timeToX(d.t1)
-                        })
-                        .attr("cy", function (d) {
-                            return valToY(d.y)
-                        });
-
-
-                    d3.select(div_name)
-                        .select("#delete_trajectory_button")
-                        .style("visibility", "visible");
-
-                },
-                error: function (result, textStatus) {
-                }
-            })
-        }
-    }
-
-
-    var diagram_option = d3.select(div_name)
-                            .select(".diagram-div")
-                            .append("div");
-
-    var constant = diagram_option.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "constant_checkbox")
-        .attr("value", "false")
-        .on("change", function(){ common_geom.specification_fixed = !common_geom.specification_fixed;});
-    var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
-
-
-    var experimental_data_div = diagram_option.append("div");
-
-
-    function hide_data(dataset_name){
-        return function (){
-            svg.selectAll(".data-circle")
-                .filter(function(d){ return d.dataset == dataset_name })
-                .style("visibility",  this.checked ? 'visible' : 'hidden');
-
-            svg.selectAll(".data-path")
-                .filter(function(d){ return d[0].dataset == dataset_name })
-                .style("visibility",  this.checked ? 'visible' : 'hidden');
-
-        }
-    }
-
-    for (var i=0; i <  dataset_names.length; i++){
-        experimental_data_div.append("label")
-            .attr("for", "dataset_" + [i] + "_input").text(dataset_names[i])
-            .style("color", colorScale(i));
-
-        experimental_data_div.append("input")
-            .attr("id", "dataset_" + [i] + "_input")
-            .attr("type", "checkbox")
-            .attr("checked", "true")
-            .on("change", hide_data(dataset_names[i]) );
-    }
-
-    var axis_range_div = diagram_option.append("div");
-    var time_max_label = axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
-    var time_max_input = axis_range_div.append("input")
-        .attr("id", "time_max")
-        .attr("value", xRange[1])
-        .attr("length", "6")
-        .on("change", function(){
-            var val = parseFloat(this.value);
-            if (!isNaN(val)){
-                xRange[1] = parseFloat(this.value);
-                adjust_scales();
-            }
-        });
-
-    var y_min_label = axis_range_div.append("label").attr("for", "y_min_input").text(" Min " + variable_name);
-    var y_min_input = axis_range_div.append("input")
-        .attr("id", "y_max")
-        .attr("value", yRange[1])
-        .attr("length", "6")
-        .on("change", function(){
-            var val = parseFloat(this.value);
-            if (!isNaN(val)){
-                yRange[1] = parseFloat(this.value);
-                adjust_scales();
-            }
-        });
-
-    var y_max_label = axis_range_div.append("label").attr("for", "y_max_input").text(" Max " + variable_name);
-    var y_max_input = axis_range_div.append("input")
-        .attr("id", "y_min")
-        .attr("value", yRange[0])
-        .attr("length", "6")
-        .on("change", function(){
-            var val = parseFloat(this.value);
-            if (!isNaN(val)){
-                yRange[0] = parseFloat(this.value);
-                adjust_scales();
-            }
-        });
-
-    var example_plot_buttons_div = diagram_option.append("div");
-    example_plot_buttons_div.append('button')
-        .classed("btn", true).classed("btn-default", true).attr("type", "button")
-        .text("Plot trajectory satisfying this constraint")
-        .on("click", plotExampleTrajectory(false));
-
-    example_plot_buttons_div.append('button')
-        .classed("btn", true).classed("btn-default", true)
-        .text("Plot trajectory satisfying all constraints")
-        .on("click", plotExampleTrajectory(true));
-
-    example_plot_buttons_div.append('button')
-        .text("Delete example trajectory")
-        .on("click", function(){
-            example_trajctory_g.selectAll(".example_line").remove();
-            example_trajctory_g.selectAll(".example_circle").remove();
-            d3.select(this).style("visibility", "hidden");
-        })
-        .attr("id", "delete_trajectory_button")
-        .classed("btn", true).classed("btn-danger", true)
-        .style("visibility", "hidden");
-
-
-
-    var newg = svg.append("g");
+    var newg = common_geom.svg.append("g");
 
     // we draw these lines before the dragrect to improve carity when rectangle is very thin
     var delay_line = newg.append("line").classed("red-line", true);
@@ -793,7 +604,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
                 var data = all_data[i].value;
 
-                var circles = svg.append('g')
+                var circles = common_geom.svg.append('g')
                     .selectAll('circle')
                     .data(data)
                     .enter()
@@ -807,19 +618,19 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
                     .attr("r", 2)
                     .classed("data-circle", true);
 
-                svg
+                common_geom.svg
                     .append("path")
                     .classed("data-path", true)
-                    .datum(data.filter(function (d) { return d.variable == variable_name; }))
+                    .datum(data.filter(function (d) { return d.variable == common_geom.variable_name; }))
                     .attr("fill", "none")
-                    .attr("stroke", colorScale(i))
+                    .attr("stroke", common_geom.colorScale(i))
                     .attr("stroke-linejoin", "round")
                     .attr("stroke-linecap", "round")
                     .attr("stroke-width", 1.5)
                     .attr("d", data_line_generator);
 
                 circles.filter(function (d) {
-                    return d.variable != variable_name
+                    return d.variable != common_geom.variable_name
                 })
                     .remove();
 
@@ -904,15 +715,15 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
         // 2 bounds
         if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + index + "<" + y_upper + ")";
+            latex_string = "(" + y_lower + "< x_" + common_geom.index + "<" + y_upper + ")";
         }
 
         // 1 bound
         else if (rect_geom.top_fixed) {
-            latex_string = "(x_" + index + "<" + y_upper + ")";
+            latex_string = "(x_" + common_geom.index + "<" + y_upper + ")";
         }
         else if (rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + index + ")";
+            latex_string = "(" + y_lower + "< x_" + common_geom.index + ")";
         }
 
         // 0 bounds
@@ -974,7 +785,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
     function update_text() {
 
         function create_initial_bar (kind){
-            timing_parent_bar = create_bar(1, kind, common_geom, svg, placeholder_form, newg, helper_funcs);
+            timing_parent_bar = create_bar(1, kind, common_geom, placeholder_form, newg, helper_funcs);
             update_text();
         }
 
@@ -988,7 +799,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
             adjust_everything: adjust_everything,
             append_timing_bar: append_timing_bar
         };
-        describe_constraint(timing_parent_bar, variable_name, placeholder_form, rect_geom, update_functions);
+        describe_constraint(timing_parent_bar, common_geom.variable_name, placeholder_form, rect_geom, update_functions);
 
         update_formula();
     }
@@ -1079,7 +890,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
         } else {
-            timing_parent_bar = create_bar(1, kind, common_geom, svg, placeholder_form, newg, helper_funcs, options);
+            timing_parent_bar = create_bar(1, kind, common_geom, placeholder_form, newg, helper_funcs, options);
         }
         update_text();
     }
@@ -1102,7 +913,7 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
     function adjust_rect_values(){
         d3.select("#paramModal").remove();
-        var modal_contents = d3.select(div_name).append("div")
+        var modal_contents = d3.select(common_geom.div_name).append("div")
             .attr("id", "paramModal")
             .classed("modal", true)
             .classed("fade", true)
@@ -1176,5 +987,5 @@ function Rectangle(svg, common_geom, div_name, spec_id, index, variable_name, op
 
 
     adjust_everything(true);
-    return {add_bar: append_timing_bar, getSpecString: getSpecString}
+    return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales}
 }
