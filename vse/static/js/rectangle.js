@@ -461,29 +461,6 @@ function Rectangle(common_geom, options) {
         });
     var use_letters_label = placeholder_latex.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
-    d3.select(common_geom.div_name).append('button')
-        .text("Save")
-        .on("click", function(){
-            var new_spec_string = getSpecString();
-            $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            url: "http://" + window.location.host + "/specifications/" + common_geom.spec_id + "/save",
-            dataType: 'html',
-            async: true,
-            data: new_spec_string,
-
-             beforeSend: function(xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-             },
-
-            success: function (data) {
-                d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
-            },
-            error: function (result, textStatus) { }
-            })
-        });
-
     var newg = common_geom.svg.append("g");
 
     // we draw these lines before the dragrect to improve carity when rectangle is very thin
