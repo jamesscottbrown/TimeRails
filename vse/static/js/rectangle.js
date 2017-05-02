@@ -34,10 +34,6 @@ function Rectangle(common_geom, options) {
         return common_geom.yScale.invert(y);
     }
 
-    var data_line_generator = d3.svg.line()
-        .x(function (d) { return timeToX(d.time); })
-        .y(function (d) { return valToY(d.value); });
-
     var helper_funcs = {
         getStartX: function (){ return rect_geom.track_circle_pos; },
         XToTime: XToTime,
@@ -129,17 +125,7 @@ function Rectangle(common_geom, options) {
         set_edges();
     }
 
-    function adjust_scales(){
-
-        // Create new scales
-        var new_xScale = d3.scale.linear()
-            .domain(common_geom.xRange)
-            .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
-
-        var new_yScale = d3.scale.linear()
-        .domain(common_geom.yRange)
-        .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
-
+    function adjust_scales(new_xScale, new_yScale){
 
         function convertX(x){
             return new_xScale(common_geom.xScale.invert(x));
@@ -184,12 +170,13 @@ function Rectangle(common_geom, options) {
             timing_parent_bar.adjust_scales(new_xScale);
         }
 
-        // switch scales
-        common_geom.xScale = new_xScale;
-        common_geom.yScale = new_yScale;
+        var new_data_line_generator = d3.svg.line()
+        .x(function (d) { return new_xScale(d.time); })
+        .y(function (d) { return new_yScale(d.value); });
+
 
         d3.select(common_geom.div_name).selectAll(".data-path")
-            .attr("d", function(d){ return data_line_generator(d); });
+            .attr("d", function(d){ return new_data_line_generator(d); });
 
         // Redraw
         common_geom.drawAxes(common_geom);
@@ -615,6 +602,10 @@ function Rectangle(common_geom, options) {
                     })
                     .attr("r", 2)
                     .classed("data-circle", true);
+
+                    var data_line_generator = d3.svg.line()
+                        .x(function (d) { return timeToX(d.time); })
+                        .y(function (d) { return valToY(d.value); });
 
                 common_geom.svg
                     .append("path")

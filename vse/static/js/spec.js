@@ -134,7 +134,7 @@ function addCommonElements(common_geom, rect){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 common_geom.xRange[1] = parseFloat(this.value);
-                rect.adjust_scales();
+                adjustAllScales(common_geom);
             }
         });
 
@@ -147,7 +147,7 @@ function addCommonElements(common_geom, rect){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 common_geom.yRange[1] = parseFloat(this.value);
-                rect.adjust_scales();
+                adjustAllScales(common_geom);
             }
         });
 
@@ -160,7 +160,7 @@ function addCommonElements(common_geom, rect){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 common_geom.yRange[0] = parseFloat(this.value);
-                rect.adjust_scales();
+                adjustAllScales(common_geom);
             }
         });
 
@@ -186,6 +186,28 @@ function addCommonElements(common_geom, rect){
         .classed("btn", true).classed("btn-danger", true)
         .style("visibility", "hidden");
 
+}
+
+function adjustAllScales(common_geom) {
+        // Create new scales
+        var new_xScale = d3.scale.linear()
+            .domain(common_geom.xRange)
+            .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
+
+        var new_yScale = d3.scale.linear()
+        .domain(common_geom.yRange)
+        .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
+
+        for (var i=0; i < common_geom.rectangles.length; i++){
+            common_geom.rectangles[i].adjust_scales(new_xScale, new_yScale);
+        }
+
+        // switch scales
+        common_geom.xScale = new_xScale;
+        common_geom.yScale = new_yScale;
+
+        // Redraw axes
+        common_geom.drawAxes(common_geom);
 }
 
 
@@ -234,6 +256,9 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
     var index = 1;
     div_name = "#" + div_name;
 
+    // Group together data that is shared between all rectangles in a specification,
+    // and methods that act on the whole specification
+
     var common_geom = {
         w: parseInt(svg.attr("width")),
         h: parseInt(svg.attr("height")),
@@ -252,7 +277,10 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         index: index,
         variable_name: variable_name,
 
-        drawAxes: drawAxes
+        drawAxes: drawAxes,
+        adjustAllScales: adjustAllScales,
+
+        rectangles: []
     };
 
     common_geom.xScale = d3.scale.linear()
@@ -391,6 +419,8 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         var kind = (term.type == "finally") ? 'some' : 'all';
         diagram.add_bar(kind, timing_bar_options);
     }
+
+    common_geom.rectangles.push(diagram);
 
     drawAxes(common_geom);
     addCommonElements(common_geom, diagram);
