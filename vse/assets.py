@@ -27,7 +27,7 @@ js_spec = Bundle(
     'libs/d3.v3.4.11.js',
     'libs/d3-context-menu.js',
     'libs/https_cdn.mathjax.org_mathjax_latest_MathJax.js?config=TeX-AMS-MML_HTMLorMML.js',
-    'js/dragrect.js',
+    'js/spec.js',
     'js/rectangle.js',
     'js/time_rail.js',
     'js/description.js',
