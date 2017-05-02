@@ -195,6 +195,12 @@ function Rectangle(common_geom, options) {
             }
 
             var cursor_x = d3.mouse(common_geom.svg.node())[0];
+            drag_track_circle_inner(cursor_x);
+            adjust_everything(false);
+        });
+
+
+    function drag_track_circle_inner(cursor_x){
             var newx = imposeLimits(0, common_geom.w, cursor_x);
 
             if (timing_parent_bar) {
@@ -205,9 +211,7 @@ function Rectangle(common_geom, options) {
             var shift = newx - rect_geom.start_time_pos;
             rect_geom.track_circle_pos += shift;
             rect_geom.start_time_pos += shift;
-
-            adjust_everything(false);
-        });
+    }
 
     function drag_fixed() {
         // resize so edges remain on axes if necessary
@@ -230,9 +234,13 @@ function Rectangle(common_geom, options) {
 
         // horizontal movement
         var rect_center = d3.mouse(common_geom.svg.node())[0] - rect_geom.width/2;
-        var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.w - rect_geom.width, rect_center);
 
-        rect_geom.start_time_pos = new_start_pos;
+        if (rect_center < rect_geom.track_circle_pos){
+            drag_track_circle_inner(rect_center);
+        } else {
+            var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.w - rect_geom.width, rect_center);
+            rect_geom.start_time_pos = new_start_pos;
+        }
 
         // vertical movement
         var rect_center = d3.mouse(common_geom.svg.node())[1] - rect_geom.height/2;
