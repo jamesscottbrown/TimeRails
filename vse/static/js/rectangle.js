@@ -1,5 +1,5 @@
 
-function Rectangle(common_geom, options) {
+function Rectangle(common_geom, isPrimaryRectangle, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
@@ -15,7 +15,8 @@ function Rectangle(common_geom, options) {
         top_fixed: true,
         bottom_fixed: true,
         left_fixed: true,
-        right_fixed: true
+        right_fixed: true,
+        followRectangle: false
     };
 
 
@@ -211,6 +212,15 @@ function Rectangle(common_geom, options) {
             var shift = newx - rect_geom.start_time_pos;
             rect_geom.track_circle_pos += shift;
             rect_geom.start_time_pos += shift;
+
+            if (isPrimaryRectangle && rect_geom.followRectangle){
+                for (var i=1; i<common_geom.rectangles.length; i++){
+                    var other_rect = common_geom.rectangles[i].rect_geom;
+                    other_rect.track_circle_pos += shift;
+                    other_rect.start_time_pos += shift;
+                    common_geom.rectangles[i].adjust_everything();
+                }
+            }
     }
 
     function drag_fixed() {
@@ -485,10 +495,28 @@ function Rectangle(common_geom, options) {
             .origin(Object)
             .on("drag", dragmove));
 
-    dragrect.on('contextmenu', d3.contextMenu([{
-            title: 'Adjust values',
+
+        var rectMenu = [{
+            title: function(){ return 'Adjust values'; },
             action: adjust_rect_values
-        }]));
+        }];
+
+        if (isPrimaryRectangle){
+            rectMenu.push({
+                title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
+                action: function () {
+                    rect_geom.followRectangle = ! rect_geom.followRectangle;
+                }
+            });
+        } else {
+            rectMenu.push({
+                title: function(){ return 'Delete rectangle'; },
+                action: deleteRectangle
+            });
+        }
+
+
+    dragrect.on('contextmenu', d3.contextMenu(rectMenu));
 
     var dragbarleft = newg.append("circle")
         .attr("id", "dragleft")
@@ -566,6 +594,12 @@ function Rectangle(common_geom, options) {
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
+
+    if (!isPrimaryRectangle){
+        track_circle.style("visibility", "hidden");
+        startline.style("visibility", "hidden");
+        delay_line.style("visibility", "hidden");
+    }
 
     // Plotting saved datasets
     d3.json(window.location + "/data", function(error, all_data){
@@ -884,6 +918,19 @@ function Rectangle(common_geom, options) {
     }
 
 
+    function deleteRectangle(){
+        dragbarleft.remove();
+        dragbarright.remove();
+        dragbartop.remove();
+        dragbarbottom.remove();
+        dragrect.remove();
+        delay_line.remove();
+        startline.remove();
+        track_circle.remove();
+
+        common_geom.rectangles.splice(common_geom.rectangles.indexOf(this), 1);
+        common_geom.adjust_everything
+    }
 
     function adjust_rect_values(){
         d3.select("#paramModal").remove();
@@ -961,5 +1008,6 @@ function Rectangle(common_geom, options) {
 
 
     adjust_everything(true);
-    return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales}
+    return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
+            adjust_everything: adjust_everything, rect_geom: rect_geom}
 }
