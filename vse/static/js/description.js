@@ -1,6 +1,6 @@
 
 function describe_constraint (timing_parent_bar, variable_name, placeholder_form, geom, funcs) {
-    placeholder_form.selectAll('div').remove();
+    placeholder_form.selectAll("*").remove();
 
     addNewRailOption();
 

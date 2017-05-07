@@ -16,7 +16,8 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         bottom_fixed: true,
         left_fixed: true,
         right_fixed: true,
-        followRectangle: false
+        followRectangle: false,
+        rectangleIndex: common_geom.rectangles.length
     };
 
 
@@ -464,7 +465,10 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
 
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.w + "px");
 
-    var placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form");
+    var placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form")
+                            .append('div')
+                            .classed(".rect-" + rect_geom.rectangleIndex, true)
+        .classed("single-rect-spec", true);
     var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
     var placeholder_latex_formula = placeholder_latex.append("div");
 
@@ -928,8 +932,12 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         startline.remove();
         track_circle.remove();
 
-        common_geom.rectangles.splice(common_geom.rectangles.indexOf(this), 1);
-        common_geom.adjust_everything
+        common_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
+        for (var i=0; i<common_geom.rectangles; i++){
+            common_geom.rectangles[i].saveRectangleIndex(i);
+        }
+
+        common_geom.adjust_everything();
     }
 
     function adjust_rect_values(){
@@ -1009,5 +1017,6 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
 
     adjust_everything(true);
     return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
-            adjust_everything: adjust_everything, rect_geom: rect_geom}
+            adjust_everything: adjust_everything, rect_geom: rect_geom,
+            saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;} }
 }

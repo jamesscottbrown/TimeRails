@@ -80,3 +80,7 @@
      fill: rgb(255,0,0);
     fill-opacity: 0.5;
 }
+
+.single-rect-spec {
+    border-bottom: 1px dashed #000;
+}
