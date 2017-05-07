@@ -925,6 +925,11 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
 
 
     function deleteRectangle(){
+
+         if (timing_parent_bar) {
+             timing_parent_bar.delete();
+         }
+
         dragbarleft.remove();
         dragbarright.remove();
         dragbartop.remove();
