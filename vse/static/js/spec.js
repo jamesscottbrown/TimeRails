@@ -209,6 +209,14 @@ function addCommonElements(common_geom, rect){
             })
         });
 
+    d3.select(common_geom.div_name).select("#use_letters_checkbox").on("change", function(){
+        common_geom.use_letters = !common_geom.use_letters;
+
+        for (var i=0; i<common_geom.rectangles.length; i++){
+            common_geom.rectangles[i].update_formula();
+        }
+    })
+
 }
 
 function getSpecString(common_geom){

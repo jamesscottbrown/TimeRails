@@ -473,15 +473,6 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
     var placeholder_latex_formula = placeholder_latex.append("div");
 
     var options_form = d3.select(common_geom.div_name).append("div").classed("space-div", true).append("form");
-    var use_letters = placeholder_latex.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "use_letters_checkbox")
-        .attr("value", "false")
-        .on("change", function(){
-            common_geom.use_letters = !common_geom.use_letters;
-            update_text();
-        });
-    var use_letters_label = placeholder_latex.append("label").attr("for", "use_letters_checkbox").text("Use letters");
 
     var newg = common_geom.svg.append("g");
 
@@ -1018,5 +1009,6 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
     adjust_everything(true);
     return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
             adjust_everything: adjust_everything, rect_geom: rect_geom,
-            saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;} }
+            saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;},
+            update_formula: update_formula }
 }
