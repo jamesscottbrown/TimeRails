@@ -17,7 +17,8 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         left_fixed: true,
         right_fixed: true,
         followRectangle: false,
-        rectangleIndex: common_geom.rectangles.length
+        rectangleIndex: common_geom.rectangles.length,
+        start_line_visible: true
     };
 
 
@@ -494,7 +495,11 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         var rectMenu = [{
             title: function(){ return 'Adjust values'; },
             action: adjust_rect_values
-        }];
+        },
+            {
+                title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
+                action: toggle_start_line_visibility
+            }];
 
         if (isPrimaryRectangle){
             rectMenu.push({
@@ -590,10 +595,16 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
 
-    if (!isPrimaryRectangle){
-        track_circle.style("visibility", "hidden");
-        startline.style("visibility", "hidden");
-        delay_line.style("visibility", "hidden");
+    function toggle_start_line_visibility(){
+
+        if (timing_parent_bar){ return; }
+
+        rect_geom.start_line_visible = !rect_geom.start_line_visible;
+
+        var visibility_string = rect_geom.start_line_visible ? "visible" : "hidden";
+        track_circle.style("visibility", visibility_string);
+        startline.style("visibility", visibility_string);
+        delay_line.style("visibility", visibility_string);
     }
 
     // Plotting saved datasets
