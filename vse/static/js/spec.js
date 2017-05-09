@@ -324,6 +324,9 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
         drawAxes: drawAxes,
         adjustAllScales: adjustAllScales,
+        adjustAllRectangles: function(update_description){
+            for (var i=0; i<common_geom.rectangles.length; i++){ common_geom.rectangles[i].adjust_everything(update_description); }
+        },
 
         rectangles: []
     };

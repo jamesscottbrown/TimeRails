@@ -18,9 +18,22 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         right_fixed: true,
         followRectangle: false,
         rectangleIndex: common_geom.rectangles.length,
-        start_line_visible: true
+        start_line_visible: true,
+
+        num_rails_above: 0,
+        get_num_rails_above: get_num_rails_above,
+
+        rail_height: 0
     };
 
+    function get_num_rails_above(){
+        rect_geom.num_rails_above = 0;
+        for (var i=0; i<rect_geom.rectangleIndex; i++){
+            rect_geom.num_rails_above += 1;
+            rect_geom.num_rails_above += common_geom.rectangles[i].get_num_rails();
+        }
+        return rect_geom.num_rails_above;
+    }
 
     var timing_parent_bar = false;
     
@@ -85,6 +98,13 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
     function adjust_everything(update_description){
         // We rely on: rect_geom.width, rect_geom.height, , common_geom.h
 
+        var num_rails_above = get_num_rails_above();
+        rect_geom.rail_height = common_geom.h + (num_rails_above-1) * common_geom.track_padding;
+
+        if (parseInt(common_geom.svg.attr("height")) < rect_geom.rail_height + common_geom.vertical_padding){
+            common_geom.svg.attr("height", rect_geom.rail_height + common_geom.vertical_padding)
+        }
+
         // convenience quanities (redundant)
         rect_geom.delay_line_length = rect_geom.start_time_pos - rect_geom.track_circle_pos;
         rect_geom.delay_line_height = rect_geom.rect_top + (rect_geom.height/2);
@@ -117,10 +137,15 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         startline.attr("x1", rect_geom.track_circle_pos)
             .attr("x2", rect_geom.track_circle_pos)
             .attr("y1", rect_geom.delay_line_height)
-            .attr("y2", common_geom.h - common_geom.track_padding);
+            .attr("y2", rect_geom.rail_height);
 
         track_circle.attr("cx", rect_geom.track_circle_pos)
-                .attr("cy", common_geom.h - common_geom.track_padding);
+                .attr("cy", rect_geom.rail_height);
+
+        if (timing_parent_bar){
+            // may need to shift time bars vertically
+            timing_parent_bar.adjust_everything();
+        }
 
         if (update_description){
           update_text();
@@ -361,6 +386,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                     timing_parent_bar = false;
+                    common_geom.adjustAllRectangles();
                     update_text();
                 }
             },
@@ -372,7 +398,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             }
         },
@@ -382,7 +408,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             }
         },
@@ -396,7 +422,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('some')();
                 update_text();
             }
@@ -407,7 +433,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('all')();
                 update_text();
             }
@@ -799,7 +825,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
     function update_text() {
 
         function create_initial_bar (kind){
-            timing_parent_bar = create_bar(1, kind, common_geom, placeholder_form, newg, helper_funcs);
+            timing_parent_bar = create_bar(1, kind, common_geom, rect_geom, placeholder_form, newg, helper_funcs);
             update_text();
         }
 
@@ -904,7 +930,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
         } else {
-            timing_parent_bar = create_bar(1, kind, common_geom, placeholder_form, newg, helper_funcs, options);
+            timing_parent_bar = create_bar(1, kind, common_geom, rect_geom, placeholder_form, newg, helper_funcs, options);
         }
         update_text();
     }
@@ -1026,5 +1052,8 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
     return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
             adjust_everything: adjust_everything, rect_geom: rect_geom,
             saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;},
-            update_formula: update_formula }
+            update_formula: update_formula,
+            get_num_rails: function (){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0; },
+            get_num_rails_above: get_num_rails_above
+            }
 }

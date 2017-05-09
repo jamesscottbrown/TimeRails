@@ -1,15 +1,13 @@
-function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, options){
-    // increase SVG height
-    var svg = geom.svg;
+function create_bar(level, kind, geom, rectGeom, placeholder_form, newg, helper_funcs, options){
 
-    svg.attr("height", parseInt(svg.attr("height")) + geom.track_padding);
+    var svg = geom.svg;
 
     var timing_parent_bar = false;
 
     var start_time_pos = geom.horizontal_padding;
     var left_tick_pos = geom.horizontal_padding + 20;
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
-    var base_y = geom.h + (level-2) * geom.track_padding ;
+    var base_y;
 
     if (options){
         if (options.hasOwnProperty('start_time')) { start_time_pos = helper_funcs.TimeToX(options.start_time); }
@@ -17,8 +15,15 @@ function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, opt
         if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = helper_funcs.TimeToX(options.right_tick_time); }
     }
 
-    // Function that defines where each element will be positioned
     function adjust_everything(update_description){
+
+        base_y = rectGeom.rail_height + (level - 1) * geom.track_padding;
+
+        // increase SVG height
+        if (parseFloat(svg.attr("height")) < (base_y + 2*geom.track_padding)){
+            svg.attr("height", base_y + 2*geom.track_padding);
+        }
+
         track
             .attr("x1", left_tick_pos)
             .attr("x2", right_tick_pos)
@@ -53,7 +58,11 @@ function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, opt
         track_circle
             .attr("cx", start_time_pos)
             .attr("cy", base_y + geom.track_padding);
-        
+
+        if (timing_parent_bar){
+            timing_parent_bar.adjust_everything();
+        }
+
         if (update_description){
             helper_funcs.update_text();
         }
@@ -161,16 +170,18 @@ function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, opt
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, placeholder_form, newg, helper_funcs_new, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, rectGeom, placeholder_form, newg, helper_funcs_new, options);
+            geom.adjustAllRectangles(true);
             helper_funcs.update_text();
         }
     };
 
     var remove_parent_bar = function() {
-            if (timing_parent_bar){
-                timing_parent_bar.delete();
-                timing_parent_bar = false;
-            }
+        if (timing_parent_bar){
+            timing_parent_bar.delete();
+            timing_parent_bar = false;
+        }
+        geom.adjustAllRectangles(true);
         helper_funcs.update_text();
     };
 
@@ -420,12 +431,13 @@ function create_bar(level, kind, geom, placeholder_form, newg, helper_funcs, opt
 
     
     adjust_everything(true);
+    geom.adjustAllRectangles();
 
-    function getTimingParentBar (){
-        return timing_parent_bar;
-    }
 
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
-        describe_constraint: describe_constraint, getTimingParentBar: getTimingParentBar, adjust_scales: adjust_scales};
+        describe_constraint: describe_constraint,
+        getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
+        adjust_everything: adjust_everything,
+        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;} };
 }
