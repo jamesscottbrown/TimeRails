@@ -124,6 +124,51 @@ function addCommonElements(common_geom, rect){
             .on("change", hide_data(dataset_names[i]) );
     }
 
+        // Plotting saved datasets
+    d3.json(window.location + "/data", function(error, all_data){
+
+            for (var i=0; i<all_data.length; i++) {
+
+                var data = all_data[i].value;
+
+                var circles = common_geom.svg.append('g')
+                    .selectAll('circle')
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return common_geom.xScale(d.time)
+                    })
+                    .attr("cy", function (d) {
+                        return common_geom.yScale(d.value)
+                    })
+                    .attr("r", 2)
+                    .classed("data-circle", true);
+
+                    var data_line_generator = d3.svg.line()
+                        .x(function (d) { return common_geom.xScale(d.time); })
+                        .y(function (d) { return common_geom.yScale(d.value); });
+
+                common_geom.svg
+                    .append("path")
+                    .classed("data-path", true)
+                    .datum(data.filter(function (d) { return d.variable == common_geom.variable_name; }))
+                    .attr("fill", "none")
+                    .attr("stroke", common_geom.colorScale(i))
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", data_line_generator);
+
+                circles.filter(function (d) {
+                    return d.variable != common_geom.variable_name
+                })
+                    .remove();
+
+            }
+    });
+
+
     var axis_range_div = diagram_option.append("div");
     var time_max_label = axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
     var time_max_input = axis_range_div.append("input")
