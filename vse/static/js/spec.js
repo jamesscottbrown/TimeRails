@@ -234,7 +234,7 @@ function addCommonElements(common_geom, rect){
     d3.select(common_geom.div_name).append('button')
         .text("Save")
         .on("click", function(){
-            var new_spec_string = getSpecString();
+            var new_spec_string = getSpecString(common_geom);
             $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
@@ -267,7 +267,7 @@ function addCommonElements(common_geom, rect){
 function getSpecString(common_geom){
     var spec_strings = [];
     for (var i=0; i<common_geom.rectangles.length; i++){
-        spec_strings.push(common_geom.rectangles[i]);
+        spec_strings.push(common_geom.rectangles[i].getSpecString());
     }
     return spec_strings.join(' && ');
 }
