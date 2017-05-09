@@ -874,7 +874,7 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
             x_lower = "0";
         }
 
-        return spec_string + "Globally(" + x_lower + "," + x_upper + ", " + y_spec_string + ")";
+        return spec_string + "Globally(" + x_lower + "," + x_upper + ", " + y_spec_string + "))";
     }
 
     function add_timing_bar(kind, options){

@@ -387,6 +387,19 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
     var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
+    var rectangle_strings = string.split("&amp;&amp;");
+    var diagram;
+    for (var i=0; i<rectangle_strings.length; i++){
+        diagram = addRectangleToSubplot(rectangle_strings[i], common_geom);
+        common_geom.rectangles.push(diagram);
+    }
+
+    drawAxes(common_geom);
+    addCommonElements(common_geom, diagram);
+    return {getSpecString: getSpecString}; // used when combining specifications to generate example trajectory
+}
+
+function addRectangleToSubplot(string, common_geom){
     if (!string){ return Rectangle(common_geom, true); }
 
     var queue = [];
@@ -423,7 +436,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         } else if (string.startsWith("inequality")) {
             string = string.replace(/\)/g, ''); // remove all closing parens
             args = string.slice(11);
-            
+
             parts = args.split(',');
 
             var lt, gt, part, terms, name, val;
@@ -513,9 +526,6 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         diagram.add_bar(kind, timing_bar_options);
     }
 
-    common_geom.rectangles.push(diagram);
-
-    drawAxes(common_geom);
-    addCommonElements(common_geom, diagram);
     return diagram;
+
 }
