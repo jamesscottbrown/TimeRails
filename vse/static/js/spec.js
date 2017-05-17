@@ -367,7 +367,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
     svg.on('contextmenu', d3.contextMenu([{
             title: 'Add rectangle',
-            action: function(){ common_geom.rectangles.push(Rectangle(common_geom, false))}
+            action: function(){ common_geom.rectangles.push(Rectangle(common_geom))}
         }]));
 
 
@@ -429,7 +429,7 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 }
 
 function addRectangleToSubplot(string, common_geom){
-    if (!string){ return Rectangle(common_geom, true); }
+    if (!string){ return Rectangle(common_geom); }
 
     var queue = [];
     var args, parts, start, end;
@@ -493,7 +493,7 @@ function addRectangleToSubplot(string, common_geom){
 
     // handle case where constraint is an inequality alone
     if (queue.length == 0){
-        return Rectangle(common_geom, true, rectangle_opts);
+        return Rectangle(common_geom, rectangle_opts);
     }
 
     // We need to distinguish between the cases where the innermost term is Finally or Globally
@@ -537,7 +537,7 @@ function addRectangleToSubplot(string, common_geom){
         queue.push(term);
     }
 
-    var diagram = Rectangle(common_geom, true, rectangle_opts);
+    var diagram = Rectangle(common_geom, rectangle_opts);
 
     while (queue.length > 0){
         term = queue.pop();

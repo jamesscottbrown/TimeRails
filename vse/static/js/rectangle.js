@@ -1,5 +1,5 @@
 
-function Rectangle(common_geom, isPrimaryRectangle, options) {
+function Rectangle(common_geom, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
@@ -247,8 +247,10 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
             rect_geom.track_circle_pos += shift;
             rect_geom.start_time_pos += shift;
 
-            if (isPrimaryRectangle && rect_geom.followRectangle){
-                for (var i=1; i<common_geom.rectangles.length; i++){
+            if (rect_geom.followRectangle){
+                for (var i=0; i<common_geom.rectangles.length; i++){
+                    if (i == rect_geom.rectangleIndex){ continue; }
+
                     var other_rect = common_geom.rectangles[i].rect_geom;
                     other_rect.track_circle_pos += shift;
                     other_rect.start_time_pos += shift;
@@ -526,24 +528,20 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
             title: function(){ return 'Adjust values'; },
             action: adjust_rect_values
         },
-            {
-                title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
-                action: toggle_start_line_visibility
-            }];
-
-        if (isPrimaryRectangle){
-            rectMenu.push({
-                title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
-                action: function () {
-                    rect_geom.followRectangle = ! rect_geom.followRectangle;
-                }
-            });
-        } else {
-            rectMenu.push({
-                title: function(){ return 'Delete rectangle'; },
-                action: deleteRectangle
-            });
-        }
+        {
+            title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
+            action: toggle_start_line_visibility
+        },
+        {
+            title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
+            action: function () {
+                rect_geom.followRectangle = ! rect_geom.followRectangle;
+            }
+        },
+        {
+            title: function(){ return 'Delete rectangle'; },
+            action: deleteRectangle
+    }];
 
 
     dragrect.on('contextmenu', d3.contextMenu(rectMenu));
