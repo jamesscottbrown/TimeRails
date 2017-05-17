@@ -926,7 +926,10 @@ function Rectangle(common_geom, options) {
             common_geom.rectangles[i].saveRectangleIndex(i);
         }
 
-        common_geom.adjust_everything();
+        // delete description
+        placeholder_latex_formula.remove();
+        placeholder_form.remove();
+        common_geom.adjustAllRectangles();
     }
 
     function adjust_rect_values(){
