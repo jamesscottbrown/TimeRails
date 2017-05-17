@@ -387,6 +387,9 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
 
     var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
+    drawAxes(common_geom);
+    addCommonElements(common_geom, diagram);
+
     var rectangle_strings = string.split("&amp;&amp;");
     var diagram;
     for (var i=0; i<rectangle_strings.length; i++){
@@ -394,8 +397,6 @@ function add_subplot_from_specification(specification_string, div_name, spec_id,
         common_geom.rectangles.push(diagram);
     }
 
-    drawAxes(common_geom);
-    addCommonElements(common_geom, diagram);
     return {getSpecString: getSpecString}; // used when combining specifications to generate example trajectory
 }
 
