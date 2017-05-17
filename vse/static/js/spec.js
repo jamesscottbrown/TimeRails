@@ -240,12 +240,12 @@ function addCommonElements(common_geom, rect){
     example_plot_buttons_div.append('button')
         .classed("btn", true).classed("btn-default", true).attr("type", "button")
         .text("Plot trajectory satisfying this constraint")
-        .on("click", plotExampleTrajectory(false));  // TODO: fix
+        .on("click", plotExampleTrajectory(false));
 
     example_plot_buttons_div.append('button')
         .classed("btn", true).classed("btn-default", true)
         .text("Plot trajectory satisfying all constraints")
-        .on("click", plotExampleTrajectory(true));  // TODO: fix
+        .on("click", plotExampleTrajectory(true));
 
     example_plot_buttons_div.append('button')
         .text("Delete example trajectory")
@@ -288,7 +288,22 @@ function addCommonElements(common_geom, rect){
         for (var i=0; i<common_geom.rectangles.length; i++){
             common_geom.rectangles[i].update_formula();
         }
-    })
+    });
+
+    d3.select("#export_button")
+        .on("click", function(){
+
+            var operator = d3.select("#operator").node().value;
+            var symbol = (operator == "and") ? " && " : " || ";
+
+            var spec_strings = [];
+            for (var i=0; i < diagrams.length; i++){
+                spec_strings.push("(" + diagrams[i].getSpecString(common_geom) + ")"); // TODO: get right common_geoms
+            }
+
+            alert(spec_strings.join(symbol));
+            //return true;
+        })
 
 }
 
