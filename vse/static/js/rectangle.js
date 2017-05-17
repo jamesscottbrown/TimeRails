@@ -194,6 +194,13 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
                 return new_yScale(d.y)
             });
 
+        d3.select(common_geom.div_name).selectAll(".example_box")
+            .attr("x", function(d){ return new_xScale(d.t1) })
+            .attr("width", function(d){ return new_xScale(d.t2) - new_xScale(d.t1) })
+            .attr("y", function(d){ return new_yScale(d.y_max) })
+            .attr("height", function(d){ return new_yScale(d.y_min) - new_yScale(d.y_max) });
+
+
         if (timing_parent_bar){
             timing_parent_bar.adjust_scales(new_xScale);
         }
@@ -487,9 +494,6 @@ function Rectangle(common_geom, isPrimaryRectangle, options) {
 
     // Actually create visual elements
     /************************************************/
-    var example_trajctory_g = common_geom.svg.append("g")
-        .attr("id", "example_trajectory");
-
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.w + "px");
 
     var placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form")

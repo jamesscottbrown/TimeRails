@@ -5,13 +5,15 @@ from copy import deepcopy
 
 
 class RectangleSet:
-    def __init__(self, dt, t_max):
+    def __init__(self, dt, t_max, y_range):
         self.rectangles = {}  # hash, indexed by a (min_y, max_y) tuple
         self.num_times = 0
         self.num_rectangles = 0
 
         self.dt = dt
         self.t_max = t_max
+
+        self.y_range = y_range
 
         self.t0 = Real('t0')
         self.s = Solver()
@@ -32,14 +34,12 @@ class RectangleSet:
     def add_rectangle(self, start_time, length, min_y, max_y):
 
         if max_y is False:
-            max_y = 30 # float('inf')
-        else:
-            self.thresholds.add(max_y)
+            max_y = float(self.y_range[0])
+        self.thresholds.add(max_y)
 
         if min_y is False:
-            min_y = -1  # float('-inf')
-        else:
-            self.thresholds.add(min_y)
+            min_y = float(self.y_range[1])
+        self.thresholds.add(min_y)
 
         start_time_object = self.get_time()
         self.s.add(start_time_object == start_time)
@@ -89,6 +89,8 @@ class RectangleSet:
                     rect.start_time_value = float(m[rect.start_time].as_decimal(5).replace('?', ''))
                     rect.length_value = float(m[rect.length].as_decimal(5).replace('?', ''))
 
+            self.merge_rectangles()
+
     def get_axis_limits(self):
         thresholds = list(self.thresholds)
         if len(thresholds) == 0 or (len(thresholds) == 1 and thresholds[0]==0):
@@ -102,34 +104,7 @@ class RectangleSet:
             y_min = (1/2) * np.min(thresholds)
         return y_min, y_max
 
-
-    def draw(self):
-        # must have called solve first!
-
-        plot = plt.figure()
-        ax = plot.add_subplot(111)
-        ax.set_xlim([0, self.t_max])
-
-        y_min, y_max = self.get_axis_limits()
-        ax.set_ylim([y_min, y_max])
-
-        # ax.set_ylim([-5, 20])
-
-        rect_lists = self.rectangles.values()
-        for rect_list in rect_lists:
-            for rect in rect_list:
-                height = rect.max_y - rect.min_y
-                print "x=[%s,%s] y=[%s,%s]" % (rect.start_time_value, rect.start_time_value + rect.length_value,
-                                               rect.min_y, rect.min_y + height)
-
-                ax.add_patch(patches.Rectangle((rect.start_time_value, rect.min_y), rect.length_value, height))
-
-        for level in self.thresholds:
-            plt.plot((0, self.t_max), (level, level), 'k-')
-
-            # plt.xlim([0, 100])
-
-    def get_signal(self, plot=False):
+    def get_signal(self):
         x = np.zeros((self.num_rectangles,))
         y = np.zeros((self.num_rectangles,))
 
@@ -140,11 +115,6 @@ class RectangleSet:
                 x[i] = rect.start_time_value + rect.length_value / 2
                 y[i] = (rect.min_y + rect.max_y) / 2
                 i += 1
-
-        if plot:
-            plt.figure()
-            i = np.argsort(x)
-            plt.plot(x[i], y[i], 'o-')
 
         return x, y
 
@@ -157,82 +127,38 @@ class RectangleSet:
                 pos.append(i)
         return pos
 
-    def plot_start_positions(self, x, gt, lt, duration):
-        pos = self.find_start_positions(x, gt, lt, duration)
+    def merge_rectangles(self):
+        for (min_y, max_y) in self.rectangles.keys():
+            sorted_rectangles = sorted(self.rectangles[(min_y, max_y)])
 
-        plot = plt.figure()
-        ax = plot.add_subplot(111)
+            merged_rectangles = []
+            start_time = 0
+            length = 0
 
-        for p in pos:
-            ax.add_patch(patches.Rectangle((p, gt), duration, lt - gt, alpha=0.25))
+            for i in range(0, len(sorted_rectangles)):
 
-        plt.plot(x)
+                if i == 0:
+                    start_time = sorted_rectangles[i].start_time_value
+                    length = sorted_rectangles[i].length_value
 
-    def get_animation_frame(self, x, time_object=False, time_value=False):
-        # we already have a set of rectangles
-        # just need to impose additional constraints
+                elif sorted_rectangles[i].start_time_value <= (start_time + length):
+                    length = (sorted_rectangles[i].start_time_value + sorted_rectangles[i].length_value) - start_time
 
-        # TODO: sampling rates
-        # TODO: message if not satisfiable
+                else:
+                    modified_rect = sorted_rectangles[i-1]
+                    modified_rect.start_time_value = start_time
+                    modified_rect.length = length
+                    merged_rectangles.append(modified_rect)
 
-        self.s2 = Solver()
-        self.s2.add(self.s.assertions()) # create an actual copy
+                    start_time = sorted_rectangles[i].start_time_value
+                    length = sorted_rectangles[i].length_value
 
-        if time_object is not False and time_value is not False:
-            self.s2.add(time_object == time_value)
+            modified_rect = sorted_rectangles[i]
+            modified_rect.start_time_value = start_time
+            modified_rect.length_value = length
+            merged_rectangles.append(modified_rect)
 
-        self.x = x
-
-        print len(self.rectangles.keys())
-
-        for rect_position in self.rectangles.keys():
-
-            for rectangle in self.rectangles[rect_position]:
-                start_times = self.find_start_positions(x, rect_position[0], rect_position[1], rectangle.length_value)
-
-                new_constraints = reduce(lambda a, b: Or(a, b), map(lambda t: (rectangle.start_time == t), start_times))
-                self.s2.add(new_constraints)
-
-        self.s2.check()
-
-    def plot_animation_frame(self, t=False, ax=False):
-        # must have called get_animation_frame
-        #
-
-        if ax is False:
-            plot = plt.figure()
-            ax = plot.add_subplot(111)
-            ax.set_xlim([0, self.t_max])
-
-        y_min, y_max = self.get_axis_limits()
-        if np.min(self.x) < y_min:
-            y_min = np.min(self.x)
-        if np.max(self.x) > y_max:
-            y_max = np.max(self.x)
-        ax.set_ylim([y_min, y_max])
-
-        m2 = self.s2.model()
-
-        rect_lists = self.rectangles.values()
-        for rect_list in rect_lists:
-            for rect in rect_list:
-                start_time_value = float(m2[rect.start_time].as_decimal(5).replace('?', ''))
-                length_value = float(m2[rect.length].as_decimal(5).replace('?', ''))
-
-                height = rect.max_y - rect.min_y
-                print "Animated rect at x=[%s,%s] y=[%s,%s]" % (start_time_value, start_time_value + length_value,
-                                                                rect.min_y, rect.min_y + height)
-                ax.add_patch(patches.Rectangle((start_time_value, rect.min_y), length_value, height, alpha=0.25))
-
-        for level in self.thresholds:
-            plt.plot((0, self.t_max), (level, level), 'k-')
-
-        plt.plot(self.x, 'o-')
-
-        if t is not False:
-            plt.axvline(x=t)
-            plt.title("t = %s" % t)
-
+            self.rectangles[(min_y, max_y)] = merged_rectangles
 
 class Rectangle:
     def __init__(self, start_time, length, length_value, min_y, max_y):
@@ -246,6 +172,25 @@ class Rectangle:
 
         if max_y < min_y:
             print "FUCK", max_y, min_y
+
+    # define sorting
+    def __eq__(self, other):
+        return self.start_time_value == other.start_time_value
+
+    def __ne__(self, other):
+        return self.start_time_value != other.start_time_value
+
+    def __lt__(self, other):
+        return self.start_time_value < other.start_time_value
+
+    def __le__(self, other):
+        return self.start_time_value <= other.start_time_value
+
+    def __gt__(self, other):
+        return self.start_time_value > other.start_time_value
+
+    def __ge__(self, other):
+        return self.start_time_value >= other.start_time_value
 
 
 class Inequality:
@@ -277,7 +222,7 @@ class Finally:
         self.end_time = end_time
         self.sub_term = sub_term
 
-    def generate_constraint(self, rectangle_set, start_time=0, start_time_object=False):
+    def generate_constraint(self, rectangle_set, start_time=0):
         t_new = rectangle_set.get_time()
 
         t_min = start_time + self.start_time
@@ -298,20 +243,18 @@ class Globally:
         self.end_time = end_time
         self.sub_term = sub_term
 
-    def generate_constraint(self, rectangle_set, start_time=0, start_time_object=False):
+    def generate_constraint(self, rectangle_set, start_time=0):
         if isinstance(self.sub_term, Inequality):
             duration = self.end_time - self.start_time
-            self.sub_term.holds_globally(duration, self.start_time, rectangle_set) #start-time or self.start time, or sum?
-        elif start_time_object is not False:
-             self.sub_term.generate_constraint(rectangle_set, start_time_object)
-             return self.start_time, self.end_time
+            self.sub_term.holds_globally(duration, self.start_time + start_time, rectangle_set) #start-time or self.start time, or sum?
+
         else:
-            for t in np.arange(self.start_time, self.end_time, rectangle_set.dt):
+          for t in np.arange(self.start_time, self.end_time, rectangle_set.dt):
                 self.sub_term.generate_constraint(rectangle_set, t + start_time)
 
 
-def solve_system(specifications, dt, t_max, draw=False):
-    rectangle_set = RectangleSet(dt, t_max)
+def solve_system(specifications, dt, t_max, y_range):
+    rectangle_set = RectangleSet(dt, t_max, y_range)
 
     for spec in specifications:
         spec.generate_constraint(rectangle_set, 0)
@@ -319,65 +262,7 @@ def solve_system(specifications, dt, t_max, draw=False):
     rectangle_set.construct_overlapping_constraints()
     rectangle_set.solve()
 
-    if draw:
-        rectangle_set.draw()
-
     return rectangle_set
-
-    # TODO: impose t_max constraints
-
-
-def animate_system(specifications, dt, t_max, x):
-    for spec in specifications:
-        rectangle_set = RectangleSet(dt, t_max)
-        time_object = rectangle_set.get_time()
-        start_time, end_time = spec.generate_constraint(rectangle_set, 0, time_object)
-
-        for t in np.arange(start_time, end_time):
-            rectangle_set.get_animation_frame(x, time_object=time_object, time_value=t)
-            rectangle_set.plot_animation_frame(t)
-
-
-def actual_animate_system(specs, dt, t_max, max_start_time, x, separate=True):
-    animations = []
-
-    if separate:
-        for spec in specs:
-            anim = actual_animate_constraint([spec], dt, t_max, max_start_time, x)
-            animations.append(anim)
-            HTML(anim.to_html5_video())  # for some reason, in IPythion notebook, commenting this out breaks things
-    else:
-        anim = actual_animate_constraint(specs, dt, t_max, max_start_time, x)
-        animations.append(anim)
-
-    return animations
-
-
-def actual_animate_constraint(specs, dt, t_max, max_start_time, x):
-    fig = plt.figure()
-    ax = plt.axes(xlim=(0, 40), ylim=(-2, 2))
-    line, = ax.plot([], [], lw=2)
-
-    def init():
-        return line,
-
-    def inner_animate_system(t):
-        rectangle_set = RectangleSet(dt, t_max)
-        time_object = rectangle_set.get_time()
-
-        for spec in specs:
-            start_time, end_time = spec.generate_constraint(rectangle_set, 0, time_object)
-
-        plt.cla()
-        rectangle_set.get_animation_frame(x, time_object=time_object, time_value=t)
-        rectangle_set.plot_animation_frame(t=t, ax=ax)
-
-        return line,  # ???
-
-    anim = animation.FuncAnimation(fig, inner_animate_system, init_func=init,
-                                   frames=max_start_time, interval=dt, blit=True)
-
-    return anim
 
 
 def parse_spec_string(string):

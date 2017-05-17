@@ -133,13 +133,22 @@ def save_specification(specification_id):
 @login_required
 def generate_example_trajectory():
     """Compute an example trajectory satisfying a specification."""
-    specs = smt.parse_spec_strings(request.args.getlist("specification_string[]"))
 
-    rectangle_set = smt.solve_system(specs, 1, request.args.get("t_max"))
-    x, y = rectangle_set.get_signal()
+    single_specs = []
+    for spec in request.args.getlist("specification_string[]"):
+        single_specs.extend(spec.split("&&"))
 
-    points = []
-    for pair in zip(x,y):
-        points.append({"x": pair[0], "y": pair[1]})
+    specs = smt.parse_spec_strings(single_specs)
 
-    return json.dumps(points)
+    rectangle_set = smt.solve_system(specs, 1, request.args.get("t_max"), request.args.getlist("yRange[]"))
+    rectangles = []
+    rect_lists = rectangle_set.rectangles.values()
+    for rect_list in rect_lists:
+        for rect in rect_list:
+            rectangles.append({"t1": rect.start_time_value,
+                               "t2": rect.start_time_value + rect.length_value,
+                               "y": (rect.min_y + rect.max_y) / 2,
+                               "y_min": rect.min_y,
+                               "y_max": rect.max_y})
+
+    return json.dumps(rectangles)

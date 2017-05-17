@@ -19,10 +19,10 @@ function addCommonElements(common_geom, rect){
 
             if (applyAllConstraints) {
                 for (var i = 0; i < diagrams.length; i++) {
-                    spec_strings.push(diagrams[i].getSpecString());
+                    spec_strings.push(diagrams[i].getSpecString(common_geom));
                 }
             } else {
-                spec_strings.push(getSpecString());
+                spec_strings.push(getSpecString(common_geom));
             }
 
             $.ajax({
@@ -31,7 +31,7 @@ function addCommonElements(common_geom, rect){
                 url: "http://" + window.location.host + "/specifications/example",
                 dataType: 'html',
                 async: true,
-                data: {"specification_string": spec_strings, "t_max": common_geom.xRange[1]},
+                data: {"specification_string": spec_strings, "t_max": common_geom.xRange[1], "yRange": common_geom.yRange},
 
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", csrf_token);
@@ -48,10 +48,10 @@ function addCommonElements(common_geom, rect){
                         .data(data)
                         .enter()
                         .append("line")
-                        .attr("x1", function(d){ return timeToX(d.t1) })
-                        .attr("x2", function(d){ return timeToX(d.t2) })
-                        .attr("y1", function(d){ return valToY(d.y) })
-                        .attr("y2", function(d){ return valToY(d.y) })
+                        .attr("x1", function(d){ return common_geom.xScale(d.t1) })
+                        .attr("x2", function(d){ return common_geom.xScale(d.t2) })
+                        .attr("y1", function(d){ return common_geom.yScale(d.y) })
+                        .attr("y2", function(d){ return common_geom.yScale(d.y) })
                         .attr("stroke-width", "2")
                         .attr("stroke", "rgb(0,0,0)")
                         .attr("class", "example_line");
@@ -66,11 +66,35 @@ function addCommonElements(common_geom, rect){
                         .attr("class", "example_circle")
                         .attr("r", 3.5)
                         .attr("cx", function (d) {
-                            return timeToX(d.t1)
+                            return common_geom.xScale(d.t1)
                         })
                         .attr("cy", function (d) {
-                            return valToY(d.y)
+                            return common_geom.yScale(d.y)
                         });
+
+                    example_trajctory_g
+                        .append("g")
+                        .selectAll(".example_box")
+                        .data(data)
+                        .enter()
+                        .append("rect")
+                        .attr("class", "example_box")
+                        .attr("y", function (d) {
+                            return common_geom.yScale(d.y_max)
+                        })
+                        .attr("height", function (d) {
+                            return common_geom.yScale(d.y_min) - common_geom.yScale(d.y_max)
+                        })
+                        .attr("x", function (d) {
+                            return common_geom.xScale(d.t1)
+                        })
+                        .attr("width", function (d) {
+                            return common_geom.xScale(d.t2) - common_geom.xScale(d.t1)
+                        })
+                        .attr("fill-opacity", 0.2)
+                        .style("isolation-mode", "isolate");
+
+
 
 
                     d3.select(common_geom.div_name)
@@ -83,6 +107,9 @@ function addCommonElements(common_geom, rect){
             })
         }
     }
+
+    var example_trajctory_g = common_geom.svg.append("g")
+        .attr("id", "example_trajectory");
 
     var diagram_option = d3.select(common_geom.div_name)
                             .select(".diagram-div")
@@ -225,6 +252,7 @@ function addCommonElements(common_geom, rect){
         .on("click", function(){
             example_trajctory_g.selectAll(".example_line").remove();
             example_trajctory_g.selectAll(".example_circle").remove();
+            example_trajctory_g.selectAll(".example_box").remove();
             d3.select(this).style("visibility", "hidden");
         })
         .attr("id", "delete_trajectory_button")
@@ -267,7 +295,7 @@ function addCommonElements(common_geom, rect){
 function getSpecString(common_geom){
     var spec_strings = [];
     for (var i=0; i<common_geom.rectangles.length; i++){
-        spec_strings.push(common_geom.rectangles[i].getSpecString());
+        spec_strings.push(common_geom.rectangles[i].getSpecString(common_geom));
     }
     return spec_strings.join(' && ');
 }
