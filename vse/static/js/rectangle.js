@@ -99,7 +99,7 @@ function Rectangle(common_geom, options) {
         // We rely on: rect_geom.width, rect_geom.height, , common_geom.h
 
         var num_rails_above = get_num_rails_above();
-        rect_geom.rail_height = common_geom.h + (num_rails_above-1) * common_geom.track_padding;
+        rect_geom.rail_height = common_geom.h + (num_rails_above) * common_geom.track_padding;
 
         if (parseInt(common_geom.svg.attr("height")) < rect_geom.rail_height + common_geom.vertical_padding){
             common_geom.svg.attr("height", rect_geom.rail_height + common_geom.vertical_padding)
