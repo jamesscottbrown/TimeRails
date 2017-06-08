@@ -12,7 +12,7 @@ css = Bundle(
 css_spec = Bundle(
     'css/spec.css',
     filters='cssmin',
-    output='public/css/spec.css'
+    output='public/css/spec_css.css'
 )
 
 js = Bundle(
