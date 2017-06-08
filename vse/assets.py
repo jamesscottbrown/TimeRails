@@ -32,7 +32,7 @@ js_spec = Bundle(
     'js/time_rail.js',
     'js/description.js',
     filters='jsmin',
-    output='public/js/spec.js'
+    output='public/js/spec_js.js'
 )
 
 assets = Environment()
