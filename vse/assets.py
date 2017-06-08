@@ -12,7 +12,7 @@ css = Bundle(
 css_spec = Bundle(
     'css/spec.css',
     filters='cssmin',
-    output='public/css/common.css'
+    output='public/css/spec.css'
 )
 
 js = Bundle(
@@ -32,7 +32,7 @@ js_spec = Bundle(
     'js/time_rail.js',
     'js/description.js',
     filters='jsmin',
-    output='public/js/common.js'
+    output='public/js/spec.js'
 )
 
 assets = Environment()
