@@ -9,7 +9,7 @@ RUN apt-get upgrade -y
 RUN apt-get install -y git python binutils g++ make sqlite3 python-pip
 
 RUN git clone https://github.com/Z3Prover/z3.git
-RUN git checkout 596652ed
+RUN cd z3; git checkout 596652ed
 RUN cd z3; python scripts/mk_make.py --python
 RUN cd z3/build; make; make install
 
