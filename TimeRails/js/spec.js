@@ -10,7 +10,7 @@ function sum (x){
     return total;
 }
 
-function addCommonElements(common_geom, rect){
+function addCommonElements(common_geom, subplot_geom){
 
     function plotExampleTrajectory(applyAllConstraints){
 
@@ -31,7 +31,7 @@ function addCommonElements(common_geom, rect){
                 url: "http://" + window.location.host + "/specifications/example",
                 dataType: 'html',
                 async: true,
-                data: {"specification_string": spec_strings, "t_max": common_geom.xRange[1], "yRange": common_geom.yRange},
+                data: {"specification_string": spec_strings, "t_max": common_geom.xRange[1], "yRange": subplot_geom.yRange},
 
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", csrf_token);
@@ -50,8 +50,8 @@ function addCommonElements(common_geom, rect){
                         .append("line")
                         .attr("x1", function(d){ return common_geom.xScale(d.t1) })
                         .attr("x2", function(d){ return common_geom.xScale(d.t2) })
-                        .attr("y1", function(d){ return common_geom.yScale(d.y) })
-                        .attr("y2", function(d){ return common_geom.yScale(d.y) })
+                        .attr("y1", function(d){ return subplot_geom.yScale(d.y) })
+                        .attr("y2", function(d){ return subplot_geom.yScale(d.y) })
                         .attr("stroke-width", "2")
                         .attr("stroke", "rgb(0,0,0)")
                         .attr("class", "example_line");
@@ -69,7 +69,7 @@ function addCommonElements(common_geom, rect){
                             return common_geom.xScale(d.t1)
                         })
                         .attr("cy", function (d) {
-                            return common_geom.yScale(d.y)
+                            return subplot_geom.yScale(d.y)
                         });
 
                     example_trajctory_g
@@ -80,10 +80,10 @@ function addCommonElements(common_geom, rect){
                         .append("rect")
                         .attr("class", "example_box")
                         .attr("y", function (d) {
-                            return common_geom.yScale(d.y_max)
+                            return subplot_geom.yScale(d.y_max)
                         })
                         .attr("height", function (d) {
-                            return common_geom.yScale(d.y_min) - common_geom.yScale(d.y_max)
+                            return subplot_geom.yScale(d.y_min) - subplot_geom.yScale(d.y_max)
                         })
                         .attr("x", function (d) {
                             return common_geom.xScale(d.t1)
@@ -108,7 +108,7 @@ function addCommonElements(common_geom, rect){
         }
     }
 
-    var example_trajctory_g = common_geom.svg.append("g")
+    var example_trajctory_g = subplot_geom.svg.append("g")
         .attr("id", "example_trajectory");
 
     var diagram_option = d3.select(common_geom.div_name)
@@ -128,11 +128,11 @@ function addCommonElements(common_geom, rect){
 
     function hide_data(dataset_name){
         return function (){
-            common_geom.svg.selectAll(".data-circle")
+            subplot_geom.svg.selectAll(".data-circle")
                 .filter(function(d){ return d.dataset == dataset_name })
                 .style("visibility",  this.checked ? 'visible' : 'hidden');
 
-            common_geom.svg.selectAll(".data-path")
+            subplot_geom.svg.selectAll(".data-path")
                 .filter(function(d){ return d[0].dataset == dataset_name })
                 .style("visibility",  this.checked ? 'visible' : 'hidden');
 
@@ -158,7 +158,7 @@ function addCommonElements(common_geom, rect){
 
                 var data = all_data[i].value;
 
-                var circles = common_geom.svg.append('g')
+                var circles = subplot_geom.svg.append('g')
                     .selectAll('circle')
                     .data(data)
                     .enter()
@@ -167,19 +167,19 @@ function addCommonElements(common_geom, rect){
                         return common_geom.xScale(d.time)
                     })
                     .attr("cy", function (d) {
-                        return common_geom.yScale(d.value)
+                        return subplot_geom.yScale(d.value)
                     })
                     .attr("r", 2)
                     .classed("data-circle", true);
 
                     var data_line_generator = d3.svg.line()
                         .x(function (d) { return common_geom.xScale(d.time); })
-                        .y(function (d) { return common_geom.yScale(d.value); });
+                        .y(function (d) { return subplot_geom.yScale(d.value); });
 
-                common_geom.svg
+                subplot_geom.svg
                     .append("path")
                     .classed("data-path", true)
-                    .datum(data.filter(function (d) { return d.variable == common_geom.variable_name; }))
+                    .datum(data.filter(function (d) { return d.variable == subplot_geom.variable_name; }))
                     .attr("fill", "none")
                     .attr("stroke", common_geom.colorScale(i))
                     .attr("stroke-linejoin", "round")
@@ -188,7 +188,7 @@ function addCommonElements(common_geom, rect){
                     .attr("d", data_line_generator);
 
                 circles.filter(function (d) {
-                    return d.variable != common_geom.variable_name
+                    return d.variable != subplot_geom.variable_name
                 })
                     .remove();
 
@@ -206,33 +206,33 @@ function addCommonElements(common_geom, rect){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 common_geom.xRange[1] = parseFloat(this.value);
-                adjustAllScales(common_geom);
+                adjustAllScales(common_geom, subplot_geom);
             }
         });
 
-    var y_min_label = axis_range_div.append("label").attr("for", "y_min_input").text(" Min " + common_geom.variable_name);
+    var y_min_label = axis_range_div.append("label").attr("for", "y_min_input").text(" Min " + subplot_geom.variable_name);
     var y_min_input = axis_range_div.append("input")
         .attr("id", "y_max")
-        .attr("value", common_geom.yRange[1])
+        .attr("value", subplot_geom.yRange[1])
         .attr("length", "6")
         .on("change", function(){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
-                common_geom.yRange[1] = parseFloat(this.value);
-                adjustAllScales(common_geom);
+                subplot_geom.yRange[1] = parseFloat(this.value);
+                adjustAllScales(common_geom, subplot_geom);
             }
         });
 
-    var y_max_label = axis_range_div.append("label").attr("for", "y_max_input").text(" Max " + common_geom.variable_name);
+    var y_max_label = axis_range_div.append("label").attr("for", "y_max_input").text(" Max " + subplot_geom.variable_name);
     var y_max_input = axis_range_div.append("input")
         .attr("id", "y_min")
-        .attr("value", common_geom.yRange[0])
+        .attr("value", subplot_geom.yRange[0])
         .attr("length", "6")
         .on("change", function(){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
-                common_geom.yRange[0] = parseFloat(this.value);
-                adjustAllScales(common_geom);
+                subplot_geom.yRange[0] = parseFloat(this.value);
+                adjustAllScales(common_geom, subplot_geom);
             }
         });
 
@@ -315,15 +315,15 @@ function getSpecString(common_geom){
     return spec_strings.join(' && ');
 }
 
-function adjustAllScales(common_geom) {
+function adjustAllScales(common_geom, subplot_geom) {
         // Create new scales
         var new_xScale = d3.scale.linear()
             .domain(common_geom.xRange)
-            .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
+            .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
 
         var new_yScale = d3.scale.linear()
-        .domain(common_geom.yRange)
-        .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
+        .domain(subplot_geom.yRange)
+        .range([common_geom.vertical_padding, common_geom.subplotHeight - common_geom.vertical_padding]);
 
         for (var i=0; i < common_geom.rectangles.length; i++){
             common_geom.rectangles[i].adjust_scales(new_xScale, new_yScale);
@@ -331,120 +331,157 @@ function adjustAllScales(common_geom) {
 
         // switch scales
         common_geom.xScale = new_xScale;
-        common_geom.yScale = new_yScale;
+        subplot_geom.yScale = new_yScale;
 
         // Redraw axes
-        common_geom.drawAxes(common_geom);
+        common_geom.drawAxes(common_geom, subplot_geom);
 }
 
 
-function drawAxes(common_geom){
+function drawAxes(common_geom, subplot_geom){
     var xAxis =  d3.svg.axis()
         .scale(common_geom.xScale)
         .orient("bottom");
 
-    common_geom.svg.selectAll('.axis').remove();
-    common_geom.svg.selectAll('.axis-label').remove();
+    subplot_geom.svg.selectAll('.axis').remove();
+    subplot_geom.svg.selectAll('.axis-label').remove();
 
-    common_geom.svg.append("g")
+    subplot_geom.svg.append("g")
         .call(xAxis)
         .attr("class", "axis")
-        .attr("transform", "translate(0," + (common_geom.h - common_geom.vertical_padding) + ")");
+        .attr("transform", "translate(0," + subplot_geom.yScale.range()[1] + ")");
 
-    common_geom.svg
+    subplot_geom.svg
         .append("text")
         .classed("axis-label", true)
-        .attr('x', -common_geom.h/2)
+        .attr('x', -common_geom.subplotHeight/2)
         .attr("y", 6)
 
         .attr("transform", "rotate(-90)")
         .attr("dy", ".75em")
-        .text(common_geom.variable_name);
+        .text(subplot_geom.variable_name);
 
     var yAxis =  d3.svg.axis()
-        .scale(common_geom.yScale)
+        .scale(subplot_geom.yScale)
         .orient("left");
 
-    common_geom.svg.append("g")
+    subplot_geom.svg.append("g")
         .call(yAxis)
         .attr("class", "axis")
         .attr("transform", "translate(" + (common_geom.horizontal_padding) + ", " + 0 + ")");
+
 }
 
-function add_subplot_from_specification(specification_string, div_name, spec_id, variable_name){
-   // d3.select("#diagrams").append('div').attr("id", div_name);
+function create_specification(div_name, spec_id) {
+
+    var subplotWidth = 750,
+        subplotHeight = 450;
 
     var diagram_div = d3.select('#' + div_name).select(".svg-container").append('div').classed("diagram-div", true);
 
     var svg = diagram_div.append("svg")
-        .attr("width", 750)
-        .attr("height", 450);
-
-    svg.on('contextmenu', d3.contextMenu([{
-            title: 'Add rectangle',
-            action: function(){ common_geom.rectangles.push(Rectangle(common_geom))}
-        }]));
+        .attr("width", subplotWidth)
+        .attr("height", 0)
+        .on('contextmenu', d3.contextMenu([]));
 
 
     var index = 1;
+    var subplotIndex = 0;
     div_name = "#" + div_name;
 
     // Group together data that is shared between all rectangles in a specification,
     // and methods that act on the whole specification
-
     var common_geom = {
         w: parseInt(svg.attr("width")),
         h: parseInt(svg.attr("height")),
         vertical_padding: 30,
         horizontal_padding: 60,
         track_padding: 20,
+
+        subplotWidth: subplotWidth,
+        subplotHeight: subplotHeight,
+
         specification_fixed: false,
         use_letters: false,
 
         colorScale: d3.scale.category10(),
+
         xRange: [0, 100],
-        yRange: [100, 0],
-        svg: svg,
+
         div_name: div_name,
         spec_id: spec_id,
         index: index,
-        variable_name: variable_name,
 
         drawAxes: drawAxes,
         adjustAllScales: adjustAllScales,
-        adjustAllRectangles: function(update_description){
-            for (var i=0; i<common_geom.rectangles.length; i++){ common_geom.rectangles[i].adjust_everything(update_description); }
+        adjustAllRectangles: function (update_description) {
+            for (var i = 0; i < common_geom.rectangles.length; i++) {
+                common_geom.rectangles[i].adjust_everything(update_description);
+            }
         },
 
-        rectangles: []
+        rectangles: [],
+
     };
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
-        .range([common_geom.horizontal_padding, common_geom.w - common_geom.horizontal_padding]);
-
-    common_geom.yScale = d3.scale.linear()
-        .domain(common_geom.yRange)
-        .range([common_geom.vertical_padding, common_geom.h - common_geom.vertical_padding]);
+        .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
 
 
-    var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
-    drawAxes(common_geom);
-    addCommonElements(common_geom, diagram);
+    function add_subplot_from_specification(specification_string, variable_name) {
 
-    var rectangle_strings = string.split("&amp;&amp;");
-    var diagram;
-    for (var i=0; i<rectangle_strings.length; i++){
-        diagram = addRectangleToSubplot(rectangle_strings[i], common_geom);
-        common_geom.rectangles.push(diagram);
+        // Group together data that is shared between all rectangles in a sub-plot
+        var subplot_geom = {
+            yRange: [100, 0],
+            variable_name: variable_name,
+            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")") // TODO: rename this
+        };
+
+        subplot_geom.yScale = d3.scale.linear()
+            .domain(subplot_geom.yRange)
+            .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
+
+        subplot_geom.svg
+            .append("rect")
+            .attr("x", common_geom.horizontal_padding)
+            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
+            .attr("y", common_geom.vertical_padding)
+            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
+            .style("opacity", 0)
+            .attr("class", "clickable-background")
+            .on('contextmenu', d3.contextMenu([{
+            title: 'Add rectangle',
+            action: function () {
+                common_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
+            }
+        }]));
+
+        svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
+
+
+        var string = specification_string.toLowerCase().trim().replace(/ /g, '');
+
+        drawAxes(common_geom, subplot_geom);
+        addCommonElements(common_geom, subplot_geom);
+
+        var rectangle_strings = string.split("&amp;&amp;");
+        var diagram;
+        for (var i = 0; i < rectangle_strings.length; i++) {
+            diagram = addRectangleToSubplot(rectangle_strings[i], common_geom, subplot_geom);
+            common_geom.rectangles.push(diagram);
+        }
+        subplotIndex += 1;
     }
 
-    return {getSpecString: getSpecString}; // used when combining specifications to generate example trajectory
+    // TODO: getSpecString needs to handle all subplots
+    return {getSpecString: getSpecString, add_subplot_from_specification: add_subplot_from_specification}; // used when combining specifications to generate example trajectory
 }
 
-function addRectangleToSubplot(string, common_geom){
-    if (!string){ return Rectangle(common_geom); }
+
+function addRectangleToSubplot(string, common_geom, subplot_geom){
+    if (!string){ return Rectangle(common_geom, subplot_geom); }
 
     var queue = [];
     var args, parts, start, end;
@@ -508,7 +545,7 @@ function addRectangleToSubplot(string, common_geom){
 
     // handle case where constraint is an inequality alone
     if (queue.length == 0){
-        return Rectangle(common_geom, rectangle_opts);
+        return Rectangle(common_geom, subplot_geom, rectangle_opts);
     }
 
     // We need to distinguish between the cases where the innermost term is Finally or Globally
@@ -552,7 +589,7 @@ function addRectangleToSubplot(string, common_geom){
         queue.push(term);
     }
 
-    var diagram = Rectangle(common_geom, rectangle_opts);
+    var diagram = Rectangle(common_geom, subplot_geom, rectangle_opts);
 
     while (queue.length > 0){
         term = queue.pop();
