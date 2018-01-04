@@ -1227,48 +1227,61 @@ function Mode(common_geom, subplot_geom, options) {
 
         modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
 
-        var start, end;
-        if (timing_parent_bar){
-            start = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-            end = XToTime(rect_geom.start_time_pos + rect_geom.width) - XToTime(rect_geom.track_circle_pos);
-        } else {
-            start = XToTime(rect_geom.start_time_pos);
-            end = XToTime(rect_geom.start_time_pos + rect_geom.width);
+        var shift = 0;
+        if (timing_parent_bar) {
+            shift = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
         }
 
+        var startTime = XToTime(rect_geom.start_time_pos - rect_geom.width_left) - shift;
+        var midTime = XToTime(rect_geom.start_time_pos) - shift;
+        var endTime = XToTime(rect_geom.start_time_pos + rect_geom.width) - shift;
 
-        var timeDiv = modalBody.append("div");
-        timeDiv.append("text").text("From ");
-        var startTimeBox = timeDiv.append("input").attr("value",  start.toFixed(2)).node();
-        timeDiv.append("text").text(" to ");
-        var endTimeBox = timeDiv.append("input").attr("value",  end.toFixed(2)).node();
+        var startDiv = modalBody.append("div");
+        startDiv.append("text").text("From ");
+        var startTimeBox = startDiv.append("input").attr("value", startTime.toFixed(2)).node();
+        startDiv.append("text").text(" to ");
+        var midTimeBox = startDiv.append("input").attr("value", midTime.toFixed(2)).node();
+        startDiv.append("text").text(", value is between");
+        var minValBox_left = startDiv.append("input").attr("value", YToVal(rect_geom.rect_top_left + rect_geom.height_left).toFixed(2)).node();
+        startDiv.append("text").text(" and ");
+        var maxValBox_left = startDiv.append("input").attr("value", YToVal(rect_geom.rect_top_left).toFixed(2)).node();
+        startDiv.append("text").text(".");
 
-        var valDiv = modalBody.append("div");
-        valDiv.append("text").text("Value is between");
-        var minValBox = valDiv.append("input").attr("value", YToVal(rect_geom.rect_top + rect_geom.height).toFixed(2)).node();
-        valDiv.append("text").text(" and ");
-        var maxValBox = valDiv.append("input").attr("value", YToVal(rect_geom.rect_top).toFixed(2)).node();
+        var midDiv = modalBody.append("div");
+        midDiv.append("text").text("Then value is momentarily between ");
+        var minValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_max_pos).toFixed(2)).node();
+        midDiv.append("text").text(" and ");
+        var maxValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_min_pos).toFixed(2)).node();
+        midDiv.append("text").text(".");
+
+        var endDiv = modalBody.append("div");
+        endDiv.append("text").text("Then value is between ");
+        var minValBox_right = endDiv.append("input").attr("value", YToVal(rect_geom.rect_top + rect_geom.height).toFixed(2)).node();
+        endDiv.append("text").text(" and ");
+        var maxValBox_right = endDiv.append("input").attr("value", YToVal(rect_geom.rect_top).toFixed(2)).node();
+        endDiv.append("text").text(" until ");
+        var endTimeBox = endDiv.append("input").attr("value", endTime.toFixed(2)).node();
+        endDiv.append("text").text(".");
 
 
-        modalFooter.append("button").text("Save").on("click", function(){
+        modalFooter.append("button").text("Save").on("click", function () {
 
-            if (timing_parent_bar){
-                rect_geom.width = timeToX(parseFloat(endTimeBox.value)) - timeToX(parseFloat(startTimeBox.value));
-                rect_geom.start_time_pos =  timeToX(parseFloat(startTimeBox.value) + XToTime(rect_geom.track_circle_pos));
-            } else {
-                rect_geom.width = timeToX(parseFloat(endTimeBox.value)) - timeToX(parseFloat(startTimeBox.value));
-                rect_geom.start_time_pos =  timeToX(parseFloat(startTimeBox.value));
+            rect_geom.width_left = timeToX(parseFloat(midTimeBox.value)) - timeToX(parseFloat(startTimeBox.value));
+            rect_geom.height_left = valToY(parseFloat(minValBox_left.value)) - valToY(parseFloat(maxValBox_left.value));
+            rect_geom.rect_top_left = valToY(parseFloat(maxValBox_left.value));
 
-                rect_geom.track_circle_pos = rect_geom.start_time_pos;
-            }
+            rect_geom.start_time_pos = timeToX(parseFloat(midTimeBox.value) + shift);
+            rect_geom.transition_max_pos = valToY(parseFloat(maxValBox_mid.value));
+            rect_geom.transition_min_pos = valToY(parseFloat(minValBox_mid.value));
 
-            rect_geom.height = valToY(parseFloat(minValBox.value)) - valToY(parseFloat(maxValBox.value));
-            rect_geom.rect_top = valToY(parseFloat(maxValBox.value));
+            rect_geom.width = timeToX(parseFloat(endTimeBox.value)) - timeToX(parseFloat(midTimeBox.value));
+            rect_geom.height = valToY(parseFloat(minValBox_right.value)) - valToY(parseFloat(maxValBox_right.value));
+            rect_geom.rect_top = valToY(parseFloat(maxValBox_right.value));
 
             adjust_everything(true);
         })
 
-        .attr("data-dismiss", "modal");
+            .attr("data-dismiss", "modal");
         modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
 
         $('#paramModal').modal('toggle');
