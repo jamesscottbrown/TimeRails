@@ -1001,35 +1001,6 @@ function Mode(common_geom, subplot_geom, options) {
     // Describing selected region
     /************************************************/
 
-    function getYLatexString(){
-
-        var y_upper = YToVal(rect_geom.rect_top).toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + rect_geom.height ).toFixed(2);
-
-        var latex_string;
-
-        // 2 bounds
-        if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + common_geom.index + "<" + y_upper + ")";
-        }
-
-        // 1 bound
-        else if (rect_geom.top_fixed) {
-            latex_string = "(x_" + common_geom.index + "<" + y_upper + ")";
-        }
-        else if (rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + common_geom.index + ")";
-        }
-
-        // 0 bounds
-        else {
-            // Don't convert, but keep as an easily checkable sentinel value
-            latex_string = "";
-        }
-
-        return latex_string;
-    }
-
     function update_formula(){
         var latex_string =  get_latex_string();
         placeholder_latex_formula.html("$" + latex_string + "$");
@@ -1037,44 +1008,34 @@ function Mode(common_geom, subplot_geom, options) {
     }
 
     function get_latex_string(){
-        var y_latex_string = getYLatexString();
+
         var latex_string = "";
+        var start_time = XToTime(rect_geom.start_time_pos - rect_geom.width_left);
+        var mid_time = XToTime(rect_geom.start_time_pos);
+        var end_time = XToTime(rect_geom.start_time_pos + rect_geom.width);
 
-        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
-        if (timing_parent_bar){
+        if (timing_parent_bar) {
             latex_string = timing_parent_bar.getLatex();
-            var delay_time = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-            delay_time = delay_time.toFixed(2);
 
-            var length =   XToTime(rect_geom.start_time_pos + rect_geom.width) - XToTime(rect_geom.track_circle_pos);
-            length = length.toFixed(2);
-
-            if (delay_time == 0 && length == 0){
-                return latex_string + y_latex_string;
-            } else {
-                var symbol = common_geom.use_letters ? ' G' : ' \\square';
-                return latex_string + symbol + "_{[" + delay_time + "," + length + "]}" + y_latex_string;
-            }
+            start_time -= XToTime(rect_geom.track_circle_pos);
+            mid_time -= XToTime(rect_geom.track_circle_pos);
+            end_time -= XToTime(rect_geom.track_circle_pos);
         }
 
-        // Otherwise, rectangle is represented by a Global term with a start and end time
-        if (!rect_geom.top_fixed && !rect_geom.bottom_fixed) {
-            return latex_string + "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
-        }
+        start_time = start_time.toFixed(2);
+        mid_time = mid_time.toFixed(2);
+        end_time = end_time.toFixed(2);
 
-        var x_lower = XToTime(rect_geom.start_time_pos).toFixed(2);
-        var x_upper = XToTime(rect_geom.start_time_pos + rect_geom.width ).toFixed(2);
-
-        if (!rect_geom.right_fixed){
-            x_upper = "\\infty";
-        }
-
-        if (!rect_geom.left_fixed){
-            x_lower = "0";
-        }
+        var y1 = "(" + YToVal(rect_geom.rect_top_left + rect_geom.height_left).toFixed(2) + "< x_" + common_geom.index + "<" + YToVal(rect_geom.rect_top_left).toFixed(2) + ")";
+        var y2 = "(" + YToVal(rect_geom.transition_min_pos).toFixed(2) + "< x_" + common_geom.index + "<" + YToVal(rect_geom.transition_max_pos).toFixed(2) + ")";
+        var y3 = "(" + YToVal(rect_geom.rect_top + rect_geom.height).toFixed(2) + "< x_" + common_geom.index + "<" + YToVal(rect_geom.rect_top).toFixed(2) + ")";
 
         var symbol = common_geom.use_letters ? ' G' : ' \\square';
-        return latex_string + symbol + "_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
+
+        return latex_string + symbol + "_{[" + start_time + "," + mid_time + "]}" + y1
+            + "\\wedge " + symbol + "_{[" + mid_time + "," + mid_time + "]}" + y2
+            + "\\wedge " + symbol + "_{[" + mid_time + "," + end_time+ "]}" + y3
+            + "";
     }
 
     function update_text() {
