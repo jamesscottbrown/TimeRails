@@ -16,6 +16,19 @@ function Mode(common_geom, subplot_geom, options) {
         bottom_fixed: true,
         left_fixed: true,
         right_fixed: true,
+
+        rect_top_left: 450 * 2/4,
+        height_left: 200 * 0.75,
+        width_left: 300 * 0.75,
+
+        top_fixed_left: true,
+        bottom_fixed_left: true,
+        left_fixed_left: true,
+
+        transition_max_pos: 450 / 3,
+        transition_min_pos: 450 * 2/3,
+        transition_marker_width: 10,
+
         followRectangle: false,
         rectangleIndex: common_geom.rectangles.length,
         start_line_visible: true,
@@ -107,26 +120,40 @@ function Mode(common_geom, subplot_geom, options) {
 
         // convenience quanities (redundant)
         rect_geom.delay_line_length = rect_geom.start_time_pos - rect_geom.track_circle_pos;
-        rect_geom.delay_line_height = rect_geom.rect_top + (rect_geom.height/2);
+
+        // delay-line is drawn at height of bottom of the lower of the two rectangles to avoid clutter
+        rect_geom.delay_line_height = Math.max(rect_geom.rect_top+rect_geom.height, rect_geom.rect_top_left+rect_geom.height_left);
 
         // move things
-        dragbarleft.attr("cx", rect_geom.start_time_pos)
-            .attr("cy", rect_geom.delay_line_height);
+        dragbarleft_left.attr("cx", rect_geom.start_time_pos - rect_geom.width_left)
+            .attr("cy", rect_geom.rect_top_left + rect_geom.height_left/2);
 
         dragbarright.attr("cx", rect_geom.start_time_pos + rect_geom.width)
-            .attr("cy", rect_geom.delay_line_height);
+            .attr("cy", rect_geom.rect_top + rect_geom.height/2);
 
         dragbartop.attr("cx", rect_geom.start_time_pos + (rect_geom.width / 2))
             .attr("cy", rect_geom.rect_top);
 
+        dragbartop_left.attr("cx", rect_geom.start_time_pos - (rect_geom.width_left / 2))
+            .attr("cy", rect_geom.rect_top_left);
+
         dragbarbottom.attr("cx", rect_geom.start_time_pos + (rect_geom.width / 2))
             .attr("cy", rect_geom.rect_top + rect_geom.height);
+
+        dragbarbottom_left.attr("cx", rect_geom.start_time_pos - (rect_geom.width_left / 2))
+            .attr("cy", rect_geom.rect_top_left + rect_geom.height_left);
 
         dragrect
             .attr("x", rect_geom.start_time_pos)
             .attr("y", rect_geom.rect_top)
             .attr("height", rect_geom.height)
             .attr("width", Math.max(rect_geom.width,1));
+
+        dragrect_left
+            .attr("x", rect_geom.start_time_pos - rect_geom.width_left)
+            .attr("y", rect_geom.rect_top_left)
+            .attr("height", rect_geom.height_left)
+            .attr("width", Math.max(rect_geom.width_left,1));
 
         delay_line
             .attr("x1", rect_geom.track_circle_pos)
@@ -141,6 +168,33 @@ function Mode(common_geom, subplot_geom, options) {
 
         track_circle.attr("cx", rect_geom.track_circle_pos)
                 .attr("cy", rect_geom.rail_height);
+
+        transition_marker_top
+            .attr("cx", rect_geom.start_time_pos)
+            .attr("cy", rect_geom.transition_max_pos);
+
+        transition_marker_top_tick
+            .attr("x1", rect_geom.start_time_pos - 7/2)
+            .attr("x2", rect_geom.start_time_pos + 7/2)
+            .attr("y1", rect_geom.transition_max_pos)
+            .attr("y2", rect_geom.transition_max_pos);
+
+        transition_marker_bottom
+            .attr("cx", rect_geom.start_time_pos)
+            .attr("cy", rect_geom.transition_min_pos);
+
+        transition_marker_bottom_tick
+            .attr("x1", rect_geom.start_time_pos - 7/2)
+            .attr("x2", rect_geom.start_time_pos + 7/2)
+            .attr("y1", rect_geom.transition_min_pos)
+            .attr("y2", rect_geom.transition_min_pos);
+
+        transition_marker_vertical
+            .attr("x1", rect_geom.start_time_pos)
+            .attr("x2", rect_geom.start_time_pos)
+            .attr("y1", rect_geom.transition_min_pos)
+            .attr("y2", rect_geom.transition_max_pos)
+
 
         if (timing_parent_bar){
             // may need to shift time bars vertically
@@ -294,25 +348,44 @@ function Mode(common_geom, subplot_geom, options) {
         adjust_everything(true);
     }
 
-    function drag_resize_left(d) {
+    function dragmove_left(d) {
+        // horizontal movement
+        var oldRectCenter = rect_geom.start_time_pos - rect_geom.width_left/2;
+        var rect_center = d3.mouse(subplot_geom.svg.node())[0] - rect_geom.width/2;
+
+        var new_start_pos = rect_geom.start_time_pos + (rect_center - oldRectCenter);
+
+        if (new_start_pos < rect_geom.track_circle_pos){
+            drag_track_circle_inner(new_start_pos);
+        } else {
+            rect_geom.start_time_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.subplotWidth - rect_geom.width, new_start_pos);
+        }
+
+        // vertical movement
+        var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height_left/2;
+        rect_geom.rect_top_left = imposeLimits(0, common_geom.subplotHeight - rect_geom.height, rect_center);
+
+        adjust_everything(true);
+    }
+
+    function drag_resize_left_left(d) {
         if (common_geom.specification_fixed){ return; }
 
         if (!rect_geom.left_fixed) {
             return;
         }
 
-        var oldx = rect_geom.start_time_pos;
+        var oldx = rect_geom.start_time_pos - rect_geom.width_left;
         //Max x on the right is x + width - dragbarw
         //Max x on the left is 0 - (dragbarw/2)
 
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
-        var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
-        drag_resize_left_inner(oldx, newx);
+        var newx = imposeLimits(0, rect_geom.start_time_pos, cursor_x);
+        drag_resize_left_inner_left(oldx, newx);
     }
 
-    function drag_resize_left_inner(oldx, newx) {
-        rect_geom.start_time_pos = newx;
-        rect_geom.width = rect_geom.width + (oldx - newx);
+    function drag_resize_left_inner_left(oldx, newx) {
+        rect_geom.width_left = rect_geom.width_left + (oldx - newx);
 
         adjust_everything(true);
     }
@@ -346,22 +419,36 @@ function Mode(common_geom, subplot_geom, options) {
         }
 
         var oldy = rect_geom.rect_top;
-        //Max x on the right is x + width - dragbarw
-        //Max x on the left is 0 - (dragbarw/2)
-
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
         var newy = imposeLimits(0, rect_geom.rect_top + rect_geom.height - (rect_geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner(oldy, newy);
     }
 
     function drag_resize_top_inner(oldy, newy) {
-        //Max x on the right is x + width - dragbarw
-        //Max x on the left is 0 - (dragbarw/2)
-
         rect_geom.rect_top = newy;
         rect_geom.height = rect_geom.height + (oldy - newy);
         adjust_everything(true);
     }
+
+    function drag_resize_top_left(d) {
+        if (common_geom.specification_fixed){ return; }
+
+        if (!rect_geom.top_fixed_left) {
+            return;
+        }
+
+        var oldy = rect_geom.rect_top_left;
+        var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
+        var newy = imposeLimits(0, rect_geom.rect_top_left + rect_geom.height_left - (rect_geom.dragbarw / 2), cursor_y);
+        drag_resize_top_inner_left(oldy, newy);
+    }
+
+    function drag_resize_top_inner_left(oldy, newy) {
+        rect_geom.rect_top_left = newy;
+        rect_geom.height_left = rect_geom.height_left + (oldy - newy);
+        adjust_everything(true);
+    }
+
 
 
     function drag_resize_bottom(d) {
@@ -382,6 +469,67 @@ function Mode(common_geom, subplot_geom, options) {
         rect_geom.height = newy - rect_geom.rect_top;
         adjust_everything(true);
     }
+
+    function drag_resize_bottom_left(d) {
+        if (common_geom.specification_fixed){ return; }
+
+        if (!rect_geom.bottom_fixed_left) {
+            return;
+        }
+
+        var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
+        var newy = imposeLimits(rect_geom.rect_top_left + (rect_geom.dragbarw / 2), common_geom.subplotHeight, cursor_y);
+
+        drag_resize_bottom_inner_left(newy);
+    }
+
+    function drag_resize_bottom_inner_left(newy) {
+        //recalculate width
+        rect_geom.height_left = newy - rect_geom.rect_top_left;
+        adjust_everything(true);
+    }
+
+
+
+    function drag_transition_marker_top() {
+        if (common_geom.specification_fixed){ return; }
+
+        // shift y
+        var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
+        rect_geom.transition_max_pos = imposeLimits(0, rect_geom.transition_min_pos, cursor_y);
+
+        // shift x
+        var oldx = rect_geom.start_time_pos;
+        var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
+        var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
+        drag_resize_left_inner(oldx, newx);
+    }
+
+    function drag_transition_marker_bottom() {
+        if (common_geom.specification_fixed){ return; }
+
+        // shift y
+        var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
+        rect_geom.transition_min_pos = imposeLimits(rect_geom.transition_max_pos, common_geom.subplotHeight, cursor_y);
+
+
+        // shift x
+        var oldx = rect_geom.start_time_pos;
+        var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
+        var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
+        drag_resize_left_inner(oldx, newx);
+    }
+
+    function drag_resize_left_inner(oldx, newx) {
+        rect_geom.start_time_pos = newx;
+        rect_geom.width = rect_geom.width + (oldx - newx);
+
+        adjust_everything(true);
+    }
+
+
+
+
 
 
     // Context menus and associated functions
@@ -461,6 +609,19 @@ function Mode(common_geom, subplot_geom, options) {
         return false;
     }
 
+    function rclick_left_left() {
+        if (common_geom.specification_fixed){ return; }
+
+        rect_geom.left_fixed_left = !rect_geom.left_fixed_left;
+
+        if (!rect_geom.left_fixed_left) {
+            drag_resize_left_inner(rect_geom.start_time_pos_left, 0);
+        }
+
+        set_edges();
+        return false;
+    }
+
     function rclick_right() {
         if (common_geom.specification_fixed){ return; }
 
@@ -481,6 +642,16 @@ function Mode(common_geom, subplot_geom, options) {
         set_edges();
     }
 
+  function rclick_top_left() {
+        if (common_geom.specification_fixed){ return; }
+
+        rect_geom.top_fixed_left = !rect_geom.top_fixed_left;
+        if (!rect_geom.top_fixed_left) {
+            drag_resize_top_inner_left(rect_geom.rect_top_left, 0);
+        }
+        set_edges();
+    }
+
     function rclick_bottom() {
         if (common_geom.specification_fixed){ return; }
 
@@ -491,6 +662,15 @@ function Mode(common_geom, subplot_geom, options) {
         set_edges();
     }
 
+    function rclick_bottom_left () {
+        if (common_geom.specification_fixed){ return; }
+
+        rect_geom.bottom_fixed_left  = !rect_geom.bottom_fixed_left ;
+        if (!rect_geom.bottom_fixed_left ) {
+            drag_resize_bottom_inner_left (common_geom.subplotHeight);
+        }
+        set_edges();
+    }
 
     // Actually create visual elements
     /************************************************/
@@ -511,6 +691,37 @@ function Mode(common_geom, subplot_geom, options) {
     var delay_line = newg.append("line").classed("red-line", true);
 
     var startline = newg.append("line").classed("red-line", true);
+
+
+    var dragrect_left = newg.append("rect")
+        .attr("id", "active")
+        .attr("fill", "lightgreen")
+        .attr("fill-opacity", .25)
+        .attr("cursor", "move")
+        .call(d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragmove_left));
+
+
+        var rectMenu = [{
+            title: function(){ return 'Adjust values'; },
+            action: adjust_rect_values
+        },
+        {
+            title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
+            action: toggle_start_line_visibility
+        },
+        {
+            title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
+            action: function () {
+                rect_geom.followRectangle = ! rect_geom.followRectangle;
+            }
+        },
+        {
+            title: function(){ return 'Delete mode'; },
+            action: deleteRectangle
+    }];
+
 
     var dragrect = newg.append("rect")
         .attr("id", "active")
@@ -537,15 +748,16 @@ function Mode(common_geom, subplot_geom, options) {
             }
         },
         {
-            title: function(){ return 'Delete rectangle'; },
+            title: function(){ return 'Delete mode'; },
             action: deleteRectangle
     }];
 
 
     dragrect.on('contextmenu', d3.contextMenu(rectMenu));
+    dragrect_left.on('contextmenu', d3.contextMenu(rectMenu));
 
-    var dragbarleft = newg.append("circle")
-        .attr("id", "dragleft")
+    var dragbarleft_left = newg.append("circle")
+        .attr("id", "dragleftleft")
         .attr("r", rect_geom.dragbarw / 2)
         .attr("fill", "lightgray")
         .attr("fill-opacity", .5)
@@ -553,12 +765,12 @@ function Mode(common_geom, subplot_geom, options) {
         .call(
             d3.behavior.drag()
             .origin(Object)
-            .on("drag", drag_resize_left)
+            .on("drag", drag_resize_left_left)
         ).on('contextmenu', d3.contextMenu([{
             title: function(){
-                return rect_geom.left_fixed ? 'Remove limit' : 'Apply limit';
+                return rect_geom.left_fixed_left ? 'Remove limit' : 'Apply limit';
             },
-            action: rclick_left
+            action: rclick_left_left
         }]));
 
     var dragbarright = newg.append("circle")
@@ -596,6 +808,23 @@ function Mode(common_geom, subplot_geom, options) {
             action: rclick_top
         }]));
 
+    var dragbartop_left = newg.append("circle")
+        .attr("r", rect_geom.dragbarw / 2)
+        .attr("id", "dragtopleft")
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ns-resize")
+        .call(
+            d3.behavior.drag()
+            .origin(Object)
+            .on("drag", drag_resize_top_left)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return rect_geom.top_fixed_left ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_top_left
+        }]));
+
 
     var dragbarbottom = newg.append("circle")
         .attr("id", "dragbottom")
@@ -612,6 +841,47 @@ function Mode(common_geom, subplot_geom, options) {
             },
             action: rclick_bottom
         }]));
+
+    var dragbarbottom_left = newg.append("circle")
+        .attr("id", "dragbottomleft")
+        .attr("r", rect_geom.dragbarw / 2)
+        .attr("fill", "lightgray")
+        .attr("fill-opacity", .5)
+        .attr("cursor", "ns-resize")
+        .call( d3.behavior.drag()
+        .origin(Object)
+        .on("drag", drag_resize_bottom_left)
+        ).on('contextmenu', d3.contextMenu([{
+            title: function(){
+                return rect_geom.bottom_fixed_left ? 'Remove limit' : 'Apply limit';
+            },
+            action: rclick_bottom_left
+        }]));
+
+    var transition_marker_top = newg.append("circle")
+        .attr("fill", "lightgray")
+        .classed("transition_marker", true)
+        .attr("r", 7)
+        .call(
+            d3.behavior.drag()
+                .origin(Object)
+                .on("drag", drag_transition_marker_top)
+        );
+
+    var transition_marker_top_tick = newg.append("line").style("stroke", "black");
+
+    var transition_marker_bottom = newg.append("circle")
+        .attr("fill", "lightgray")
+        .classed("transition_marker", true)
+        .attr("r", 7)
+        .attr("cursor", "ns-resize")
+        .call(
+            d3.behavior.drag()
+                .origin(Object)
+                .on("drag", drag_transition_marker_bottom)
+        );
+    var transition_marker_bottom_tick = newg.append("line").style("stroke", "black");
+    var transition_marker_vertical = newg.append("line").style("stroke", "black");
 
     var track_circle = newg
         .append("g")
@@ -691,6 +961,37 @@ function Mode(common_geom, subplot_geom, options) {
         // 0 edges
         else {
             dragrect.style("stroke-dasharray", [0, rect_geom.width + rect_geom.height + rect_geom.width + rect_geom.height].join(','));
+        }
+        
+        // now do the same thing for rect-left (for which the right side is always fixed)
+        dragrect_left.style("stroke", "black");
+
+        // 4 edges:
+        if (rect_geom.top_fixed_left && rect_geom.bottom_fixed_left && rect_geom.left_fixed_left) {
+            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
+        }
+
+        // 3 edges
+        else if (rect_geom.top_fixed_left && rect_geom.bottom_fixed_left ) {
+            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
+        } else if (rect_geom.top_fixed_left && rect_geom.left_fixed_left) {
+            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
+        } else if (rect_geom.bottom_fixed_left && rect_geom.left_fixed_left) {
+            dragrect.style("stroke-dasharray", [0, (rect_geom.width_left), rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
+        }
+
+        // 2 edges
+        else if (rect_geom.top_fixed_left) {
+            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left + rect_geom.height_left].join(','));
+        } else if (rect_geom.bottom_fixed_left) {
+            dragrect.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
+        } else if (rect_geom.left_fixed_left) {
+            dragrect.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
+        }
+
+        // 1 edges
+        else {
+            dragrect.style("stroke-dasharray", [0, (rect_geom.width_left + rect_geom.height_left + rect_geom.width_left), rect_geom.height_left].join(','));
         }
 
         update_text();
@@ -910,14 +1211,22 @@ function Mode(common_geom, subplot_geom, options) {
              timing_parent_bar.delete();
          }
 
-        dragbarleft.remove();
+        dragbarleft_left.remove();
         dragbarright.remove();
         dragbartop.remove();
+        dragbartop_left.remove();
         dragbarbottom.remove();
+        dragbarbottom_left.remove();
         dragrect.remove();
+        dragrect_left.remove();
         delay_line.remove();
         startline.remove();
         track_circle.remove();
+        transition_marker_bottom.remove();
+        transition_marker_bottom_tick.remove();
+        transition_marker_top.remove();
+        transition_marker_top_tick.remove();
+        transition_marker_vertical.remove();
 
         common_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
         for (var i=0; i<common_geom.rectangles; i++){
