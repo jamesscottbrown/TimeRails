@@ -372,7 +372,7 @@ function drawAxes(common_geom, subplot_geom){
 
 }
 
-function create_specification(div_name, spec_id, spec_options) {
+function Diagram(div_name, spec_id, spec_options) {
 
     var subplotWidth = 750,
         subplotHeight = 450;
@@ -435,7 +435,7 @@ function create_specification(div_name, spec_id, spec_options) {
 
 
 
-    function add_subplot_from_specification(specification_string, variable_name) {
+    function addConstraintSubplot(specification_string, variable_name) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
@@ -493,8 +493,46 @@ function create_specification(div_name, spec_id, spec_options) {
         subplotIndex += 1;
     }
 
+
+    function addInputSubplot(specification_string, variable_name) {
+
+        // Group together data that is shared between all rectangles in a sub-plot
+        var subplot_geom = {
+            yRange: [100, 0],
+            variable_name: variable_name,
+            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")") // TODO: rename this
+        };
+
+        subplot_geom.yScale = d3.scale.linear()
+            .domain(subplot_geom.yRange)
+            .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
+
+
+        // TODO: actually initialise populate from specification_string (and save?)
+
+        subplot_geom.svg
+            .append("rect")
+            .attr("x", common_geom.horizontal_padding)
+            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
+            .attr("y", common_geom.vertical_padding)
+            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
+            .style("opacity", 0)
+            .attr("class", "clickable-background");
+
+        svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
+
+        var string = specification_string.toLowerCase().trim().replace(/ /g, '');
+
+        drawAxes(common_geom, subplot_geom);
+        addCommonElements(common_geom, subplot_geom);
+
+        drawInput();
+        subplotIndex += 1;
+    }
+
+
     // TODO: getSpecString needs to handle all subplots
-    return {getSpecString: getSpecString, add_subplot_from_specification: add_subplot_from_specification}; // used when combining specifications to generate example trajectory
+    return {getSpecString: getSpecString, addConstraintSubplot: addConstraintSubplot, addInputSubplot:addInputSubplot}; // used when combining specifications to generate example trajectory
 }
 
 

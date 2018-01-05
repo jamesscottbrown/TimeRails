@@ -84,3 +84,24 @@
 .single-rect-spec {
     border-bottom: 1px dashed #000;
 }
+
+/* For the input widget */
+
+    .line {
+        stroke: steelblue;
+        stroke-width: 2px;
+    }
+
+    .control-point {
+        fill: steelblue;
+    }
+
+    .data-points {
+        fill: black;
+    }
+
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
