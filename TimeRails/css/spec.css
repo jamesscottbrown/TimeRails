@@ -91,11 +91,7 @@
         stroke: steelblue;
         stroke-width: 2px;
     }
-
-    .control-point {
-        fill: steelblue;
-    }
-
+    
     .data-points {
         fill: black;
     }

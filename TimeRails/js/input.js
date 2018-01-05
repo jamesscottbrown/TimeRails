@@ -149,6 +149,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -167,6 +168,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -245,6 +247,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -263,6 +266,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -283,6 +287,7 @@
                 .attr("cx", x(state.positions[2].x))
                 .attr("cy", y(state.positions[2].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -379,6 +384,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -399,6 +405,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -422,6 +429,7 @@
                 .attr("cx", x(state.positions[2].x))
                 .attr("cy", y(state.positions[2].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
@@ -452,6 +460,7 @@
                 .attr("cx", x(state.positions[3].x))
                 .attr("cy", y(state.positions[3].y))
                 .attr("r", 5)
+                .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
                         .origin(Object)
