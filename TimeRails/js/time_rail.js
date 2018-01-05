@@ -193,11 +193,13 @@ function create_bar(level, kind, geom, rectGeom, placeholder_form, newg, helper_
         },
         {
             title: 'Constraint applies at <i>some</i> time in range',
-            action: set_parent_bar('some')
+            action: set_parent_bar('some'),
+            disabled: (level >= geom.max_depth)
         },
         {
             title: 'Constraint applies at <i>all</i> times in range',
-            action: set_parent_bar('all')
+            action: set_parent_bar('all'),
+            disabled: (level >= geom.max_depth)
         },
         {
 				divider: true

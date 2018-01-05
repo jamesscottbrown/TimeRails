@@ -555,7 +555,8 @@ function Mode(common_geom, subplot_geom, options) {
                 }
                 timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 1)
         },
         {
             title: 'Constraint applies at <i>all</i> times in range',
@@ -565,7 +566,8 @@ function Mode(common_geom, subplot_geom, options) {
                 }
                 timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 1)
         },
 
         {
@@ -962,7 +964,7 @@ function Mode(common_geom, subplot_geom, options) {
         else {
             dragrect.style("stroke-dasharray", [0, rect_geom.width + rect_geom.height + rect_geom.width + rect_geom.height].join(','));
         }
-        
+
         // now do the same thing for rect-left (for which the right side is always fixed)
         dragrect_left.style("stroke", "black");
 

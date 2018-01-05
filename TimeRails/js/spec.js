@@ -372,7 +372,7 @@ function drawAxes(common_geom, subplot_geom){
 
 }
 
-function create_specification(div_name, spec_id) {
+function create_specification(div_name, spec_id, spec_options) {
 
     var subplotWidth = 750,
         subplotHeight = 450;
@@ -424,6 +424,11 @@ function create_specification(div_name, spec_id) {
 
     };
 
+    if (!spec_options){ spec_options = {}; }
+    common_geom.max_depth = spec_options.max_depth ? spec_options.max_depth : 5;
+    common_geom.allow_rectangles = spec_options.hasOwnProperty("allow_rectangles") ? spec_options.allow_rectangles : true;
+    common_geom.allow_modes = spec_options.hasOwnProperty("allow_modes") ? spec_options.allow_modes : false;
+
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
         .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
@@ -443,6 +448,24 @@ function create_specification(div_name, spec_id) {
             .domain(subplot_geom.yRange)
             .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
 
+        var menu_options = [];
+        if (common_geom.allow_rectangles) {
+            menu_options.push({
+                title: 'Add rectangle',
+                action: function () {
+                    common_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
+                }
+            });
+        }
+        if (common_geom.allow_modes) {
+            menu_options.push({
+                title: 'Add Mode',
+                action: function () {
+                    common_geom.rectangles.push(Mode(common_geom, subplot_geom))
+                }
+            })
+        }
+
         subplot_geom.svg
             .append("rect")
             .attr("x", common_geom.horizontal_padding)
@@ -451,12 +474,7 @@ function create_specification(div_name, spec_id) {
             .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
             .style("opacity", 0)
             .attr("class", "clickable-background")
-            .on('contextmenu', d3.contextMenu([{
-            title: 'Add rectangle',
-            action: function () {
-                common_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
-            }
-        }]));
+            .on('contextmenu', d3.contextMenu(menu_options));
 
         svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
 

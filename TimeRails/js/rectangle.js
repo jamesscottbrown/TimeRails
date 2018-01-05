@@ -407,7 +407,8 @@ function Rectangle(common_geom, subplot_geom, options) {
                 }
                 timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 1)
         },
         {
             title: 'Constraint applies at <i>all</i> times in range',
@@ -417,7 +418,8 @@ function Rectangle(common_geom, subplot_geom, options) {
                 }
                 timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 1)
         },
 
         {
@@ -432,7 +434,8 @@ function Rectangle(common_geom, subplot_geom, options) {
                 timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('some')();
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 2)
         },
         {
             title: 'Always-Eventually',
@@ -443,7 +446,8 @@ function Rectangle(common_geom, subplot_geom, options) {
                 timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('all')();
                 update_text();
-            }
+            },
+            disabled: (common_geom.max_depth <= 2)
         }
 
     ];
