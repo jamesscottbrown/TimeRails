@@ -421,7 +421,7 @@ function Diagram(div_name, spec_id, spec_options) {
         },
 
         rectangles: [],
-
+        variable_names: []
     };
 
     if (!spec_options){ spec_options = {}; }
@@ -490,7 +490,9 @@ function Diagram(div_name, spec_id, spec_options) {
             diagram = addRectangleToSubplot(rectangle_strings[i], common_geom, subplot_geom);
             common_geom.rectangles.push(diagram);
         }
+
         subplotIndex += 1;
+        common_geom.variable_names.append(variable_name);
     }
 
 
@@ -527,12 +529,17 @@ function Diagram(div_name, spec_id, spec_options) {
         addCommonElements(common_geom, subplot_geom);
 
         drawInput();
+
         subplotIndex += 1;
+        common_geom.variable_names.append(variable_name);
     }
 
 
     // TODO: getSpecString needs to handle all subplots
-    return {getSpecString: getSpecString, addConstraintSubplot: addConstraintSubplot, addInputSubplot:addInputSubplot}; // used when combining specifications to generate example trajectory
+    return {getSpecString: getSpecString,
+        addConstraintSubplot: addConstraintSubplot,
+        addInputSubplot:addInputSubplot,
+        getVariableNames: function(){ return common_geom.variable_names}};
 }
 
 
