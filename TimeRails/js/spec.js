@@ -492,7 +492,7 @@ function Diagram(div_name, spec_id, spec_options) {
         }
 
         subplotIndex += 1;
-        common_geom.variable_names.append(variable_name);
+        common_geom.variable_names.push(variable_name);
     }
 
 
@@ -531,7 +531,7 @@ function Diagram(div_name, spec_id, spec_options) {
         drawInput();
 
         subplotIndex += 1;
-        common_geom.variable_names.append(variable_name);
+        common_geom.variable_names.push(variable_name);
     }
 
 
