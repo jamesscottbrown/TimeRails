@@ -864,6 +864,7 @@ function Mode(common_geom, subplot_geom, options) {
         .attr("fill", "lightgray")
         .classed("transition_marker", true)
         .attr("r", 7)
+        .attr("cursor", "ns-resize")
         .call(
             d3.behavior.drag()
                 .origin(Object)
