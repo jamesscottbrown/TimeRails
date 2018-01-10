@@ -1,27 +1,13 @@
-    function drawInput(opts, state) {
+    function drawInput(common_geom, subplot_geom, opts, state) {
 
         if (!opts){ opts = []; }
         var maxTime = opts.maxTime ? opts.maxTime : 100;
         var maxY = opts.maxY ? opts.maxY : 10;
         var num_points = opts.num_points ? opts.num_points : 100;
 
-        // Shared things
-        var svg = d3.select("svg");
-        var margin = {top: 20, right: 20, bottom: 30, left: 50};
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            var width = +svg.attr("width") - margin.left - margin.right,
-                height = +svg.attr("height") - margin.top - margin.bottom;
-
-
-
-        var x = d3.scale.linear()
-                .rangeRound([0, width])
-                .domain([0, maxTime]);
-
-        var y = d3.scale.linear()
-                .rangeRound([height, 0])
-                .domain([0, maxY]);
-
+        var g = subplot_geom.svg;
+        var x = common_geom.xScale;
+        var y = subplot_geom.yScale;
 
         var color = d3.scale.category10();
 
@@ -39,8 +25,6 @@
             }
         }
 
-
-
         // context menu to add terms
         var menu = [{
                         title: 'Add linear term',
@@ -51,8 +35,16 @@
                     },{
                         title: 'Add bell-shaped term',
                         action: function(){ addBellTerm(); }
-                    }]
-        svg.on('contextmenu', d3.contextMenu(menu));
+                    }];
+
+        g.append("rect")
+            .attr("x", common_geom.horizontal_padding)
+            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
+            .attr("y", common_geom.vertical_padding)
+            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
+            .style("opacity", 0)
+            .attr("class", "clickable-background")
+            .on('contextmenu', d3.contextMenu(menu));
 
         function addLinearTerm(s){
             if (!s){ s = {type: "linear", positions: [{x: 0, y: 0}, {x: maxTime, y: maxY} ]}; }
@@ -157,7 +149,7 @@
 
                             function () {
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
                                 updateLine();
                             })
@@ -177,12 +169,12 @@
                             function () {
                                 // move, but keep to the right of point 1
                                 var cursor_x = d3.mouse(g.node())[0];
-                                var newx = imposeLimits(point1.attr("cx"), width, cursor_x);
+                                var newx = imposeLimits(point1.attr("cx"), common_geom.subplotWidth, cursor_x);
                                 point2.attr("cx", newx);
 
 
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point2.attr("cy", newy);
 
                                 updateLine();
@@ -255,7 +247,7 @@
 
                             function () {
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
                                 updateLine();
                             })
@@ -297,7 +289,7 @@
 
 
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point3.attr("cy", newy);
 
                                 updateLine();
@@ -392,7 +384,7 @@
 
                             function () {
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
                                 shiftHeight();
 
@@ -440,14 +432,14 @@
                                 // move, but keep to the right of point 2
                                 var oldx = parseFloat(point3.attr("cx"));
                                 var cursor_x = d3.mouse(g.node())[0];
-                                var newx = imposeLimits(point2.attr("cx"), width, cursor_x);
+                                var newx = imposeLimits(point2.attr("cx"), common_geom.subplotWidth, cursor_x);
                                 point3.attr("cx", newx);
 
                                 point4.attr("cx", (newx - oldx) + parseFloat(point4.attr("cx")));
                                 point2.attr("cx", (newx - oldx) + parseFloat(point2.attr("cx")));
 
                                 var cursor_y = d3.mouse(g.node())[1];
-                                var newy = imposeLimits(0, height, cursor_y);
+                                var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point3.attr("cy", newy);
                                 shiftHeight();
 
@@ -469,7 +461,7 @@
                             function () {
                                 // move, but keep to the right of point 3
                                 var cursor_x = d3.mouse(g.node())[0];
-                                var newx = imposeLimits(point3.attr("cx"), width, cursor_x);
+                                var newx = imposeLimits(point3.attr("cx"), common_geom.subplotWidth, cursor_x);
                                 point4.attr("cx", newx);
 
                                 shiftPoint2();

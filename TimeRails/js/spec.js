@@ -512,15 +512,6 @@ function Diagram(div_name, spec_id, spec_options) {
 
         // TODO: actually initialise populate from specification_string (and save?)
 
-        subplot_geom.svg
-            .append("rect")
-            .attr("x", common_geom.horizontal_padding)
-            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
-            .attr("y", common_geom.vertical_padding)
-            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
-            .style("opacity", 0)
-            .attr("class", "clickable-background");
-
         svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
 
         var string = specification_string.toLowerCase().trim().replace(/ /g, '');
@@ -528,7 +519,7 @@ function Diagram(div_name, spec_id, spec_options) {
         drawAxes(common_geom, subplot_geom);
         addCommonElements(common_geom, subplot_geom);
 
-        drawInput();
+        drawInput(common_geom, subplot_geom);
 
         subplotIndex += 1;
         common_geom.variable_names.push(variable_name);
