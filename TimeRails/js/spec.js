@@ -484,11 +484,13 @@ function Diagram(div_name, spec_id, spec_options) {
         drawAxes(common_geom, subplot_geom);
         addCommonElements(common_geom, subplot_geom);
 
-        var rectangle_strings = string.split("&amp;&amp;");
-        var diagram;
-        for (var i = 0; i < rectangle_strings.length; i++) {
-            diagram = addRectangleToSubplot(rectangle_strings[i], common_geom, subplot_geom);
-            common_geom.rectangles.push(diagram);
+        if (string){
+            var rectangle_strings = string.split("&amp;&amp;");
+            var diagram;
+            for (var i = 0; i < rectangle_strings.length; i++) {
+                diagram = addRectangleToSubplot(rectangle_strings[i], common_geom, subplot_geom);
+                common_geom.rectangles.push(diagram);
+            }
         }
 
         subplotIndex += 1;
