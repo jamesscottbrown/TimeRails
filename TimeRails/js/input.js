@@ -141,6 +141,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("cursor", "ns-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -160,6 +161,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("cursor", "move")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -239,6 +241,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("cursor", "ns-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -258,6 +261,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("cursor", "ew-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -279,6 +283,7 @@
                 .attr("cx", x(state.positions[2].x))
                 .attr("cy", y(state.positions[2].y))
                 .attr("r", 5)
+                .style("cursor", "ns-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -376,6 +381,7 @@
                 .attr("cx", x(state.positions[0].x))
                 .attr("cy", y(state.positions[0].y))
                 .attr("r", 5)
+                .style("cursor", "ns-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -397,6 +403,7 @@
                 .attr("cx", x(state.positions[1].x))
                 .attr("cy", y(state.positions[1].y))
                 .attr("r", 5)
+                .style("cursor", "ew-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
@@ -420,6 +427,7 @@
             var point3 = g.append("circle")
                 .attr("cx", x(state.positions[2].x))
                 .attr("cy", y(state.positions[2].y))
+                .style("cursor", "move")
                 .attr("r", 5)
                 .style("fill", color(i))
                 .call(
@@ -452,6 +460,7 @@
                 .attr("cx", x(state.positions[3].x))
                 .attr("cy", y(state.positions[3].y))
                 .attr("r", 5)
+                .style("cursor", "ew-resize")
                 .style("fill", color(i))
                 .call(
                     d3.behavior.drag()
