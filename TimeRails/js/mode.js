@@ -356,6 +356,8 @@ function Mode(common_geom, subplot_geom, options) {
     }
 
     function dragmove_left(d) {
+        if (common_geom.specification_fixed){ return; }
+
         // horizontal movement
         var oldRectCenter = rect_geom.start_time_pos - rect_geom.width_left/2;
         var rect_center = d3.mouse(subplot_geom.svg.node())[0] - rect_geom.width/2;
