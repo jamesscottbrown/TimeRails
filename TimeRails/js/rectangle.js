@@ -214,7 +214,6 @@ function Rectangle(common_geom, subplot_geom, options) {
             .attr("d", function(d){ return new_data_line_generator(d); });
 
         // Redraw
-        common_geom.drawAxes(common_geom, subplot_geom);
         adjust_everything();
     }
 

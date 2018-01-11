@@ -124,6 +124,22 @@ function addCommonElements(common_geom, subplot_geom){
                 common_geom.specification_fixed = !common_geom.specification_fixed;
             });
         var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
+
+
+        var time_axis_range_div = diagram_option.append("div");
+        var time_max_label = time_axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
+        var time_max_input = time_axis_range_div.append("input")
+            .attr("id", "time_max")
+            .attr("value", common_geom.xRange[1])
+            .attr("length", "6")
+            .on("change", function(){
+                var val = parseFloat(this.value);
+                if (!isNaN(val)){
+                    common_geom.xRange[1] = parseFloat(this.value);
+                    adjustAllXScales(common_geom, subplot_geom);
+                }
+            });
+
     }
 
     var experimental_data_div = diagram_option.append("div");
@@ -200,18 +216,6 @@ function addCommonElements(common_geom, subplot_geom){
 
 
     var axis_range_div = diagram_option.append("div");
-    var time_max_label = axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
-    var time_max_input = axis_range_div.append("input")
-        .attr("id", "time_max")
-        .attr("value", common_geom.xRange[1])
-        .attr("length", "6")
-        .on("change", function(){
-            var val = parseFloat(this.value);
-            if (!isNaN(val)){
-                common_geom.xRange[1] = parseFloat(this.value);
-                adjustAllScales(common_geom, subplot_geom);
-            }
-        });
 
     var y_min_label = axis_range_div.append("label").attr("for", "y_min_input").text(" Min " + subplot_geom.variable_name);
     var y_min_input = axis_range_div.append("input")
@@ -222,7 +226,7 @@ function addCommonElements(common_geom, subplot_geom){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 subplot_geom.yRange[1] = parseFloat(this.value);
-                adjustAllScales(common_geom, subplot_geom);
+                adjustAllYScales(common_geom, subplot_geom);
             }
         });
 
@@ -235,7 +239,7 @@ function addCommonElements(common_geom, subplot_geom){
             var val = parseFloat(this.value);
             if (!isNaN(val)){
                 subplot_geom.yRange[0] = parseFloat(this.value);
-                adjustAllScales(common_geom, subplot_geom);
+                adjustAllYScales(common_geom, subplot_geom);
             }
         });
 
@@ -328,32 +332,49 @@ function getSpecString(common_geom){
     return spec_strings.join(' && ');
 }
 
-function adjustAllScales(common_geom, subplot_geom) {
+function adjustAllYScales(common_geom, subplot_geom) {
         // Create new scales
-        var new_xScale = d3.scale.linear()
-            .domain(common_geom.xRange)
-            .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
-
         var new_yScale = d3.scale.linear()
         .domain(subplot_geom.yRange)
         .range([common_geom.vertical_padding, common_geom.subplotHeight - common_geom.vertical_padding]);
 
-        for (var i=0; i < common_geom.rectangles.length; i++){
-            common_geom.rectangles[i].adjust_scales(new_xScale, new_yScale);
+        for (var i=0; i < subplot_geom.rectangles.length; i++){
+            subplot_geom.rectangles[i].adjust_scales(common_geom.xScale, new_yScale);
         }
 
         // switch scales
-        common_geom.xScale = new_xScale;
         subplot_geom.yScale = new_yScale;
 
         // Redraw axes
         common_geom.drawAxes(common_geom, subplot_geom);
 }
 
+function adjustAllXScales(common_geom, subplot_geom) {
+    // TODO: if x-scale was changed, we should update all subplots
+        // Create new scales
+        var new_xScale = d3.scale.linear()
+            .domain(common_geom.xRange)
+            .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
 
-function drawAxes(common_geom, subplot_geom){
+        for (var j=0; j<common_geom.subplot_geoms.length; j++) {
+            for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
+                var this_subplot = common_geom.subplot_geoms[j];
+                this_subplot.rectangles[i].adjust_scales(new_xScale, this_subplot.yScale);
+                drawAxes(common_geom, this_subplot, new_xScale);
+            }
+        }
+        // switch scales
+        common_geom.xScale = new_xScale;
+}
+
+
+
+function drawAxes(common_geom, subplot_geom, new_xScale){
+
+    var xScale = new_xScale ? new_xScale : common_geom.xScale;
+
     var xAxis =  d3.svg.axis()
-        .scale(common_geom.xScale)
+        .scale(xScale)
         .orient("bottom");
 
     subplot_geom.svg.selectAll('.axis').remove();
@@ -427,7 +448,6 @@ function Diagram(div_name, spec_id, spec_options) {
         index: index,
 
         drawAxes: drawAxes,
-        adjustAllScales: adjustAllScales,
         adjustAllRectangles: function (update_description) {
             for (var j=0; j<common_geom.subplot_geoms.length; j++){
                 for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
