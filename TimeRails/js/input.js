@@ -26,16 +26,22 @@
         }
 
         // context menu to add terms
-        var menu = [{
-                        title: 'Add linear term',
-                        action: function(){  addLinearTerm(); } // wrap in new function to swallow unwanted arguments
-                    }, {
-                        title: 'Add sigmoidal term',
-                        action: function(){ addSigmoidalTerm(); }
-                    },{
-                        title: 'Add bell-shaped term',
-                        action: function(){ addBellTerm(); }
-                    }];
+        var getMenu = function(){
+            return [{
+                    title: 'Add linear term',
+                    action: function(){  addLinearTerm(); }, // wrap in new function to swallow unwanted arguments
+                    disabled: common_geom.specification_fixed
+                }, {
+                    title: 'Add sigmoidal term',
+                    action: function(){ addSigmoidalTerm(); },
+                    disabled: common_geom.specification_fixed
+                },{
+                    title: 'Add bell-shaped term',
+                    action: function(){ addBellTerm(); },
+                    disabled: common_geom.specification_fixed
+                }];
+            };
+
 
         g.append("rect")
             .attr("x", common_geom.horizontal_padding)
@@ -44,7 +50,7 @@
             .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
             .style("opacity", 0)
             .attr("class", "clickable-background")
-            .on('contextmenu', d3.contextMenu(menu));
+            .on('contextmenu', d3.contextMenu(getMenu));
 
         function addLinearTerm(s){
             if (!s){ s = {type: "linear", positions: [{x: 0, y: 0}, {x: maxTime, y: maxY} ]}; }
@@ -149,6 +155,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 var cursor_y = d3.mouse(g.node())[1];
                                 var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
@@ -169,6 +177,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 // move, but keep to the right of point 1
                                 var cursor_x = d3.mouse(g.node())[0];
                                 var newx = imposeLimits(point1.attr("cx"), common_geom.subplotWidth, cursor_x);
@@ -183,8 +193,8 @@
                             })
                 );
 
-            point1.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
-            point2.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
+            point1.on('contextmenu', d3.contextMenu(function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}]; }));
+            point2.on('contextmenu', d3.contextMenu(function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}]; }));
 
             updateLine();
 
@@ -249,6 +259,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 var cursor_y = d3.mouse(g.node())[1];
                                 var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
@@ -269,6 +281,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 // move, but keep to the right of point 1
                                 var cursor_x = d3.mouse(g.node())[0];
                                 var newx = imposeLimits(point1.attr("cx"), point3.attr("cx"), cursor_x);
@@ -291,7 +305,7 @@
                         .on("drag",
 
                             function () {
-
+                                if (common_geom.specification_fixed){ return; }
 
                                 var cursor_y = d3.mouse(g.node())[1];
                                 var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
@@ -303,10 +317,20 @@
 
 
             var hillCoefficient = state.hillCoefficient;
-            var menu = [{ title: 'Delete term', action: deleteLine}, {title: 'adjust steepness', action: function(){
-                hillCoefficient = parseFloat(prompt("Steepness (Hill coefficient):", hillCoefficient));
-                updateLine();
-            } }]
+            var menu = function () {
+                return [{
+                    title: 'Delete term',
+                    action: deleteLine,
+                    disabled: common_geom.specification_fixed
+                },{
+                    title: 'Adjust steepness',
+                    action: function () {
+                        hillCoefficient = parseFloat(prompt("Steepness (Hill coefficient):", hillCoefficient));
+                        updateLine();
+                        },
+                    disabled: common_geom.specification_fixed
+                }];
+            };
 
             point1.on('contextmenu', d3.contextMenu(menu));
             point2.on('contextmenu', d3.contextMenu(menu));
@@ -389,6 +413,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 var cursor_y = d3.mouse(g.node())[1];
                                 var newy = imposeLimits(0, common_geom.subplotHeight, cursor_y);
                                 point1.attr("cy", newy);
@@ -411,6 +437,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 // move, but keep to the left of point 3
                                 var cursor_x = d3.mouse(g.node())[0];
                                 var newx = imposeLimits(0, point3.attr("cx"), cursor_x);
@@ -436,6 +464,7 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
 
                                 // move, but keep to the right of point 2
                                 var oldx = parseFloat(point3.attr("cx"));
@@ -468,6 +497,8 @@
                         .on("drag",
 
                             function () {
+                                if (common_geom.specification_fixed){ return; }
+
                                 // move, but keep to the right of point 3
                                 var cursor_x = d3.mouse(g.node())[0];
                                 var newx = imposeLimits(point3.attr("cx"), common_geom.subplotWidth, cursor_x);
@@ -478,10 +509,11 @@
                             })
                 );
 
-            point1.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
-            point2.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
-            point3.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
-            point4.on('contextmenu', d3.contextMenu([{ title: 'Delete term', action: deleteLine}]));
+            var deleteMenu = function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}] };
+            point1.on('contextmenu', d3.contextMenu(deleteMenu));
+            point2.on('contextmenu', d3.contextMenu(deleteMenu));
+            point3.on('contextmenu', d3.contextMenu(deleteMenu));
+            point4.on('contextmenu', d3.contextMenu(deleteMenu));
 
 
             var line = d3.svg.line()
