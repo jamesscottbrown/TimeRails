@@ -1066,80 +1066,30 @@ function Mode(common_geom, subplot_geom, options) {
 
     // functions for generating specification to save
 
-    function getYSpecString(){
-
-        var y_upper = YToVal(rect_geom.rect_top).toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + rect_geom.height ).toFixed(2);
-
-        var spec_string;
-
-        // 2 bounds
-        if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper;
-        }
-
-        // 1 bound
-        else if (rect_geom.top_fixed) {
-            spec_string = "Inequality(lt=" + y_upper;
-        }
-        else if (rect_geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower;
-        }
-
-        // 0 bounds
-        else {
-            // Don't convert, but keep as an easily checkable sentinel value
-            spec_string = "";
-        }
-
-        return spec_string;
-    }
-
     function getSpecString(){
-        var y_spec_string = getYSpecString();
         var spec_string = "";
+        var shift = 0;
 
-        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
         if (timing_parent_bar){
             spec_string = timing_parent_bar.getSpecString();
-
-            var delay_time = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-            delay_time = delay_time.toFixed(2);
-
-            var length =   XToTime(rect_geom.start_time_pos + rect_geom.width) - XToTime(rect_geom.track_circle_pos);
-            length = length.toFixed(2);
-
-            if (delay_time == 0 && length == 0){
-                spec_string += y_spec_string;
-            } else {
-                spec_string += "Globally(" + delay_time + "," + length + "," + y_spec_string;
-            }
-
-            var numLeftParens = 0;
-            for (var i=0; i<spec_string.length; i++){
-                if (spec_string[i] == "("){ numLeftParens++; }
-            }
-
-            return spec_string + ")".repeat(numLeftParens);
+            var shift = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
         }
 
-        // Otherwise, rectangle is represented by a Global term with a start and end time
-        if (!rect_geom.top_fixed && !rect_geom.bottom_fixed) {
-            return spec_string;
-        }
+        var startTime = XToTime(rect_geom.start_time_pos - rect_geom.width_left) - shift;
+        var midTime = XToTime(rect_geom.start_time_pos) - shift;
+        var endTime = common_geom.right_fixed ? (rect_geom.start_time_pos + rect_geom.width) - shift : Infinity;
 
-        var x_lower = XToTime(rect_geom.start_time_pos).toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + rect_geom.width ).toFixed(2);
+        var startMin = common_geom.top_fixed_left ? (rect_geom.rect_top_left + rect_geom.height_left) : Infinity;
+        var startMax = common_geom.bottom_fixed_left ? (rect_geom.rect_top_left) : -Infinity;
+        var midMin = YToVal(rect_geom.transition_max_pos);
+        var midMax = YToVal(rect_geom.transition_min_pos);
+        var endMin = common_geom.top_fixed ? YToVal(rect_geom.rect_top + rect_geom.height) : Infinity;
+        var endMax = common_geom.bottom_fixed ? (rect_geom.rect_top) : -Infinity;
 
-        if (!rect_geom.right_fixed){
-            x_upper = "Inf";
-        }
+        var values = [startTime, midTime, endTime, startMin, startMax, midMin, midMax, endMin, endMax];
+        var modeString = "Mode(" + values.join(",") + ")";
 
-        if (!rect_geom.left_fixed){
-            x_lower = "0";
-        }
-
-        return spec_string + "Globally(" + x_lower + "," + x_upper + ", " + y_spec_string + "))";
+        return spec_string + modeString;
     }
 
     function add_timing_bar(kind, options){
