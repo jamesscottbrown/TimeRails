@@ -451,22 +451,27 @@ function Diagram(div_name, spec_id, spec_options) {
             .domain(subplot_geom.yRange)
             .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
 
-        var menu_options = [];
-        if (common_geom.allow_rectangles) {
-            menu_options.push({
-                title: 'Add rectangle',
-                action: function () {
-                    common_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
-                }
-            });
-        }
-        if (common_geom.allow_modes) {
-            menu_options.push({
-                title: 'Add Mode',
-                action: function () {
-                    common_geom.rectangles.push(Mode(common_geom, subplot_geom))
-                }
-            })
+        function menuOptions(){
+            var menu_options = [];
+            if (common_geom.allow_rectangles) {
+                menu_options.push({
+                    title: 'Add rectangle',
+                    action: function () {
+                        subplot_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
+                    },
+                    disabled: common_geom.specification_fixed
+                });
+            }
+            if (common_geom.allow_modes) {
+                menu_options.push({
+                    title: 'Add Mode',
+                    action: function () {
+                        subplot_geom.rectangles.push(Mode(common_geom, subplot_geom))
+                    },
+                    disabled: common_geom.specification_fixed
+                })
+            }
+            return menu_options;
         }
 
         subplot_geom.svg
@@ -477,7 +482,7 @@ function Diagram(div_name, spec_id, spec_options) {
             .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
             .style("opacity", 0)
             .attr("class", "clickable-background")
-            .on('contextmenu', d3.contextMenu(menu_options));
+            .on('contextmenu', d3.contextMenu(menuOptions));
 
         svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
 
