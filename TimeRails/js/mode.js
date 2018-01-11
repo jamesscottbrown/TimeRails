@@ -218,12 +218,19 @@ function Mode(common_geom, subplot_geom, options) {
         }
 
         // Adjust positions
-        rect_geom.track_circle_pos = convertX(rect_geom.track_circle_pos);
-
+        var leftPos = convertX(rect_geom.start_time_pos + rect_geom.width_left);
         var rightPos = convertX(rect_geom.start_time_pos + rect_geom.width);
+
+        rect_geom.track_circle_pos = convertX(rect_geom.track_circle_pos);
         rect_geom.width =  rightPos - convertX(rect_geom.start_time_pos);
         rect_geom.start_time_pos = convertX(rect_geom.start_time_pos);
 
+        rect_geom.width_left = leftPos - rect_geom.start_time_pos;
+        rect_geom.height_left = convertY(rect_geom.rect_top_left + rect_geom.height_left) - convertY(rect_geom.rect_top_left);
+        rect_geom.rect_top_left = convertY(rect_geom.rect_top_left);
+
+        rect_geom.transition_max_pos = convertY(rect_geom.transition_max_pos);
+        rect_geom.transition_min_pos = convertY(rect_geom.transition_min_pos);
 
         rect_geom.delay_line_height = convertY(rect_geom.delay_line_height);
         var bottom_pos =  convertY(rect_geom.height + rect_geom.rect_top);
