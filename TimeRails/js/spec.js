@@ -290,9 +290,13 @@ function addCommonElements(common_geom, subplot_geom){
     d3.select(common_geom.div_name).select("#use_letters_checkbox").on("change", function(){
         common_geom.use_letters = !common_geom.use_letters;
 
-        for (var i=0; i<common_geom.rectangles.length; i++){
-            common_geom.rectangles[i].update_formula();
+        for (var j=0; j<common_geom.subplot_geoms.length; j++){
+           for (var i=0; i<common_geom.subplot_geoms[j].rectangles.length; i++){
+            common_geom.subplot_geoms[j].rectangles[i].update_formula();
+            }
         }
+
+
     });
 
     d3.select("#export_button")
@@ -314,8 +318,12 @@ function addCommonElements(common_geom, subplot_geom){
 
 function getSpecString(common_geom){
     var spec_strings = [];
-    for (var i=0; i<common_geom.rectangles.length; i++){
-        spec_strings.push(common_geom.rectangles[i].getSpecString(common_geom));
+
+    for (var j=0; j<common_geom.subplot_geoms.length; j++) {
+
+        for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
+            spec_strings.push(common_geom.subplot_geoms[j].rectangles[i].getSpecString(common_geom));
+        }
     }
     return spec_strings.join(' && ');
 }
@@ -421,13 +429,17 @@ function Diagram(div_name, spec_id, spec_options) {
         drawAxes: drawAxes,
         adjustAllScales: adjustAllScales,
         adjustAllRectangles: function (update_description) {
-            for (var i = 0; i < common_geom.rectangles.length; i++) {
-                common_geom.rectangles[i].adjust_everything(update_description);
+            for (var j=0; j<common_geom.subplot_geoms.length; j++){
+                for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
+                    common_geom.subplot_geoms[j].rectangles[i].adjust_everything(update_description);
+                }
             }
         },
 
         rectangles: [],
-        variable_names: []
+        variable_names: [],
+
+        subplot_geoms: []
     };
 
     if (!spec_options){ spec_options = {}; }
@@ -447,7 +459,8 @@ function Diagram(div_name, spec_id, spec_options) {
         var subplot_geom = {
             yRange: [100, 0],
             variable_name: variable_name,
-            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")") // TODO: rename this
+            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
+            rectangles: []
         };
 
         subplot_geom.yScale = d3.scale.linear()
@@ -500,12 +513,13 @@ function Diagram(div_name, spec_id, spec_options) {
             var diagram;
             for (var i = 0; i < rectangle_strings.length; i++) {
                 diagram = addRectangleToSubplot(rectangle_strings[i], common_geom, subplot_geom);
-                common_geom.rectangles.push(diagram);
+                subplot_geom.rectangles.push(diagram);
             }
         }
 
         subplotIndex += 1;
         common_geom.variable_names.push(variable_name);
+        common_geom.subplot_geoms.push(subplot_geom);
     }
 
 
@@ -515,7 +529,8 @@ function Diagram(div_name, spec_id, spec_options) {
         var subplot_geom = {
             yRange: [100, 0],
             variable_name: variable_name,
-            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")") // TODO: rename this
+            svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
+            rectangles: []
         };
 
         subplot_geom.yScale = d3.scale.linear()
@@ -536,6 +551,7 @@ function Diagram(div_name, spec_id, spec_options) {
 
         subplotIndex += 1;
         common_geom.variable_names.push(variable_name);
+        common_geom.subplot_geoms.push(subplot_geom);
     }
 
 

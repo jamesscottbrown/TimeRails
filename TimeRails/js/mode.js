@@ -30,7 +30,7 @@ function Mode(common_geom, subplot_geom, options) {
         transition_marker_width: 10,
 
         followRectangle: false,
-        rectangleIndex: common_geom.rectangles.length,
+        rectangleIndex: subplot_geom.rectangles.length,
         start_line_visible: true,
 
         num_rails_above: 0,
@@ -43,7 +43,7 @@ function Mode(common_geom, subplot_geom, options) {
         rect_geom.num_rails_above = 0;
         for (var i=0; i<rect_geom.rectangleIndex; i++){
             rect_geom.num_rails_above += 1;
-            rect_geom.num_rails_above += common_geom.rectangles[i].get_num_rails();
+            rect_geom.num_rails_above += subplot_geom.rectangles[i].get_num_rails();
         }
         return rect_geom.num_rails_above;
     }
@@ -309,13 +309,13 @@ function Mode(common_geom, subplot_geom, options) {
             rect_geom.start_time_pos += shift;
 
             if (rect_geom.followRectangle){
-                for (var i=0; i<common_geom.rectangles.length; i++){
-                    if (i == rect_geom.rectangleIndex){ continue; }
+                for (var i=0; i<subplot_geom.rectangles.length; i++){
+                    if (i == subplot_geom.rectangleIndex){ continue; }
 
-                    var other_rect = common_geom.rectangles[i].rect_geom;
+                    var other_rect = subplot_geom.rectangles[i].rect_geom;
                     other_rect.track_circle_pos += shift;
                     other_rect.start_time_pos += shift;
-                    common_geom.rectangles[i].adjust_everything();
+                    subplot_geom.rectangles[i].adjust_everything();
                 }
             }
     }
@@ -1140,9 +1140,9 @@ function Mode(common_geom, subplot_geom, options) {
         transition_marker_top_tick.remove();
         transition_marker_vertical.remove();
 
-        common_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
-        for (var i=0; i<common_geom.rectangles; i++){
-            common_geom.rectangles[i].saveRectangleIndex(i);
+        subplot_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
+        for (var i=0; i<subplot_geom.rectangles; i++){
+            subplot_geom.rectangles[i].saveRectangleIndex(i);
         }
 
         // delete description
