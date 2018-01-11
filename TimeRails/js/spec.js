@@ -115,13 +115,16 @@ function addCommonElements(common_geom, subplot_geom){
                             .select(".diagram-div")
                             .append("div");
 
-    var constant = diagram_option.append("input")
-        .attr("type", "checkbox")
-        .attr("id", "constant_checkbox")
-        .attr("value", "false")
-        .on("change", function(){ common_geom.specification_fixed = !common_geom.specification_fixed;});
-    var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
-
+    if (common_geom.subplot_geoms.length < 1) {
+        var constant = diagram_option.append("input")
+            .attr("type", "checkbox")
+            .attr("id", "constant_checkbox")
+            .attr("value", "false")
+            .on("change", function () {
+                common_geom.specification_fixed = !common_geom.specification_fixed;
+            });
+        var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
+    }
 
     var experimental_data_div = diagram_option.append("div");
 
