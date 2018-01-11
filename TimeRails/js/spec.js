@@ -236,28 +236,30 @@ function addCommonElements(common_geom, subplot_geom){
             }
         });
 
-    var example_plot_buttons_div = diagram_option.append("div");
-    example_plot_buttons_div.append('button')
-        .classed("btn", true).classed("btn-default", true).attr("type", "button")
-        .text("Plot trajectory satisfying this constraint")
-        .on("click", plotExampleTrajectory(false));
+    if (common_geom.generateExampleTrajectories){
+        var example_plot_buttons_div = diagram_option.append("div");
+        example_plot_buttons_div.append('button')
+            .classed("btn", true).classed("btn-default", true).attr("type", "button")
+            .text("Plot trajectory satisfying this constraint")
+            .on("click", plotExampleTrajectory(false));
 
-    example_plot_buttons_div.append('button')
-        .classed("btn", true).classed("btn-default", true)
-        .text("Plot trajectory satisfying all constraints")
-        .on("click", plotExampleTrajectory(true));
+        example_plot_buttons_div.append('button')
+            .classed("btn", true).classed("btn-default", true)
+            .text("Plot trajectory satisfying all constraints")
+            .on("click", plotExampleTrajectory(true));
 
-    example_plot_buttons_div.append('button')
-        .text("Delete example trajectory")
-        .on("click", function(){
-            example_trajctory_g.selectAll(".example_line").remove();
-            example_trajctory_g.selectAll(".example_circle").remove();
-            example_trajctory_g.selectAll(".example_box").remove();
-            d3.select(this).style("visibility", "hidden");
-        })
-        .attr("id", "delete_trajectory_button")
-        .classed("btn", true).classed("btn-danger", true)
-        .style("visibility", "hidden");
+        example_plot_buttons_div.append('button')
+            .text("Delete example trajectory")
+            .on("click", function(){
+                example_trajctory_g.selectAll(".example_line").remove();
+                example_trajctory_g.selectAll(".example_circle").remove();
+                example_trajctory_g.selectAll(".example_box").remove();
+                d3.select(this).style("visibility", "hidden");
+            })
+            .attr("id", "delete_trajectory_button")
+            .classed("btn", true).classed("btn-danger", true)
+            .style("visibility", "hidden");
+    }
 
     d3.select(common_geom.div_name).append('button')
         .text("Save")
@@ -403,6 +405,7 @@ function Diagram(div_name, spec_id, spec_options) {
 
         specification_fixed: false,
         use_letters: false,
+        generateExampleTrajectories: spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true,
 
         colorScale: d3.scale.category10(),
 
