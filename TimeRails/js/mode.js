@@ -714,24 +714,34 @@ function Mode(common_geom, subplot_geom, options) {
             .on("drag", dragmove_left));
 
 
-        var rectMenu = [{
-            title: function(){ return 'Adjust values'; },
-            action: adjust_rect_values
-        },
-        {
-            title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
-            action: toggle_start_line_visibility
-        },
-        {
-            title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
-            action: function () {
-                rect_geom.followRectangle = ! rect_geom.followRectangle;
-            }
-        },
-        {
-            title: function(){ return 'Delete mode'; },
-            action: deleteRectangle
-    }];
+    var rectMenu =
+        function () {
+            return [{
+                title: function () {
+                    return 'Adjust values';
+                },
+                action: adjust_rect_values,
+                disabled: common_geom.specification_fixed
+            },{
+                title: function () {
+                    return rect_geom.start_line_visible ? "Hide start line" : "Show start line"
+                },
+                action: toggle_start_line_visibility
+            },{
+                title: function () {
+                    return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow';
+                },
+                action: function () {
+                    rect_geom.followRectangle = !rect_geom.followRectangle;
+                }
+            },{
+                title: function () {
+                    return 'Delete mode';
+                },
+                action: deleteRectangle,
+                disabled: common_geom.specification_fixed
+            }];
+        };
 
 
     var dragrect = newg.append("rect")
@@ -742,27 +752,6 @@ function Mode(common_geom, subplot_geom, options) {
         .call(d3.behavior.drag()
             .origin(Object)
             .on("drag", dragmove));
-
-
-        var rectMenu = [{
-            title: function(){ return 'Adjust values'; },
-            action: adjust_rect_values
-        },
-        {
-            title: function(){ return rect_geom.start_line_visible ? "Hide start line" : "Show start line"},
-            action: toggle_start_line_visibility
-        },
-        {
-            title: function(){ return rect_geom.followRectangle ? 'Stop other rectangles following' : 'Make other rectangles follow'; },
-            action: function () {
-                rect_geom.followRectangle = ! rect_geom.followRectangle;
-            }
-        },
-        {
-            title: function(){ return 'Delete mode'; },
-            action: deleteRectangle
-    }];
-
 
     dragrect.on('contextmenu', d3.contextMenu(rectMenu));
     dragrect_left.on('contextmenu', d3.contextMenu(rectMenu));
