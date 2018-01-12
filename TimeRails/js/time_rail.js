@@ -1,6 +1,7 @@
 function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form, newg, helper_funcs, options){
 
-    var svg = subplot_geom.svg;
+    var subplot_svg = subplot_geom.svg;
+    var diagram_svg = geom.diagram_svg;
 
     var timing_parent_bar = false;
 
@@ -93,7 +94,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             if (geom.specification_fixed){ return; }
 
             var track_length = right_tick_pos - left_tick_pos;
-            var mouse_pos = d3.mouse(svg.node())[0];
+            var mouse_pos = d3.mouse(subplot_svg.node())[0];
 
             var x1 = imposeLimits(start_time_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
             var x2 = x1 + track_length;
@@ -116,7 +117,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on("drag", function(){
             if (geom.specification_fixed){ return; }
 
-            left_tick_pos = imposeLimits(start_time_pos, helper_funcs.getStartX(), d3.mouse(svg.node())[0]);
+            left_tick_pos = imposeLimits(start_time_pos, helper_funcs.getStartX(), d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
@@ -126,7 +127,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on("drag", function(){
             if (geom.specification_fixed){ return; }
 
-            right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(svg.node())[0]);
+            right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
@@ -140,7 +141,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             var start_line_length = left_tick_pos - start_time_pos;
             var track_length = right_tick_pos - left_tick_pos;
 
-            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(svg.node())[0]);
+            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(subplot_svg.node())[0]);
             if (timing_parent_bar) {
                 x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
             }
