@@ -404,7 +404,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             },
             disabled: (common_geom.max_depth <= 1)
@@ -415,7 +415,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 update_text();
             },
             disabled: (common_geom.max_depth <= 1)
@@ -430,7 +430,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'all', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('some')();
                 update_text();
             },
@@ -442,7 +442,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 if (timing_parent_bar){
                     timing_parent_bar.delete();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                 timing_parent_bar.set_parent_bar('all')();
                 update_text();
             },
@@ -782,7 +782,7 @@ function Rectangle(common_geom, subplot_geom, options) {
     function update_text() {
 
         function create_initial_bar (kind){
-            timing_parent_bar = create_bar(1, kind, common_geom, rect_geom, placeholder_form, newg, helper_funcs);
+            timing_parent_bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
             update_text();
         }
 
@@ -887,7 +887,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
         } else {
-            timing_parent_bar = create_bar(1, kind, common_geom, rect_geom, placeholder_form, newg, helper_funcs, options);
+            timing_parent_bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs, options);
         }
         update_text();
     }

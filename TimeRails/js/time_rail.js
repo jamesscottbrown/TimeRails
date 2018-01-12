@@ -1,6 +1,6 @@
-function create_bar(level, kind, geom, rectGeom, placeholder_form, newg, helper_funcs, options){
+function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form, newg, helper_funcs, options){
 
-    var svg = geom.svg;
+    var svg = subplot_geom.svg;
 
     var timing_parent_bar = false;
 
@@ -170,7 +170,7 @@ function create_bar(level, kind, geom, rectGeom, placeholder_form, newg, helper_
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, rectGeom, placeholder_form, newg, helper_funcs_new, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, subplot_geom, rectGeom, placeholder_form, newg, helper_funcs_new, options);
             geom.adjustAllRectangles(true);
             helper_funcs.update_text();
         }
