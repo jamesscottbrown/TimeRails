@@ -227,9 +227,11 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .call(drag_track);
 
     var left_tick = newg.append("line").classed("grey-line", true)
+        .style("cursor", "ew-resize")
         .call(drag_left_tick);
 
     var right_tick = newg.append("line").classed("grey-line", true)
+        .style("cursor", "ew-resize")
         .call(drag_right_tick);
 
     var startline = newg.append("line").classed("red-line", true);
@@ -241,6 +243,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .append("g")
         .append("circle")
         .attr("r", 7)
+        .style("cursor", "move")
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);

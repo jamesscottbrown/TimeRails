@@ -887,6 +887,7 @@ function Mode(common_geom, subplot_geom, options) {
         .append("g")
         .append("circle")
         .attr("r", 7)
+        .style("cursor", "move")
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle);
