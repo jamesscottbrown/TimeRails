@@ -968,25 +968,25 @@ function Mode(common_geom, subplot_geom, options) {
 
         // 4 edges:
         if (rect_geom.top_fixed_left && rect_geom.bottom_fixed_left && rect_geom.left_fixed_left) {
-            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
         }
 
         // 3 edges
         else if (rect_geom.top_fixed_left && rect_geom.bottom_fixed_left ) {
-            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
         } else if (rect_geom.top_fixed_left && rect_geom.left_fixed_left) {
-            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
         } else if (rect_geom.bottom_fixed_left && rect_geom.left_fixed_left) {
-            dragrect.style("stroke-dasharray", [0, (rect_geom.width_left), rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [0, (rect_geom.width_left), rect_geom.height_left + rect_geom.width_left + rect_geom.height_left].join(','));
         }
 
         // 2 edges
         else if (rect_geom.top_fixed_left) {
-            dragrect.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left + rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [rect_geom.width_left + rect_geom.height_left, rect_geom.width_left + rect_geom.height_left].join(','));
         } else if (rect_geom.bottom_fixed_left) {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left + rect_geom.width_left, rect_geom.height_left].join(','));
         } else if (rect_geom.left_fixed_left) {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
+            dragrect_left.style("stroke-dasharray", [0, rect_geom.width_left, rect_geom.height_left, rect_geom.width_left, rect_geom.height_left].join(','));
         }
 
         // 1 edges
