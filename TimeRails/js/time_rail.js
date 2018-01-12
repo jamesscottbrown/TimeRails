@@ -16,14 +16,24 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = helper_funcs.TimeToX(options.right_tick_time); }
     }
 
+    // increase SVG height
+    diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) + 2*geom.track_padding);
+
+       // shift later (lower) subplots downwards
+    for (var i=subplot_geom.subplot_index+1; i<geom.subplot_geoms.length; i++){
+        var g = geom.subplot_geoms[i].svg;
+
+        var transform = g.attr("transform");
+        var p=transform.split(", ");
+
+        var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) + 2*geom.track_padding;
+        g.attr("transform", "translate(0, " + newTranslation + ")");
+    }
+
+
     function adjust_everything(update_description){
 
         base_y = rectGeom.rail_height + (level - 1) * geom.track_padding;
-
-        // increase SVG height
-        if (parseFloat(svg.attr("height")) < (base_y + 2*geom.track_padding)){
-            svg.attr("height", base_y + 2*geom.track_padding);
-        }
 
         track
             .attr("x1", left_tick_pos)
@@ -243,8 +253,21 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         startline.remove();
         track_circle.remove();
         delay_line.remove();
-        svg.attr("height", parseInt(svg.attr("height")) - geom.track_padding);
-        
+
+        diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) - 2*geom.track_padding);
+
+       // shift later (lower) subplots upwards
+        for (var i=subplot_geom.subplot_index+1; i<geom.subplot_geoms.length; i++){
+            var g = geom.subplot_geoms[i].svg;
+
+            var transform = g.attr("transform");
+            var p=transform.split(", ");
+
+            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - 2*geom.track_padding;
+            g.attr("transform", "translate(0, " + newTranslation + ")");
+        }
+
+
         if (timing_parent_bar){
             timing_parent_bar.delete();
             timing_parent_bar = false;
