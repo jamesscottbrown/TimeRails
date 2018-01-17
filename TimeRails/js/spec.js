@@ -426,6 +426,7 @@ function Diagram(div_name, spec_id, spec_options) {
     // Group together data that is shared between all rectangles in a specification,
     // and methods that act on the whole specification
     var common_geom = {
+        diagram_svg: svg,
         w: parseInt(svg.attr("width")),
         h: parseInt(svg.attr("height")),
         vertical_padding: 30,
@@ -459,7 +460,8 @@ function Diagram(div_name, spec_id, spec_options) {
         rectangles: [],
         variable_names: [],
 
-        subplot_geoms: []
+        subplot_geoms: [],
+        selected_rail: {}
     };
 
     if (!spec_options){ spec_options = {}; }
@@ -480,7 +482,8 @@ function Diagram(div_name, spec_id, spec_options) {
             yRange: [100, 0],
             variable_name: variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
-            rectangles: []
+            rectangles: [],
+            subplot_index: common_geom.subplot_geoms.length
         };
 
         subplot_geom.yScale = d3.scale.linear()
