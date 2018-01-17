@@ -36,7 +36,10 @@ function Mode(common_geom, subplot_geom, options) {
         num_rails_above: 0,
         get_num_rails_above: get_num_rails_above,
 
-        rail_height: 0
+        rail_height: 0,
+
+        siblings: [],
+        adjust_everything: adjust_everything
     };
 
     function get_num_rails_above(){
@@ -207,6 +210,14 @@ function Mode(common_geom, subplot_geom, options) {
         set_edges();
     }
 
+    function update_start_time(){
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            rect_geom.siblings[i].start_time_pos = rect_geom.start_time_pos;
+            rect_geom.siblings[i].track_circle_pos = rect_geom.track_circle_pos;
+            rect_geom.siblings[i].adjust_everything();
+        }
+    }
+
     function adjust_scales(new_xScale, new_yScale){
 
         function convertX(x){
@@ -317,6 +328,7 @@ function Mode(common_geom, subplot_geom, options) {
                     subplot_geom.rectangles[i].adjust_everything();
                 }
             }
+            update_start_time();
     }
 
     function drag_fixed() {
@@ -347,6 +359,7 @@ function Mode(common_geom, subplot_geom, options) {
             var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.subplotWidth - rect_geom.width, rect_center);
             rect_geom.start_time_pos = new_start_pos;
         }
+        update_start_time();
 
         // vertical movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height/2;
@@ -368,6 +381,7 @@ function Mode(common_geom, subplot_geom, options) {
         } else {
             rect_geom.start_time_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.subplotWidth - rect_geom.width, new_start_pos);
         }
+        update_start_time();
 
         // vertical movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height_left/2;
@@ -511,6 +525,7 @@ function Mode(common_geom, subplot_geom, options) {
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
         var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
+        update_start_time();
     }
 
     function drag_transition_marker_bottom() {
@@ -526,6 +541,7 @@ function Mode(common_geom, subplot_geom, options) {
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
         var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
         drag_resize_left_inner(oldx, newx);
+        update_start_time();
     }
 
     function drag_resize_left_inner(oldx, newx) {
@@ -542,7 +558,7 @@ function Mode(common_geom, subplot_geom, options) {
 
     // Context menus and associated functions
     /************************************************/
-    var menu = [
+    var menu = function(){ return [
         {
             title: 'Constraint starts at fixed time',
             action: function(elm, d, i) {
@@ -602,9 +618,38 @@ function Mode(common_geom, subplot_geom, options) {
                 timing_parent_bar.set_parent_bar('all')();
                 update_text();
             }
+        },
+         {
+            divider: true
+        },
+        {
+            title: 'Link start times',
+            action: function(elm, d, i) {
+                if (timing_parent_bar){
+                    timing_parent_bar.delete();
+                }
+
+                common_geom.selected_rail = rect_geom;
+            },
+            disabled: rect_geom.siblings.length > 0
+        },
+        {
+            title: 'Make start time independent',
+            action: function(elm, d, i) {
+
+                // remove this rectangle from sibling list of other rectangles
+                for (var i=0; i<rect_geom.siblings.length; i++){
+                    var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
+                    rect_geom.siblings[i].siblings.splice(index, 1);
+                }
+
+                // remove from self
+                rect_geom.siblings = [];
+            },
+            disabled: rect_geom.siblings.length === 0
         }
 
-    ];
+    ]};
 
     function rclick_left() {
         if (common_geom.specification_fixed){ return; }
@@ -890,7 +935,35 @@ function Mode(common_geom, subplot_geom, options) {
         .style("cursor", "move")
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
+        .on("click", link_rail_times)
         .call(drag_track_circle);
+
+    function link_rail_times(){
+        // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
+
+        if (!common_geom.selected_rail){ return; }
+        if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
+
+        // add new mode to the sibling list of all of this mode's siblings
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            rect_geom.siblings[i].siblings.push(common_geom.selected_rail);
+        }
+
+        // copy this mode's siblings to new mode's sibling list
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            common_geom.selected_rail.siblings.push(rect_geom.siblings[i]);
+        }
+
+        // add new mode to the sibling list of this mode
+        rect_geom.siblings.push(common_geom.selected_rail);
+
+        // add this mode to sibling list of new node
+        common_geom.selected_rail.siblings.push(rect_geom);
+
+        update_start_time();
+
+        common_geom.selected_rail = false;
+    }
 
     function toggle_start_line_visibility(){
 
@@ -1230,6 +1303,7 @@ function Mode(common_geom, subplot_geom, options) {
             rect_geom.rect_top = valToY(parseFloat(maxValBox_right.value));
 
             adjust_everything(true);
+            update_start_time();
         })
 
             .attr("data-dismiss", "modal");
