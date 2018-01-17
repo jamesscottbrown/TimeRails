@@ -480,6 +480,7 @@ function Diagram(div_name, spec_id, spec_options) {
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
             yRange: [100, 0],
+            yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
             rectangles: [],

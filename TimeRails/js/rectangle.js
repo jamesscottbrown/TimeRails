@@ -26,7 +26,9 @@ function Rectangle(common_geom, subplot_geom, options) {
         rail_height: 0,
 
         siblings: [],
-        adjust_everything: adjust_everything
+        adjust_everything: adjust_everything,
+        getYOffset: function(){ return subplot_geom.yOffset; },
+        adjustSharedTimeLine: adjustSharedTimeLine
     };
 
     function get_num_rails_above(){
@@ -162,6 +164,37 @@ function Rectangle(common_geom, subplot_geom, options) {
             rect_geom.siblings[i].track_circle_pos = rect_geom.track_circle_pos;
             rect_geom.siblings[i].adjust_everything();
         }
+    }
+
+    function update_start_time(){
+        var min_y = subplot_geom.yOffset + rect_geom.rail_height;
+        var max_y = min_y;
+
+
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            var sibling = rect_geom.siblings[i];
+            sibling.start_time_pos = rect_geom.start_time_pos;
+            sibling.track_circle_pos = rect_geom.track_circle_pos;
+            sibling.adjust_everything();
+
+            var y = sibling.getYOffset() + sibling.rail_height;
+            min_y = Math.min(min_y, y);
+            max_y = Math.max(max_y, y);
+        }
+
+
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            rect_geom.siblings[i].adjustSharedTimeLine(min_y, max_y);
+        }
+        adjustSharedTimeLine(min_y, max_y);
+    }
+
+    function adjustSharedTimeLine (min_y, max_y){
+        link_shared_times_line
+            .attr("x1", rect_geom.track_circle_pos)
+            .attr("x2", rect_geom.track_circle_pos)
+            .attr("y1", min_y)
+            .attr("y2", max_y);
     }
 
     function adjust_scales(new_xScale, new_yScale){
@@ -398,7 +431,7 @@ function Rectangle(common_geom, subplot_geom, options) {
 
     // Context menus and associated functions
     /************************************************/
-    var menu = fuction(){ return [
+    var menu = function(){ return [
         {
             title: 'Constraint starts at fixed time',
             action: function(elm, d, i) {
@@ -555,6 +588,11 @@ function Rectangle(common_geom, subplot_geom, options) {
     var delay_line = newg.append("line").classed("red-line", true);
 
     var startline = newg.append("line").classed("red-line", true);
+
+    // This line spans subplots, so must be added to the parent SVG element rather than the group holding this subplot
+    var link_shared_times_line = common_geom.diagram_svg.append("line")
+        .classed("red-line", true)
+        .call(drag_track_circle);
 
     var dragrect = newg.append("rect")
         .attr("id", "active")
