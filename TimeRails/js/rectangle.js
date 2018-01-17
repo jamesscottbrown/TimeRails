@@ -589,8 +589,10 @@ function Rectangle(common_geom, subplot_geom, options) {
 
     var startline = newg.append("line").classed("red-line", true);
 
-    // This line spans subplots, so must be added to the parent SVG element rather than the group holding this subplot
-    var link_shared_times_line = common_geom.diagram_svg.append("line")
+    // This line spans subplots, so can't be added to the group holding this subplot
+    var link_shared_times_line = common_geom.diagram_svg.select("#linking-line-div")
+        .append("line")
+        .style("opacity", "0.1")
         .classed("red-line", true)
         .call(drag_track_circle);
 

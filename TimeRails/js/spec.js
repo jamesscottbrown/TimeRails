@@ -418,6 +418,8 @@ function Diagram(div_name, spec_id, spec_options) {
         .attr("height", 0)
         .on('contextmenu', d3.contextMenu([]));
 
+    svg.append("g").attr("id", "linking-line-div");
+
 
     var index = 1;
     var subplotIndex = 0;
