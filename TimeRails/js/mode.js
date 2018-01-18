@@ -572,7 +572,8 @@ function Mode(common_geom, subplot_geom, options) {
         // shift x
         var oldx = rect_geom.start_time_pos;
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
-        var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, newx);
+        var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
+        newx = imposeLimits(common_geom.xScale.range()[0], common_geom.xScale.range()[1], newx);
 
         if (timing_parent_bar) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
@@ -601,6 +602,7 @@ function Mode(common_geom, subplot_geom, options) {
         var oldx = rect_geom.start_time_pos;
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
         var newx = imposeLimits(rect_geom.track_circle_pos, rect_geom.start_time_pos + rect_geom.width, cursor_x);
+        newx = imposeLimits(common_geom.xScale.range()[0], common_geom.xScale.range()[1], newx);
 
         if (timing_parent_bar) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
