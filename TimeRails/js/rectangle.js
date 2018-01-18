@@ -173,8 +173,9 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         for (var i=0; i<rect_geom.siblings.length; i++){
             var sibling = rect_geom.siblings[i];
-            sibling.start_time_pos = rect_geom.start_time_pos;
-            sibling.track_circle_pos = rect_geom.track_circle_pos;
+            sibling.track_circle_pos = rect_geom.track_circle_pos; // bring track_circles into line
+            sibling.start_time_pos = sibling.track_circle_pos + sibling.delay_line_length; // preserve delay line length
+
             sibling.adjust_everything();
 
             var y = sibling.getYOffset() + sibling.rail_height;
