@@ -7,7 +7,7 @@ function Mode(common_geom, subplot_geom, options) {
         height: 200 * 0.75,
         dragbarw: 20,
 
-        delay_line_length: 30,
+        delay_line_length: 0,
 
         rect_top: 450 / 2,
         start_time_pos: 750 / 2,
