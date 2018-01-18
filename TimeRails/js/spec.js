@@ -629,12 +629,24 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.subplot_geoms.push(subplot_geom);
     }
 
+    function renameVariable(oldName, newName){
+        for (var i=0; i<common_geom.subplot_geoms.length; i++){
+            var sg = common_geom.subplot_geoms[i];
+            if (sg.variable_name == oldName){
+                sg.variable_name = newName;  // saved name
+                sg.svg.select(".axis-label").text(newName); // update axis
+            }
+        }
+    }
+
 
     // TODO: getSpecString needs to handle all subplots
     return {getSpecString: getSpecString,
         addConstraintSubplot: addConstraintSubplot,
         addInputSubplot:addInputSubplot,
-        getVariableNames: function(){ return common_geom.variable_names}};
+        getVariableNames: function(){ return common_geom.variable_names},
+        renameVariable: renameVariable
+    };
 }
 
 
