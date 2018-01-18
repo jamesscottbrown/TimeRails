@@ -513,6 +513,16 @@ function Diagram(div_name, spec_id, spec_options) {
                     disabled: common_geom.specification_fixed
                 })
             }
+
+            if (menu_options){
+                menu_options.push({divider: true});
+            }
+            menu_options.push({
+                title: "Delete subplot",
+                action: deleteSubplot,
+                diasbled: common_geom.specification_fixed
+            });
+
             return menu_options;
         }
 
@@ -546,6 +556,44 @@ function Diagram(div_name, spec_id, spec_options) {
         subplotIndex += 1;
         common_geom.variable_names.push(variable_name);
         common_geom.subplot_geoms.push(subplot_geom);
+
+        function deleteSubplot(){
+            // remove g element
+            subplot_geom.svg.node().innerHTML = "";
+            subplot_geom.svg.remove();
+
+            // resize SVG
+            svg.attr("height", parseFloat(svg.attr("height")) - subplotHeight);
+
+
+           // shift later (lower) subplots downwards
+            for (var i=subplot_geom.subplot_index+1; i<common_geom.subplot_geoms.length; i++){
+                var sg = common_geom.subplot_geoms[i];
+
+                sg.yOffset = sg.yOffset - subplotHeight;
+                sg.svg.attr("transform", "translate(0, " + sg.yOffset + ")");
+
+                common_geom.subplot_geoms[i].subplot_index -= 1; // Update subplot indexes
+            }
+            subplotIndex -= 1;
+
+            // remove this subplot_geom from common_geom
+            var index = common_geom.subplot_geoms.indexOf(subplot_geom);
+            common_geom.subplot_geoms.splice(index, 1);
+
+            // adjust linking lines
+            for (var i=0; i<common_geom.subplot_geoms.length; i++) {
+                var sg = common_geom.subplot_geoms[i];
+                for (var j=0; j<sg.rectangles.length; i++){
+                    sg.rectangles[j].update_start_time();
+                }
+            }
+
+            // delete rectangles (removing reference to them by siblings in other subplots)
+            while (subplot_geom.rectangles.length > 0){
+                subplot_geom.rectangles[0].deleteRectangle();
+            }
+        }
     }
 
 

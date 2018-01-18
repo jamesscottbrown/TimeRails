@@ -1062,6 +1062,20 @@ function Rectangle(common_geom, subplot_geom, options) {
             subplot_geom.rectangles[i].saveRectangleIndex(i);
         }
 
+        // loop through sibling rectangles, removing their reference to this rectangle
+        for (var i=0; i<rect_geom.siblings.length; i++){
+            var sibling = rect_geom.siblings[i];
+
+            var index = sibling.siblings.indexOf(rect_geom);
+            sibling.siblings.splice(index, 1);
+
+            sibling.update_start_time();
+        }
+
+        // remove this rectangle's shared time line
+        link_shared_times_line.remove();
+
+
         // delete description
         placeholder_latex_formula.remove();
         placeholder_form.remove();
@@ -1149,6 +1163,8 @@ function Rectangle(common_geom, subplot_geom, options) {
             saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;},
             update_formula: update_formula,
             get_num_rails: function (){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0; },
-            get_num_rails_above: get_num_rails_above
+            get_num_rails_above: get_num_rails_above,
+            deleteRectangle: deleteRectangle,
+            update_start_time: update_start_time
             }
 }
