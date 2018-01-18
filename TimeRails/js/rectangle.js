@@ -441,7 +441,9 @@ function Rectangle(common_geom, subplot_geom, options) {
 
     // Context menus and associated functions
     /************************************************/
-    var menu = function(){ return [
+    var menu = function(){
+
+        var menuOptions = [
         {
             title: 'Constraint starts at fixed time',
             action: function(elm, d, i) {
@@ -503,37 +505,43 @@ function Rectangle(common_geom, subplot_geom, options) {
                 update_text();
             },
             disabled: (common_geom.max_depth <= 2)
-        },
-         {
-            divider: true
-        },
-        {
-            title: 'Link start times',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
+        }];
 
-                common_geom.selected_rail = rect_geom;
-            },
-            disabled: rect_geom.siblings.length > 0
-        },
-        {
-            title: 'Make start time independent',
-            action: function(elm, d, i) {
+        if (common_geom.allow_shared_times) {
+            menuOptions.push({
+                divider: true
+            });
 
-                // remove this rectangle from sibling list of other rectangles
-                for (var i=0; i<rect_geom.siblings.length; i++){
-                    var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
-                    rect_geom.siblings[i].siblings.splice(index, 1);
-                }
+            menuOptions.push({
+                title: 'Link start times',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
 
-                // remove from self
-                rect_geom.siblings = [];
-            },
-            disabled: rect_geom.siblings.length === 0
+                    common_geom.selected_rail = rect_geom;
+                },
+                disabled: rect_geom.siblings.length > 0
+            });
+            menuOptions.push({
+                title: 'Make start time independent',
+                action: function (elm, d, i) {
+
+                    // remove this rectangle from sibling list of other rectangles
+                    for (var i = 0; i < rect_geom.siblings.length; i++) {
+                        var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
+                        rect_geom.siblings[i].siblings.splice(index, 1);
+                    }
+
+                    // remove from self
+                    rect_geom.siblings = [];
+                },
+                disabled: rect_geom.siblings.length === 0
+            });
+
         }
-    ]}
+        return menuOptions;
+    };
 
     function rclick_left() {
         if (common_geom.specification_fixed){ return; }

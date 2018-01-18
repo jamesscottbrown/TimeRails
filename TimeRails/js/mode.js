@@ -632,98 +632,105 @@ function Mode(common_geom, subplot_geom, options) {
 
     // Context menus and associated functions
     /************************************************/
-    var menu = function(){ return [
-        {
-            title: 'Constraint starts at fixed time',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                    timing_parent_bar = false;
-                    common_geom.adjustAllRectangles();
+    var menu = function() {
+
+        var menuOptions = [
+            {
+                title: 'Constraint starts at fixed time',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                        timing_parent_bar = false;
+                        common_geom.adjustAllRectangles();
+                        update_text();
+                    }
+                },
+                disabled: false // optional, defaults to false
+            },
+            {
+                title: 'Constraint applies at <i>some</i> time in range',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
+                    timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    update_text();
+                },
+                disabled: (common_geom.max_depth <= 1)
+            },
+            {
+                title: 'Constraint applies at <i>all</i> times in range',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
+                    timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    update_text();
+                },
+                disabled: (common_geom.max_depth <= 1)
+            },
+
+            {
+                divider: true
+            },
+            {
+                title: 'Eventually-Always',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
+                    timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    timing_parent_bar.set_parent_bar('some')();
                     update_text();
                 }
             },
-            disabled: false // optional, defaults to false
-        },
-        {
-            title: 'Constraint applies at <i>some</i> time in range',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
+            {
+                title: 'Always-Eventually',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
+                    timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    timing_parent_bar.set_parent_bar('all')();
+                    update_text();
                 }
-                timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                update_text();
-            },
-            disabled: (common_geom.max_depth <= 1)
-        },
-        {
-            title: 'Constraint applies at <i>all</i> times in range',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                update_text();
-            },
-            disabled: (common_geom.max_depth <= 1)
-        },
+            }];
 
-        {
-            divider: true
-        },
-        {
-            title: 'Eventually-Always',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                timing_parent_bar.set_parent_bar('some')();
-                update_text();
-            }
-        },
-        {
-            title: 'Always-Eventually',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
-                timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                timing_parent_bar.set_parent_bar('all')();
-                update_text();
-            }
-        },
-         {
-            divider: true
-        },
-        {
-            title: 'Link start times',
-            action: function(elm, d, i) {
-                if (timing_parent_bar){
-                    timing_parent_bar.delete();
-                }
+        if (common_geom.allow_shared_times) {
+            menuOptions.push({
+                divider: true
+            });
 
-                common_geom.selected_rail = rect_geom;
-            },
-            disabled: rect_geom.siblings.length > 0
-        },
-        {
-            title: 'Make start time independent',
-            action: function(elm, d, i) {
+            menuOptions.push({
+                title: 'Link start times',
+                action: function (elm, d, i) {
+                    if (timing_parent_bar) {
+                        timing_parent_bar.delete();
+                    }
 
-                // remove this rectangle from sibling list of other rectangles
-                for (var i=0; i<rect_geom.siblings.length; i++){
-                    var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
-                    rect_geom.siblings[i].siblings.splice(index, 1);
-                }
+                    common_geom.selected_rail = rect_geom;
+                },
+                disabled: rect_geom.siblings.length > 0
+            });
+            menuOptions.push({
+                title: 'Make start time independent',
+                action: function (elm, d, i) {
 
-                // remove from self
-                rect_geom.siblings = [];
-            },
-            disabled: rect_geom.siblings.length === 0
+                    // remove this rectangle from sibling list of other rectangles
+                    for (var i = 0; i < rect_geom.siblings.length; i++) {
+                        var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
+                        rect_geom.siblings[i].siblings.splice(index, 1);
+                    }
+
+                    // remove from self
+                    rect_geom.siblings = [];
+                },
+                disabled: rect_geom.siblings.length === 0
+            });
+
         }
-
-    ]};
+        return menuOptions;
+    };
 
     function rclick_left() {
         if (common_geom.specification_fixed){ return; }
