@@ -327,8 +327,18 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         if (rect_center < rect_geom.track_circle_pos){
             drag_track_circle_inner(rect_center);
-        } else {
+        } else if (shift_down) {
             var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.subplotWidth - rect_geom.width, rect_center);
+            rect_geom.start_time_pos = new_start_pos;
+        } else {
+
+            var new_start_pos = imposeLimits(rect_geom.track_circle_pos, common_geom.subplotWidth - rect_geom.width, rect_center);
+
+            if (timing_parent_bar) {
+                new_start_pos = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, new_start_pos);
+            }
+
+            rect_geom.track_circle_pos += (new_start_pos - rect_geom.start_time_pos);
             rect_geom.start_time_pos = new_start_pos;
         }
         update_start_time();
@@ -596,6 +606,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         .classed("red-line", true)
         .call(drag_track_circle);
 
+    var shift_down = false;
     var dragrect = newg.append("rect")
         .attr("id", "active")
         .attr("fill", "lightgreen")
@@ -603,7 +614,13 @@ function Rectangle(common_geom, subplot_geom, options) {
         .attr("cursor", "move")
         .call(d3.behavior.drag()
             .origin(Object)
-            .on("drag", dragmove));
+        .on("drag", dragmove))
+        .on('mousedown', function(d) {
+          shift_down = d3.event.shiftKey;
+        })
+        .on('mouseup', function(d) {
+            shift_down = false;
+        });
 
 
         var rectMenu = [{
