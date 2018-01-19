@@ -22,10 +22,19 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y;
 
+    function TimeToX(time){
+        return geom.xScale(time);
+    }
+    
+    function XToTime(x){
+        return geom.xScale.invert(x);
+    }
+
+    
     if (options){
-        if (options.hasOwnProperty('start_time')) { rail.track_circle_pos = helper_funcs.TimeToX(options.start_time); }
-        if (options.hasOwnProperty('left_tick_time')) { left_tick_pos = helper_funcs.TimeToX(options.left_tick_time); }
-        if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = helper_funcs.TimeToX(options.right_tick_time); }
+        if (options.hasOwnProperty('start_time')) { rail.track_circle_pos = TimeToX(options.start_time); }
+        if (options.hasOwnProperty('left_tick_time')) { left_tick_pos = TimeToX(options.left_tick_time); }
+        if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = TimeToX(options.right_tick_time); }
     }
 
     // increase SVG height
@@ -109,7 +118,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     function adjust_scales(new_xScale){
 
         function convertX(x){
-            return new_xScale(helper_funcs.XToTime(x));
+            return new_xScale(XToTime(x));
         }
 
         rail.track_circle_pos = convertX(rail.track_circle_pos);
@@ -196,11 +205,6 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     // Context menus and associated functions
     var helper_funcs_new = {
-        getStartX: function () {
-            return rail.track_circle_pos;
-        },
-        XToTime: helper_funcs.XToTime,
-        TimeToX: helper_funcs.TimeToX,
         update_text: helper_funcs.update_text,
         update_formula: helper_funcs.update_formula
     };
@@ -329,12 +333,12 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             latex_string += timing_parent_bar.getLatex();
 
             // start and end times are relative to te track_circle
-            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
-            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+            t_lower = XToTime(left_tick_pos) - XToTime(rail.track_circle_pos);
+            t_upper =  XToTime(right_tick_pos) - XToTime(rail.track_circle_pos);
         } else {
             // start and end times are absolute
-            t_lower = helper_funcs.XToTime(left_tick_pos);
-            t_upper = helper_funcs.XToTime(right_tick_pos);
+            t_lower = XToTime(left_tick_pos);
+            t_upper = XToTime(right_tick_pos);
         }
 
         t_lower = t_lower.toFixed(2);
@@ -363,12 +367,12 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             spec_string += timing_parent_bar.getSpecString();
 
             // start and end times are relative to te track_circle
-            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
-            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+            t_lower = XToTime(left_tick_pos) - XToTime(rail.track_circle_pos);
+            t_upper =  XToTime(right_tick_pos) - XToTime(rail.track_circle_pos);
         } else {
             // start and end times are absolute
-            t_lower = helper_funcs.XToTime(left_tick_pos);
-            t_upper = helper_funcs.XToTime(right_tick_pos);
+            t_lower = XToTime(left_tick_pos);
+            t_upper = XToTime(right_tick_pos);
         }
 
         t_lower = t_lower.toFixed(2);
@@ -400,26 +404,26 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
         newDiv.append("text").text(s1 + s2);
 
-        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+        var start_time = XToTime(left_tick_pos) - XToTime(rail.track_circle_pos);
 
         newDiv.append("input")
             .classed("spec_menu", true)
             .attr("value", start_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
-                left_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(rail.track_circle_pos));
+                left_tick_pos = TimeToX(parseFloat(this.value) + XToTime(rail.track_circle_pos));
                 adjust_everything();
             });
 
         newDiv.append("text").text(" and " + s2);
 
-        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+        var end_time = XToTime(right_tick_pos) - XToTime(rail.track_circle_pos);
         newDiv.append("input")
             .classed("spec_menu", true)
             .attr("value", end_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
-                right_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(rail.track_circle_pos));
+                right_tick_pos = TimeToX(parseFloat(this.value) + XToTime(rail.track_circle_pos));
                 adjust_everything();
             });
 
@@ -472,8 +476,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
         modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
 
-        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
-        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+        var start_time = XToTime(left_tick_pos) - XToTime(rail.track_circle_pos);
+        var end_time = XToTime(right_tick_pos) - XToTime(rail.track_circle_pos);
 
         var timeDiv = modalBody.append("div");
         timeDiv.append("text").text("From ");
@@ -483,8 +487,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
 
         modalFooter.append("button").text("Save").on("click", function(){
-            left_tick_pos = helper_funcs.TimeToX(parseFloat(startTimeBox.value) + helper_funcs.XToTime(rail.track_circle_pos));
-            right_tick_pos = helper_funcs.TimeToX(parseFloat(endTimeBox.value) + helper_funcs.XToTime(rail.track_circle_pos));
+            left_tick_pos = TimeToX(parseFloat(startTimeBox.value) + XToTime(rail.track_circle_pos));
+            right_tick_pos = TimeToX(parseFloat(endTimeBox.value) + XToTime(rail.track_circle_pos));
             adjust_everything();
         })
 

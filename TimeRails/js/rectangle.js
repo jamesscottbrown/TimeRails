@@ -87,8 +87,6 @@ function Rectangle(common_geom, subplot_geom, options) {
     }
 
     var helper_funcs = {
-        XToTime: XToTime,
-        TimeToX: function(time){ return common_geom.xScale(time); },
         update_text: update_text,
         update_formula: update_formula
     };
