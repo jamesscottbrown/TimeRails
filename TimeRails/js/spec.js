@@ -173,6 +173,7 @@ function addCommonElements(common_geom, subplot_geom){
         // Plotting saved datasets
     d3.json(window.location + "/data", function(error, all_data){
 
+            if (error){ return; } // TODO: change how data is loaded
             for (var i=0; i<all_data.length; i++) {
 
                 var data = all_data[i].value;

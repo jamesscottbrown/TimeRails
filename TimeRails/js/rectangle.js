@@ -207,8 +207,10 @@ function Rectangle(common_geom, subplot_geom, options) {
             max_y = Math.max(max_y, y);
         }
 
-        min_y = Math.min(min_y, timing_parent_bar.get_rail_height_absolute());
-        max_y = Math.max(max_y, timing_parent_bar.get_rail_height_absolute());
+        if (timing_parent_bar){
+            min_y = Math.min(min_y, timing_parent_bar.get_rail_height_absolute());
+            max_y = Math.max(max_y, timing_parent_bar.get_rail_height_absolute());
+        }
 
         for (var i=0; i<rect_geom.siblings.length; i++){
             rect_geom.siblings[i].adjustSharedTimeLine(min_y, max_y);
