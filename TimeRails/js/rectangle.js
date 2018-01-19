@@ -46,10 +46,12 @@ function Rectangle(common_geom, subplot_geom, options) {
             update_text();
 
             if (newBar){
-                // newBar may be false (rather than a bar) if
+                // newBar may be false (rather than a bar)
                 newBar.children.push(rect_geom);
             }
-        }
+        },
+
+        assign_parent_bar: assign_parent_bar
     };
 
     function assign_parent_bar(bar){
@@ -187,13 +189,6 @@ function Rectangle(common_geom, subplot_geom, options) {
         set_edges();
     }
 
-    function update_start_time(){
-        for (var i=0; i<rect_geom.siblings.length; i++){
-            rect_geom.siblings[i].start_time_pos = rect_geom.start_time_pos;
-            rect_geom.siblings[i].track_circle_pos = rect_geom.track_circle_pos;
-            rect_geom.siblings[i].adjust_everything();
-        }
-    }
 
     function update_start_time(){
         var min_y = subplot_geom.yOffset + rect_geom.rail_height;
@@ -212,6 +207,8 @@ function Rectangle(common_geom, subplot_geom, options) {
             max_y = Math.max(max_y, y);
         }
 
+        min_y = Math.min(min_y, timing_parent_bar.get_rail_height_absolute());
+        max_y = Math.max(max_y, timing_parent_bar.get_rail_height_absolute());
 
         for (var i=0; i<rect_geom.siblings.length; i++){
             rect_geom.siblings[i].adjustSharedTimeLine(min_y, max_y);
@@ -556,6 +553,24 @@ function Rectangle(common_geom, subplot_geom, options) {
                     rect_geom.siblings = [];
                 },
                 disabled: rect_geom.siblings.length === 0
+            });
+            
+            menuOptions.push({
+                title: 'Attach to rail',
+                action: function (elm, d, i) {
+
+                    common_geom.selected_rail_to_add_to_rail = rect_geom;
+                },
+                disabled: false
+            });
+
+            menuOptions.push({
+                title: 'Attach to rail',
+                action: function (elm, d, i) {
+
+                    common_geom.selected_rail_to_add_to_rail = rect_geom;
+                },
+                disabled: false
             });
 
         }

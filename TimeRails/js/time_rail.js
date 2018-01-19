@@ -246,7 +246,12 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .style("cursor", "move")
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
-        .call(drag_track_circle);
+        .call(drag_track_circle)
+        .on("click", function(){
+            if (!geom.selected_rail_to_add_to_rail){ return; }
+            geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
+            geom.selected_rail_to_add_to_rail.adjustSharedTimeLine();
+        });
 
     // Externally exposed functions
     function delete_bar(){
@@ -462,11 +467,14 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     adjust_everything(true);
     geom.adjustAllRectangles();
     
-    return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
+    var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
         describe_constraint: describe_constraint,
         getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
         get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
+        get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
         children: [] };
+
+    return rail;
 }

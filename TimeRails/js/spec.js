@@ -464,7 +464,8 @@ function Diagram(div_name, spec_id, spec_options) {
         variable_names: [],
 
         subplot_geoms: [],
-        selected_rail: {}
+        selected_rail: {},
+        selected_rail_to_add_to_rail: {}
     };
 
     if (!spec_options){ spec_options = {}; }
