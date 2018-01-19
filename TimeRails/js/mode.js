@@ -41,8 +41,37 @@ function Mode(common_geom, subplot_geom, options) {
         siblings: [],
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
-        adjustSharedTimeLine: adjustSharedTimeLine
+        adjustSharedTimeLine: adjustSharedTimeLine,
+
+        setTimingBar: function(newBar){
+
+            // remove self from timing_parent_bar's list of children
+            if (timing_parent_bar){
+                var index = timing_parent_bar.children.indexOf(rect_geom);
+                timing_parent_bar.children.splice(index, 1);
+            }
+
+             if (timing_parent_bar && timing_parent_bar.children.length === 0) {
+                 timing_parent_bar.delete();
+             }
+
+            timing_parent_bar = newBar;
+            update_text();
+
+            if (newBar){
+                // newBar may be false (rather than a bar) if
+                newBar.children.push(rect_geom);
+            }
+        }
     };
+
+    function assign_parent_bar(bar){
+        for (var i=0; i < rect_geom.siblings.length; i++){
+            rect_geom.siblings[i].setTimingBar(bar);
+        }
+
+        rect_geom.setTimingBar(bar);
+    }
 
     function get_num_rails_above(){
         rect_geom.num_rails_above = 0;
@@ -640,10 +669,8 @@ function Mode(common_geom, subplot_geom, options) {
                 title: 'Constraint starts at fixed time',
                 action: function (elm, d, i) {
                     if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                        timing_parent_bar = false;
+                        assign_parent_bar(false);
                         common_geom.adjustAllRectangles();
-                        update_text();
                     }
                 },
                 disabled: false // optional, defaults to false
@@ -651,22 +678,16 @@ function Mode(common_geom, subplot_geom, options) {
             {
                 title: 'Constraint applies at <i>some</i> time in range',
                 action: function (elm, d, i) {
-                    if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                    }
-                    timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                    update_text();
+                    var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    assign_parent_bar(bar);
                 },
                 disabled: (common_geom.max_depth <= 1)
             },
             {
                 title: 'Constraint applies at <i>all</i> times in range',
                 action: function (elm, d, i) {
-                    if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                    }
-                    timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                    update_text();
+                    var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                     assign_parent_bar(bar);
                 },
                 disabled: (common_geom.max_depth <= 1)
             },
@@ -677,10 +698,8 @@ function Mode(common_geom, subplot_geom, options) {
             {
                 title: 'Eventually-Always',
                 action: function (elm, d, i) {
-                    if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                    }
-                    timing_parent_bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    assign_parent_bar(bar);
                     timing_parent_bar.set_parent_bar('some')();
                     update_text();
                 }
@@ -688,10 +707,8 @@ function Mode(common_geom, subplot_geom, options) {
             {
                 title: 'Always-Eventually',
                 action: function (elm, d, i) {
-                    if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                    }
-                    timing_parent_bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                    assign_parent_bar(bar);
                     timing_parent_bar.set_parent_bar('all')();
                     update_text();
                 }
@@ -1076,6 +1093,8 @@ function Mode(common_geom, subplot_geom, options) {
         // add this mode to sibling list of new node
         common_geom.selected_rail.siblings.push(rect_geom);
 
+        common_geom.selected_rail.setTimingBar(timing_parent_bar);
+
         update_start_time();
 
         common_geom.selected_rail = false;
@@ -1231,8 +1250,8 @@ function Mode(common_geom, subplot_geom, options) {
     function update_text() {
 
         function create_initial_bar (kind){
-            timing_parent_bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-            update_text();
+            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+            assign_parent_bar(bar);
         }
 
         var update_functions = {
@@ -1285,10 +1304,11 @@ function Mode(common_geom, subplot_geom, options) {
 
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
+            update_text();
         } else {
-            timing_parent_bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs, options);
+            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs, options);
+            assign_parent_bar(bar);
         }
-        update_text();
     }
 
     function append_timing_bar(kind, options){

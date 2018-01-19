@@ -461,12 +461,12 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     
     adjust_everything(true);
     geom.adjustAllRectangles();
-
-
+    
     return {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
         describe_constraint: describe_constraint,
         getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
-        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;} };
+        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
+        children: [] };
 }
