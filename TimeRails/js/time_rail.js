@@ -30,6 +30,21 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         g.attr("transform", "translate(0, " + newTranslation + ")");
     }
 
+    function getStartX(){
+        var minStartX = +Infinity;
+        var maxStartX = -Infinity;
+
+        for (var i=0; i<rail.children.length; i++){
+            minStartX = Math.min(minStartX, rail.children[i].track_circle_pos);
+            maxStartX = Math.max(maxStartX, rail.children[i].track_circle_pos);
+        }
+
+        // TODO: other bars need to be stored as children, not just rect/mode
+        // TODO: we need to expose track_circle_pos from bar
+
+        return [minStartX, maxStartX];
+    }
+    var minStartX, maxStartX;
 
     function adjust_everything(update_description){
 
@@ -106,19 +121,20 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(subplot_svg.node())[0];
 
-            var x1 = imposeLimits(track_circle_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
-            var x2 = x1 + track_length;
+            var new_left_end = imposeLimits(track_circle_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
+            var new_right_end = new_left_end + track_length;
 
-            if (x1 >= helper_funcs.getStartX()){
-                x1 = helper_funcs.getStartX();
-                x2 = right_tick_pos;
-            } else if (x2 <= helper_funcs.getStartX()){
-                x1 = left_tick_pos;
-                x2 = helper_funcs.getStartX();
+            [minStartX, maxStartX] = getStartX();
+            if (new_left_end >= minStartX){
+                new_left_end = minStartX;
+                new_right_end = right_tick_pos;
+            } else if (new_right_end <= maxStartX){
+                new_left_end = left_tick_pos;
+                new_right_end = maxStartX;
             }
 
-            left_tick_pos = x1;
-            right_tick_pos = x2;
+            left_tick_pos = new_left_end;
+            right_tick_pos = new_right_end;
             adjust_everything(true);
         });
 
@@ -127,7 +143,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on("drag", function(){
             if (geom.specification_fixed){ return; }
 
-            left_tick_pos = imposeLimits(track_circle_pos, helper_funcs.getStartX(), d3.mouse(subplot_svg.node())[0]);
+            [minStartX, maxStartX] = getStartX();
+            left_tick_pos = imposeLimits(track_circle_pos, minStartX, d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
@@ -137,7 +154,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on("drag", function(){
             if (geom.specification_fixed){ return; }
 
-            right_tick_pos = imposeLimits(helper_funcs.getStartX(), geom.w, d3.mouse(subplot_svg.node())[0]);
+            [minStartX, maxStartX] = getStartX();
+            right_tick_pos = imposeLimits(maxStartX, geom.w, d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
@@ -151,7 +169,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             var start_line_length = left_tick_pos - track_circle_pos;
             var track_length = right_tick_pos - left_tick_pos;
 
-            var x_left = imposeLimits(helper_funcs.getStartX() - start_line_length - track_length, helper_funcs.getStartX() - start_line_length, d3.mouse(subplot_svg.node())[0]);
+            [minStartX, maxStartX] = getStartX();
+            var x_left = imposeLimits(maxStartX - start_line_length - track_length, minStartX - start_line_length, d3.mouse(subplot_svg.node())[0]);
             if (timing_parent_bar) {
                 x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
             }

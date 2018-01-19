@@ -87,7 +87,6 @@ function Rectangle(common_geom, subplot_geom, options) {
     }
 
     var helper_funcs = {
-        getStartX: function (){ return rect_geom.track_circle_pos; },
         XToTime: XToTime,
         TimeToX: function(time){ return common_geom.xScale(time); },
         update_text: update_text,
