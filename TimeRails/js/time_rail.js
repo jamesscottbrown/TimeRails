@@ -5,13 +5,25 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     var timing_parent_bar = false;
 
-    var track_circle_pos = geom.horizontal_padding;
+    
+    var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
+        "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
+        describe_constraint: describe_constraint,
+        getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
+        adjust_everything: adjust_everything,
+        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
+        get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
+        children: [],
+        track_circle_pos: geom.horizontal_padding
+    };
+
+        
     var left_tick_pos = geom.horizontal_padding + 20;
     var right_tick_pos = geom.w - geom.horizontal_padding - 20;
     var base_y;
 
     if (options){
-        if (options.hasOwnProperty('start_time')) { track_circle_pos = helper_funcs.TimeToX(options.start_time); }
+        if (options.hasOwnProperty('start_time')) { rail.track_circle_pos = helper_funcs.TimeToX(options.start_time); }
         if (options.hasOwnProperty('left_tick_time')) { left_tick_pos = helper_funcs.TimeToX(options.left_tick_time); }
         if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = helper_funcs.TimeToX(options.right_tick_time); }
     }
@@ -40,7 +52,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         }
 
         // TODO: other bars need to be stored as children, not just rect/mode
-        // TODO: we need to expose track_circle_pos from bar
+        // TODO: we need to expose rail.track_circle_pos from bar
 
         return [minStartX, maxStartX];
     }
@@ -70,19 +82,19 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             .attr("y2", base_y + geom.track_padding/2);
             
         startline    
-            .attr("x1", track_circle_pos)
-            .attr("x2", track_circle_pos)
+            .attr("x1", rail.track_circle_pos)
+            .attr("x2", rail.track_circle_pos)
             .attr("y1", base_y)
             .attr("y2", base_y + geom.track_padding);
         
         delay_line
-            .attr("x1", track_circle_pos)
+            .attr("x1", rail.track_circle_pos)
             .attr("x2", left_tick_pos)
             .attr("y1", base_y)
             .attr("y2", base_y);
         
         track_circle
-            .attr("cx", track_circle_pos)
+            .attr("cx", rail.track_circle_pos)
             .attr("cy", base_y + geom.track_padding);
 
         if (timing_parent_bar){
@@ -100,7 +112,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             return new_xScale(helper_funcs.XToTime(x));
         }
 
-        track_circle_pos = convertX(track_circle_pos);
+        rail.track_circle_pos = convertX(rail.track_circle_pos);
         left_tick_pos = convertX(left_tick_pos);
         right_tick_pos = convertX(right_tick_pos);
 
@@ -121,7 +133,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(subplot_svg.node())[0];
 
-            var new_left_end = imposeLimits(track_circle_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
+            var new_left_end = imposeLimits(rail.track_circle_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
             var new_right_end = new_left_end + track_length;
 
             [minStartX, maxStartX] = getStartX();
@@ -144,7 +156,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             if (geom.specification_fixed){ return; }
 
             [minStartX, maxStartX] = getStartX();
-            left_tick_pos = imposeLimits(track_circle_pos, minStartX, d3.mouse(subplot_svg.node())[0]);
+            left_tick_pos = imposeLimits(rail.track_circle_pos, minStartX, d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
@@ -166,7 +178,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
                 return;
             }
 
-            var start_line_length = left_tick_pos - track_circle_pos;
+            var start_line_length = left_tick_pos - rail.track_circle_pos;
             var track_length = right_tick_pos - left_tick_pos;
 
             [minStartX, maxStartX] = getStartX();
@@ -175,9 +187,9 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
                 x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
             }
 
-            left_tick_pos = left_tick_pos + (x_left - track_circle_pos);
-            right_tick_pos = right_tick_pos + (x_left - track_circle_pos);
-            track_circle_pos = x_left;
+            left_tick_pos = left_tick_pos + (x_left - rail.track_circle_pos);
+            right_tick_pos = right_tick_pos + (x_left - rail.track_circle_pos);
+            rail.track_circle_pos = x_left;
             adjust_everything(true);
         });
 
@@ -185,7 +197,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     // Context menus and associated functions
     var helper_funcs_new = {
         getStartX: function () {
-            return track_circle_pos;
+            return rail.track_circle_pos;
         },
         XToTime: helper_funcs.XToTime,
         TimeToX: helper_funcs.TimeToX,
@@ -317,8 +329,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             latex_string += timing_parent_bar.getLatex();
 
             // start and end times are relative to te track_circle
-            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(track_circle_pos);
-            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(track_circle_pos);
+            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
         } else {
             // start and end times are absolute
             t_lower = helper_funcs.XToTime(left_tick_pos);
@@ -351,8 +363,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             spec_string += timing_parent_bar.getSpecString();
 
             // start and end times are relative to te track_circle
-            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(track_circle_pos);
-            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(track_circle_pos);
+            t_lower = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+            t_upper =  helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
         } else {
             // start and end times are absolute
             t_lower = helper_funcs.XToTime(left_tick_pos);
@@ -388,26 +400,26 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
         newDiv.append("text").text(s1 + s2);
 
-        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(track_circle_pos);
+        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
 
         newDiv.append("input")
             .classed("spec_menu", true)
             .attr("value", start_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
-                left_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(track_circle_pos));
+                left_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(rail.track_circle_pos));
                 adjust_everything();
             });
 
         newDiv.append("text").text(" and " + s2);
 
-        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(track_circle_pos);
+        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
         newDiv.append("input")
             .classed("spec_menu", true)
             .attr("value", end_time.toFixed(2))
             .attr("size", "6")
             .on("change", function (){
-                right_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(track_circle_pos));
+                right_tick_pos = helper_funcs.TimeToX(parseFloat(this.value) + helper_funcs.XToTime(rail.track_circle_pos));
                 adjust_everything();
             });
 
@@ -460,8 +472,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
         modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
 
-        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(track_circle_pos);
-        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(track_circle_pos);
+        var start_time = helper_funcs.XToTime(left_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
+        var end_time = helper_funcs.XToTime(right_tick_pos) - helper_funcs.XToTime(rail.track_circle_pos);
 
         var timeDiv = modalBody.append("div");
         timeDiv.append("text").text("From ");
@@ -471,8 +483,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
 
         modalFooter.append("button").text("Save").on("click", function(){
-            left_tick_pos = helper_funcs.TimeToX(parseFloat(startTimeBox.value) + helper_funcs.XToTime(track_circle_pos));
-            right_tick_pos = helper_funcs.TimeToX(parseFloat(endTimeBox.value) + helper_funcs.XToTime(track_circle_pos));
+            left_tick_pos = helper_funcs.TimeToX(parseFloat(startTimeBox.value) + helper_funcs.XToTime(rail.track_circle_pos));
+            right_tick_pos = helper_funcs.TimeToX(parseFloat(endTimeBox.value) + helper_funcs.XToTime(rail.track_circle_pos));
             adjust_everything();
         })
 
@@ -486,14 +498,6 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     adjust_everything(true);
     geom.adjustAllRectangles();
     
-    var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
-        describe_constraint: describe_constraint,
-        getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
-        adjust_everything: adjust_everything,
-        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
-        get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
-        children: [] };
 
     return rail;
 }
