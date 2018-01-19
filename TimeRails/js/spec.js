@@ -316,8 +316,9 @@ function addCommonElements(common_geom, subplot_geom){
 
             alert(spec_strings.join(symbol));
             //return true;
-        })
+        });
 
+    return axis_range_div;
 }
 
 function getSpecString(common_geom){
@@ -478,16 +479,18 @@ function Diagram(div_name, spec_id, spec_options) {
 
 
 
-    function addConstraintSubplot(specification_string, variable_name) {
+    function addConstraintSubplot(specification_string, variable_name, base_variable_name) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
             yRange: [100, 0],
             yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
+            base_variable_name: base_variable_name ? base_variable_name : variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
             rectangles: [],
-            subplot_index: common_geom.subplot_geoms.length
+            subplot_index: common_geom.subplot_geoms.length,
+            deleteSubplot: deleteSubplot
         };
 
         subplot_geom.yScale = d3.scale.linear()
@@ -543,7 +546,7 @@ function Diagram(div_name, spec_id, spec_options) {
         var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
         drawAxes(common_geom, subplot_geom);
-        addCommonElements(common_geom, subplot_geom);
+        var axis_range_div = addCommonElements(common_geom, subplot_geom);
 
         if (string){
             var rectangle_strings = string.split("&amp;&amp;");
@@ -562,6 +565,9 @@ function Diagram(div_name, spec_id, spec_options) {
             // remove g element
             subplot_geom.svg.node().innerHTML = "";
             subplot_geom.svg.remove();
+
+            axis_range_div.node().innerHTML = "";
+            axis_range_div.remove();
 
             // resize SVG
             svg.attr("height", parseFloat(svg.attr("height")) - subplotHeight);
@@ -603,9 +609,13 @@ function Diagram(div_name, spec_id, spec_options) {
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
             yRange: [100, 0],
+            yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
+            base_variable_name: variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
-            rectangles: []
+            rectangles: [],
+            subplot_index: common_geom.subplot_geoms.length,
+            deleteSubplot: deleteSubplot
         };
 
         subplot_geom.yScale = d3.scale.linear()
@@ -620,13 +630,53 @@ function Diagram(div_name, spec_id, spec_options) {
         var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
         drawAxes(common_geom, subplot_geom);
-        addCommonElements(common_geom, subplot_geom);
+        var axis_range_div = addCommonElements(common_geom, subplot_geom);
 
         drawInput(common_geom, subplot_geom);
 
         subplotIndex += 1;
         common_geom.variable_names.push(variable_name);
         common_geom.subplot_geoms.push(subplot_geom);
+
+        function deleteSubplot(){
+            // remove g element
+            subplot_geom.svg.node().innerHTML = "";
+            subplot_geom.svg.remove();
+
+            axis_range_div.node().innerHTML = "";
+            axis_range_div.remove();
+
+            // resize SVG
+            svg.attr("height", parseFloat(svg.attr("height")) - subplotHeight);
+
+           // shift later (lower) subplots downwards
+            for (var i=subplot_geom.subplot_index+1; i<common_geom.subplot_geoms.length; i++){
+                var sg = common_geom.subplot_geoms[i];
+
+                sg.yOffset = sg.yOffset - subplotHeight;
+                sg.svg.attr("transform", "translate(0, " + sg.yOffset + ")");
+
+                common_geom.subplot_geoms[i].subplot_index -= 1; // Update subplot indexes
+            }
+            subplotIndex -= 1;
+
+            // remove this subplot_geom from common_geom
+            var index = common_geom.subplot_geoms.indexOf(subplot_geom);
+            common_geom.subplot_geoms.splice(index, 1);
+
+            // adjust linking lines
+            for (var i=0; i<common_geom.subplot_geoms.length; i++) {
+                var sg = common_geom.subplot_geoms[i];
+                for (var j=0; j<sg.rectangles.length; i++){
+                    sg.rectangles[j].update_start_time();
+                }
+            }
+
+            // delete rectangles (removing reference to them by siblings in other subplots)
+            while (subplot_geom.rectangles.length > 0){
+                subplot_geom.rectangles[0].deleteRectangle();
+            }
+        }
     }
 
     function renameVariable(oldName, newName){
@@ -639,13 +689,26 @@ function Diagram(div_name, spec_id, spec_options) {
         }
     }
 
+    function deleteVariable(name){
+        var toDelete = [];
+
+        for (var i=0; i<common_geom.subplot_geoms.length; i++){
+            var sg = common_geom.subplot_geoms[i];
+            if (sg.base_variable_name == name){
+                sg.deleteSubplot();
+                i--; // we have removed the subplot at position i, so need to check the new one to take its place
+            }
+        }
+
+    }
+
 
     // TODO: getSpecString needs to handle all subplots
     return {getSpecString: getSpecString,
         addConstraintSubplot: addConstraintSubplot,
         addInputSubplot:addInputSubplot,
         getVariableNames: function(){ return common_geom.variable_names},
-        renameVariable: renameVariable
+        renameVariable: renameVariable, deleteVariable: deleteVariable
     };
 }
 
