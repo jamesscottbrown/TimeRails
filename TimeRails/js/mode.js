@@ -726,10 +726,6 @@ function Mode(common_geom, subplot_geom, options) {
             menuOptions.push({
                 title: 'Link start times',
                 action: function (elm, d, i) {
-                    if (timing_parent_bar) {
-                        timing_parent_bar.delete();
-                    }
-
                     common_geom.selected_rail = rect_geom;
                 },
                 disabled: rect_geom.siblings.length > 0
