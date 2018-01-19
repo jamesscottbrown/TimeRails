@@ -566,15 +566,6 @@ function Rectangle(common_geom, subplot_geom, options) {
                 disabled: false
             });
 
-            menuOptions.push({
-                title: 'Attach to rail',
-                action: function (elm, d, i) {
-
-                    common_geom.selected_rail_to_add_to_rail = rect_geom;
-                },
-                disabled: false
-            });
-
         }
         return menuOptions;
     };
