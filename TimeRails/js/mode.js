@@ -744,8 +744,14 @@ function Mode(common_geom, subplot_geom, options) {
                         rect_geom.siblings[i].siblings.splice(index, 1);
                     }
 
+                    // adjust start line for former sibling
+                    rect_geom.siblings[0].update_start_time();
+
                     // remove from self
                     rect_geom.siblings = [];
+
+                    // adjust start line for self
+                    rect_geom.update_start_time();
                 },
                 disabled: rect_geom.siblings.length === 0
             });
