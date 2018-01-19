@@ -29,6 +29,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
         adjustSharedTimeLine: adjustSharedTimeLine,
+        update_start_time: update_start_time,
 
         setTimingBar: function(newBar){
             

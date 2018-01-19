@@ -285,7 +285,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on("click", function(){
             if (!geom.selected_rail_to_add_to_rail){ return; }
             geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
-            geom.selected_rail_to_add_to_rail.adjustSharedTimeLine();
+            geom.selected_rail_to_add_to_rail.update_start_time();
         });
 
     // Externally exposed functions
