@@ -593,7 +593,7 @@ function Diagram(div_name, spec_id, spec_options) {
             // adjust linking lines
             for (var i=0; i<common_geom.subplot_geoms.length; i++) {
                 var sg = common_geom.subplot_geoms[i];
-                for (var j=0; j<sg.rectangles.length; i++){
+                for (var j=0; j<sg.rectangles.length; j++){
                     sg.rectangles[j].update_start_time();
                 }
             }
