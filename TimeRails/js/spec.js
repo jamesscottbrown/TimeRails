@@ -462,7 +462,6 @@ function Diagram(div_name, spec_id, spec_options) {
         },
 
         rectangles: [],
-        variable_names: [],
 
         subplot_geoms: [],
         selected_rail: {},
@@ -560,7 +559,6 @@ function Diagram(div_name, spec_id, spec_options) {
         }
 
         subplotIndex += 1;
-        common_geom.variable_names.push(variable_name);
         common_geom.subplot_geoms.push(subplot_geom);
 
         function deleteSubplot(){
@@ -637,7 +635,6 @@ function Diagram(div_name, spec_id, spec_options) {
         drawInput(common_geom, subplot_geom);
 
         subplotIndex += 1;
-        common_geom.variable_names.push(variable_name);
         common_geom.subplot_geoms.push(subplot_geom);
 
         function deleteSubplot(){
@@ -709,8 +706,9 @@ function Diagram(div_name, spec_id, spec_options) {
     return {getSpecString: getSpecString,
         addConstraintSubplot: addConstraintSubplot,
         addInputSubplot:addInputSubplot,
-        getVariableNames: function(){ return common_geom.variable_names},
-        renameVariable: renameVariable, deleteVariable: deleteVariable
+        getVariableNames: function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })},
+        renameVariable: renameVariable, deleteVariable: deleteVariable,
+        common_geom: common_geom
     };
 }
 
