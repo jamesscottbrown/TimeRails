@@ -509,7 +509,7 @@ function Mode(common_geom, subplot_geom, options) {
         //Max x on the left is x - width
         //Max x on the right is width of screen + (dragbarw/2)
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
-        var dragx = imposeLimits(rect_geom.start_time_pos, common_geom.subplotWidth, cursor_x);
+        var dragx = imposeLimits(rect_geom.start_time_pos, common_geom.xScale.range()[1], cursor_x);
         drag_resize_right_inner(rect_geom.start_time_pos, dragx);
     }
 
@@ -528,7 +528,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         var oldy = rect_geom.rect_top;
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        var newy = imposeLimits(timeToX(0), rect_geom.rect_top + rect_geom.height - (rect_geom.dragbarw / 2), cursor_y);
+        var newy = imposeLimits(subplot_geom.yScale.range()[0], rect_geom.rect_top + rect_geom.height - (rect_geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner(oldy, newy);
     }
 
@@ -547,7 +547,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         var oldy = rect_geom.rect_top_left;
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        var newy = imposeLimits(timeToX(0), rect_geom.rect_top_left + rect_geom.height_left - (rect_geom.dragbarw / 2), cursor_y);
+        var newy = imposeLimits(subplot_geom.yScale.range()[0], rect_geom.rect_top_left + rect_geom.height_left - (rect_geom.dragbarw / 2), cursor_y);
         drag_resize_top_inner_left(oldy, newy);
     }
 
@@ -567,7 +567,7 @@ function Mode(common_geom, subplot_geom, options) {
         }
 
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        var newy = imposeLimits(rect_geom.rect_top + (rect_geom.dragbarw / 2), common_geom.subplotHeight, cursor_y);
+        var newy = imposeLimits(rect_geom.rect_top + (rect_geom.dragbarw / 2), subplot_geom.yScale.range()[1], cursor_y);
 
         drag_resize_bottom_inner(newy);
     }
@@ -586,7 +586,7 @@ function Mode(common_geom, subplot_geom, options) {
         }
 
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        var newy = imposeLimits(rect_geom.rect_top_left + (rect_geom.dragbarw / 2), common_geom.subplotHeight, cursor_y);
+        var newy = imposeLimits(rect_geom.rect_top_left + (rect_geom.dragbarw / 2), subplot_geom.yScale.range()[1], cursor_y);
 
         drag_resize_bottom_inner_left(newy);
     }
@@ -604,7 +604,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         // shift y
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        rect_geom.transition_max_pos = imposeLimits(timeToX(0), rect_geom.transition_min_pos, cursor_y);
+        rect_geom.transition_max_pos = imposeLimits(subplot_geom.yScale.range()[0], rect_geom.transition_min_pos, cursor_y);
 
         // shift x
         var oldx = rect_geom.start_time_pos;
@@ -632,7 +632,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         // shift y
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
-        rect_geom.transition_min_pos = imposeLimits(rect_geom.transition_max_pos, common_geom.subplotHeight, cursor_y);
+        rect_geom.transition_min_pos = imposeLimits(rect_geom.transition_max_pos, subplot_geom.yScale.range()[1], cursor_y);
 
 
         // shift x
