@@ -414,6 +414,8 @@ function Interval(common_geom, subplot_geom, options) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
         }
 
+        if (rect_geom.following){ newx = oldx; }
+
         if (!shift_down){
             rect_geom.track_circle_pos += (newx - rect_geom.start_time_pos);
         }
@@ -442,6 +444,8 @@ function Interval(common_geom, subplot_geom, options) {
         if (timing_parent_bar) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
         }
+
+        if (rect_geom.following){ newx = oldx; }
 
         if (!shift_down){
             rect_geom.track_circle_pos += (newx - rect_geom.start_time_pos);
