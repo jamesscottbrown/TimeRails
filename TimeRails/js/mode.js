@@ -1440,9 +1440,9 @@ function Mode(common_geom, subplot_geom, options) {
 
         var midDiv = modalBody.append("div");
         midDiv.append("text").text("Then value is momentarily between ");
-        var minValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_max_pos).toFixed(2)).node();
+        var minValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_min_pos).toFixed(2)).node();
         midDiv.append("text").text(" and ");
-        var maxValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_min_pos).toFixed(2)).node();
+        var maxValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_max_pos).toFixed(2)).node();
         midDiv.append("text").text(".");
 
         var endDiv = modalBody.append("div");
