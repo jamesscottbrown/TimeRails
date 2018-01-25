@@ -811,58 +811,32 @@ function Rectangle(common_geom, subplot_geom, options) {
         dragrect.style("stroke", "black");
 
         // Edging goes top, right, bottom, left
-        // As a rectangle has 4 sides, there are 2^4 = 16 cases to handle.
-
-        // 4 edges:
-        if (rect_geom.top_fixed && rect_geom.bottom_fixed && rect_geom.left_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width + rect_geom.height + rect_geom.width + rect_geom.height].join(','));
+        var dashArray = "";
+        if (rect_geom.top_fixed){
+            dashArray += rect_geom.width + ",0";
+        } else {
+            dashArray += "0," + rect_geom.width;
         }
 
-        // 3 edges
-        else if (rect_geom.top_fixed && rect_geom.bottom_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width + rect_geom.height + rect_geom.width, rect_geom.height].join(','));
-        } else if (rect_geom.top_fixed && rect_geom.bottom_fixed && rect_geom.left_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width, rect_geom.height, rect_geom.width + rect_geom.height].join(','));
-        } else if (rect_geom.top_fixed && rect_geom.left_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width + rect_geom.height, rect_geom.width, rect_geom.height].join(','));
-        } else if (rect_geom.bottom_fixed && rect_geom.left_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [0, (rect_geom.width), rect_geom.height + rect_geom.width + rect_geom.height].join(','));
+        if (rect_geom.right_fixed){
+            dashArray += "," + rect_geom.height + ",0";
+        } else {
+           dashArray += "," +  "0," + rect_geom.height;
         }
 
-        // 2 edges
-        else if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width, rect_geom.height, rect_geom.width, rect_geom.height].join(','));
-        } else if (rect_geom.top_fixed && rect_geom.left_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width, rect_geom.height + rect_geom.width, rect_geom.height].join(','));
-        } else if (rect_geom.top_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width + rect_geom.height, rect_geom.width + rect_geom.height].join(','));
-        } else if (rect_geom.bottom_fixed && rect_geom.left_fixed) {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width + rect_geom.height, rect_geom.width + rect_geom.height].join(','));
-        } else if (rect_geom.bottom_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width, rect_geom.height + rect_geom.width, rect_geom.height].join(','));
-        } else if (rect_geom.left_fixed && rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width, rect_geom.height, rect_geom.width, rect_geom.height].join(','));
+        if (rect_geom.bottom_fixed){
+            dashArray += "," + rect_geom.width + ",0";
+        } else {
+           dashArray += "," +  "0," + rect_geom.width;
         }
 
-        // 1 edges
-        else if (rect_geom.top_fixed) {
-            dragrect.style("stroke-dasharray", [rect_geom.width, (rect_geom.height + rect_geom.width + rect_geom.height)].join(','));
-        }
-        else if (rect_geom.bottom_fixed) {
-            dragrect.style("stroke-dasharray", [0, (rect_geom.width + rect_geom.height), rect_geom.width, rect_geom.height].join(','));
-        }
-        else if (rect_geom.left_fixed) {
-            dragrect.style("stroke-dasharray", [0, (rect_geom.width + rect_geom.height + rect_geom.width), rect_geom.height].join(','));
-        }
-        else if (rect_geom.right_fixed) {
-            dragrect.style("stroke-dasharray", [0, (rect_geom.width + rect_geom.height + rect_geom.width), rect_geom.height].join(','));
+        if (rect_geom.left_fixed){
+            dashArray += "," + rect_geom.height + ",0";
+        } else {
+           dashArray += "," +  "0," + rect_geom.height;
         }
 
-        // 0 edges
-        else {
-            dragrect.style("stroke-dasharray", [0, rect_geom.width + rect_geom.height + rect_geom.width + rect_geom.height].join(','));
-        }
-
+        dragrect.style("stroke-dasharray", dashArray);
         update_text();
     }
 
