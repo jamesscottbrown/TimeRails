@@ -31,6 +31,8 @@ function Mode(common_geom, subplot_geom, options) {
         siblings: [],
         followers: [],
         following: false,
+        startTimeIsBound: true,
+        endTimeIsBound: false,
 
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
@@ -176,11 +178,23 @@ function Mode(common_geom, subplot_geom, options) {
         startline.attr("x1", rect_geom.track_circle_pos)
             .attr("x2", rect_geom.track_circle_pos)
             .attr("y1", rect_geom.delay_line_height)
-            .attr("y2", rect_geom.rail_height);
+            .attr("y2", rect_geom.rail_height)
+            .style("visibility", (rect_geom.startTimeIsBound && !rect_geom.following) ? 'visible' : 'hidden');
+
+        endline.attr("x1", rect_geom.track_circle_pos + rect_geom.width)
+            .attr("x2", rect_geom.track_circle_pos + rect_geom.width)
+            .attr("y1", rect_geom.delay_line_height)
+            .attr("y2", rect_geom.rail_height)
+            .style("visibility", rect_geom.endTimeIsBound ? 'visible' : 'hidden');
 
         track_circle.attr("cx", rect_geom.track_circle_pos)
+            .attr("cy", rect_geom.rail_height)
+            .style("visibility", (rect_geom.startTimeIsBound && !rect_geom.following) ? 'visible' : 'hidden');
+
+        end_circle.attr("cx", rect_geom.track_circle_pos + rect_geom.width)
                 .attr("cy", rect_geom.rail_height)
-                .style("visibility", rect_geom.following ? 'hidden' : 'visible');
+                .style("visibility", rect_geom.endTimeIsBound ? 'visible' : 'hidden')
+                .style("visibility", rect_geom.endTimeIsBound ? 'visible' : 'hidden');
 
         if (timing_parent_bar){
             // may need to shift time bars vertically
@@ -334,7 +348,6 @@ function Mode(common_geom, subplot_geom, options) {
             adjust_everything(false);
         });
 
-
     function drag_track_circle_inner(cursor_x){
             var newx = imposeLimits(timeToX(0), common_geom.xScale.range()[1], cursor_x);
 
@@ -360,6 +373,28 @@ function Mode(common_geom, subplot_geom, options) {
             update_start_time();
             update_end_time();
     }
+
+    var drag_end_circle = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", function(){
+            if (common_geom.specification_fixed){
+                return;
+            }
+
+            var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
+            drag_end_circle_inner(cursor_x);
+            adjust_everything(false);
+        });
+
+    function drag_end_circle_inner(cursor_x){
+            var newx = imposeLimits(timeToX(0), common_geom.xScale.range()[1], cursor_x);
+            rect_geom.width = newx - rect_geom.start_time_pos;
+            adjust_everything();
+            update_end_time();
+    }
+
+
+
 
     function drag_fixed() {
         // resize so edges remain on axes if necessary
@@ -631,6 +666,9 @@ function Mode(common_geom, subplot_geom, options) {
 
     var startline = newg.append("line").classed("red-line", true);
 
+    var endline = newg.append("line").classed("red-line", true)
+                        .style("visibility", "hidden");
+
     // This line spans subplots, so can't be added to the group holding this subplot
     var link_shared_times_line = common_geom.diagram_svg.select("#linking-line-div")
         .append("line")
@@ -668,6 +706,36 @@ function Mode(common_geom, subplot_geom, options) {
                 title: 'Make start time independent',
                 action: makeStartTimeIndependent,
                 disabled: (rect_geom.siblings.length === 0 && !rect_geom.following)
+            },{
+                divider: true
+            },{
+                title: 'Bind start time',
+                action: function(){ 
+                    rect_geom.startTimeIsBound = true;
+                    adjust_everything();
+                },
+                disabled: rect_geom.startTimeIsBound
+            },{
+                title: 'Un-bind start time',
+                action: function (){
+                    rect_geom.startTimeIsBound = false;
+                    adjust_everything();
+                },
+                disabled: (!rect_geom.startTimeIsBound || rect_geom.following || timing_parent_bar)
+            },{
+                title: 'Bind end time',
+                action: function(){ 
+                    rect_geom.endTimeIsBound = true;
+                    adjust_everything();
+                },
+                disabled: rect_geom.endTimeIsBound
+            },{
+                title: 'Un-bind end time',
+                action: function (){
+                    rect_geom.endTimeIsBound = false;
+                    adjust_everything();
+                },
+                disabled: !rect_geom.endTimeIsBound
             }];
         };
 
@@ -752,6 +820,18 @@ function Mode(common_geom, subplot_geom, options) {
         .on('contextmenu', d3.contextMenu(menu))
         .on("click", link_to_start_time)
         .call(drag_track_circle);
+
+    var end_circle = newg
+        .append("g")
+        .append("circle")
+        .attr("r", 7)
+        .style("cursor", "move")
+        .style("visibility", "hidden")
+        .classed("track_circle", true)
+        .on('contextmenu', d3.contextMenu(menu))
+        .on("click", link_to_start_time)
+        .call(drag_end_circle);
+
 
     function link_to_start_time(){
         // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
