@@ -14,7 +14,30 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
         get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
         children: [],
-        track_circle_pos: geom.horizontal_padding
+        track_circle_pos: geom.horizontal_padding,
+        subplot: subplot_geom,
+
+        toJSON: function () {
+            // modify copy of this object that will be serialised to eliminate cyclic references
+            var clone = Object.assign({}, rail);
+
+            // N.B. .children stores only rectangles/modes (not other rails)
+            clone.children = clone.children.map(function (n) {
+                var subplot_index = geom.subplot_geoms.indexOf(n.subplot);
+                var rectIndex = n.subplot.rectangles.indexOf(n);
+                return {subplot_index: subplot_index, rect_index: rectIndex, kind: n.kind};
+            });
+
+            clone.timing_parent_bar = false;
+            if (timing_parent_bar){
+                var subplot_index = geom.subplot_geoms.indexOf(timing_parent_bar.subplot);
+                var railIndex = timing_parent_bar.subplot.rails.indexOf(timing_parent_bar);
+                clone.timing_parent_bar = {subplot_index: subplot_index, railIndex: railIndex, kind: timing_parent_bar.kind};
+            }
+
+            delete clone.subplot;
+            return clone;
+        }
     };
 
         
@@ -502,6 +525,6 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     adjust_everything(true);
     geom.adjustAllRectangles();
     
-
+    subplot_geom.rails.push(rail);
     return rail;
 }

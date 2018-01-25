@@ -611,6 +611,14 @@
                     y: y.invert(parseFloat(circle.attr("cy")))};
         }
 
-        return {addLinearTerm: addLinearTerm, addSigmoidalTerm: addSigmoidalTerm,  addBellTerm: addBellTerm, getExpression: getExpression, getState: getState };
+        function getTerms(){
+            return terms;
+        }
+
+        function toJSON(){
+            return terms.map(function(term){ return term.getState(); })
+        }
+
+        return {addLinearTerm: addLinearTerm, addSigmoidalTerm: addSigmoidalTerm,  addBellTerm: addBellTerm, getExpression: getExpression, getState: getState, getTerms: getTerms, toJSON: toJSON };
     }
 

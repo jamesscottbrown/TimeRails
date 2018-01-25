@@ -3,6 +3,8 @@ function Rectangle(common_geom, subplot_geom, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
+        kind: "rectangle",
+
         width: 300 * 0.75,
         height: 200 * 0.75,
         dragbarw: 20,
@@ -52,7 +54,8 @@ function Rectangle(common_geom, subplot_geom, options) {
             }
         },
 
-        assign_parent_bar: assign_parent_bar
+        assign_parent_bar: assign_parent_bar,
+        subplot: subplot_geom
     };
 
     function assign_parent_bar(bar){
@@ -1195,6 +1198,17 @@ function Rectangle(common_geom, subplot_geom, options) {
             get_num_rails: function (){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0; },
             get_num_rails_above: get_num_rails_above,
             deleteRectangle: deleteRectangle,
-            update_start_time: update_start_time
+            update_start_time: update_start_time,
+            toJSON: function () {
+            // modify copy of this object that will be serialised to eliminate cyclic references
+            var clone = Object.assign({}, rect_geom);
+
+            clone.siblings = clone.siblings.map(function (n) {
+                var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
+                var rectIndex = n.subplot.rectangles.indexOf(n);
+                return {subplot_index: subplot_index, rect_index: rectIndex};
+            });
+            return clone;
+        }
             }
 }

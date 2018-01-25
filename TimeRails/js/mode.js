@@ -3,6 +3,8 @@ function Mode(common_geom, subplot_geom, options) {
     // Setting up scales and initial default positions
     /************************************************/
     var rect_geom = {
+        kind: "mode",
+
         width: 300 * 0.75,
         height: 200 * 0.75,
         dragbarw: 20,
@@ -64,7 +66,8 @@ function Mode(common_geom, subplot_geom, options) {
                 newBar.children.push(rect_geom);
             }
         },
-        
+
+        subplot: subplot_geom,
         assign_parent_bar: assign_parent_bar
     };
 
@@ -1478,13 +1481,35 @@ function Mode(common_geom, subplot_geom, options) {
 
 
     adjust_everything(true);
-    return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
-            adjust_everything: adjust_everything, rect_geom: rect_geom,
-            saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;},
-            update_formula: update_formula,
-            get_num_rails: function (){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0; },
-            get_num_rails_above: get_num_rails_above,
-            deleteRectangle: deleteRectangle,
-            update_start_time: update_start_time
-            }
+
+    rect_geom.add_bar = append_timing_bar;
+    rect_geom.getSpecString = getSpecString;
+    rect_geom.adjust_scales = adjust_scales;
+    rect_geom.adjust_everything = adjust_everything;
+    rect_geom.saveRectangleIndex = function (index) {
+        rect_geom.rectangleIndex = index;
+    };
+    rect_geom.update_formula = update_formula;
+    rect_geom.get_num_rails = function () {
+        return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;
+    };
+    rect_geom.get_num_rails_above = get_num_rails_above;
+    rect_geom.deleteRectangle = deleteRectangle;
+    rect_geom.update_start_time = update_start_time;
+    rect_geom.toJSON = function () {
+        // modify copy of this object that will be serialised to eliminate cyclic references
+        var clone = Object.assign({}, rect_geom);
+
+        clone.siblings = clone.siblings.map(function (n) {
+            var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
+            var rectIndex = n.subplot.rectangles.indexOf(n);
+            return {subplot_index: subplot_index, rect_index: rectIndex};
+        });
+
+        delete clone.subplot;
+
+        return clone;
+    };
+
+    return rect_geom;
 }

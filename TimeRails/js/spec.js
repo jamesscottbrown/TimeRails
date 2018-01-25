@@ -484,12 +484,14 @@ function Diagram(div_name, spec_id, spec_options) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
+            subplot_type: "constraint",
             yRange: [100, 0],
             yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
             base_variable_name: base_variable_name ? base_variable_name : variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
             rectangles: [],
+            rails: [],
             subplot_index: common_geom.subplot_geoms.length,
             deleteSubplot: deleteSubplot
         };
@@ -608,12 +610,14 @@ function Diagram(div_name, spec_id, spec_options) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
+            subplot_type: "input",
             yRange: [100, 0],
             yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
             base_variable_name: variable_name,
             svg: svg.append("g").attr("transform", "translate(0, " + (subplotIndex * subplotHeight) + ")"), // TODO: rename this
             rectangles: [],
+            rails: [],
             subplot_index: common_geom.subplot_geoms.length,
             deleteSubplot: deleteSubplot
         };
@@ -632,7 +636,7 @@ function Diagram(div_name, spec_id, spec_options) {
         drawAxes(common_geom, subplot_geom);
         var axis_range_div = addCommonElements(common_geom, subplot_geom);
 
-        drawInput(common_geom, subplot_geom);
+        subplot_geom.inputSubplot = drawInput(common_geom, subplot_geom);
 
         subplotIndex += 1;
         common_geom.subplot_geoms.push(subplot_geom);
@@ -702,14 +706,14 @@ function Diagram(div_name, spec_id, spec_options) {
     }
 
 
-    // TODO: getSpecString needs to handle all subplots
-    return {getSpecString: getSpecString,
-        addConstraintSubplot: addConstraintSubplot,
-        addInputSubplot:addInputSubplot,
-        getVariableNames: function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })},
-        renameVariable: renameVariable, deleteVariable: deleteVariable,
-        common_geom: common_geom
-    };
+        common_geom.getSpecString = getSpecString;
+        common_geom.addConstraintSubplot = addConstraintSubplot;
+        common_geom.addInputSubplot = addInputSubplot;
+        common_geom.getVariableNames = function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })};
+        common_geom.renameVariable = renameVariable;
+        common_geom.deleteVariable = deleteVariable;
+
+        return common_geom;
 }
 
 
