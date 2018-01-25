@@ -269,28 +269,31 @@ function addCommonElements(common_geom, subplot_geom){
             .style("visibility", "hidden");
     }
 
-    d3.select(common_geom.div_name).append('button')
-        .text("Save")
-        .on("click", function(){
-            var new_spec_string = getSpecString(common_geom);
-            $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            url: "http://" + window.location.host + "/specifications/" + common_geom.spec_id + "/save",
-            dataType: 'html',
-            async: true,
-            data: new_spec_string,
+        if (common_geom.subplot_geoms.length < 1) {
+            d3.select(common_geom.div_name).append('button')
+                .text("Save")
+                .on("click", function () {
+                    var new_spec_string = getSpecString(common_geom);
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        url: "http://" + window.location.host + "/specifications/" + common_geom.spec_id + "/save",
+                        dataType: 'html',
+                        async: true,
+                        data: new_spec_string,
 
-             beforeSend: function(xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-             },
+                        beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                        },
 
-            success: function (data) {
-                d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
-            },
-            error: function (result, textStatus) { }
-            })
-        });
+                        success: function (data) {
+                            d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
+                        },
+                        error: function (result, textStatus) {
+                        }
+                    })
+                });
+        }
 
     d3.select(common_geom.div_name).select("#use_letters_checkbox").on("change", function(){
         common_geom.use_letters = !common_geom.use_letters;
