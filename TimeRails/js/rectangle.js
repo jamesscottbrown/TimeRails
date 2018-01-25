@@ -1043,54 +1043,7 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         return spec_string;
     }
-
-    function getSpecString(){
-        var y_spec_string = getYSpecString();
-        var spec_string = "";
-
-        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
-        if (timing_parent_bar){
-            spec_string = timing_parent_bar.getSpecString();
-
-            var delay_time = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-            delay_time = delay_time.toFixed(2);
-
-            var length =   XToTime(rect_geom.start_time_pos + rect_geom.width) - XToTime(rect_geom.track_circle_pos);
-            length = length.toFixed(2);
-
-            if (delay_time == 0 && length == 0){
-                spec_string += y_spec_string;
-            } else {
-                spec_string += "Globally(" + delay_time + "," + length + "," + y_spec_string;
-            }
-
-            var numLeftParens = 0;
-            for (var i=0; i<spec_string.length; i++){
-                if (spec_string[i] == "("){ numLeftParens++; }
-            }
-
-            return spec_string + ")".repeat(numLeftParens);
-        }
-
-        // Otherwise, rectangle is represented by a Global term with a start and end time
-        if (!rect_geom.top_fixed && !rect_geom.bottom_fixed) {
-            return spec_string;
-        }
-
-        var x_lower = XToTime(rect_geom.start_time_pos).toFixed(2);
-        var x_upper = XToTime( timeToX(x_lower) + rect_geom.width ).toFixed(2);
-
-        if (!rect_geom.right_fixed){
-            x_upper = "Inf";
-        }
-
-        if (!rect_geom.left_fixed){
-            x_lower = "0";
-        }
-
-        return spec_string + "Globally(" + x_lower + "," + x_upper + ", " + y_spec_string + "))";
-    }
-
+    
     function add_timing_bar(kind, options){
         // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
@@ -1237,7 +1190,6 @@ function Rectangle(common_geom, subplot_geom, options) {
     adjust_everything(true);
     
     rect_geom.add_bar = append_timing_bar;
-    rect_geom.getSpecString = getSpecString;
     rect_geom.adjust_scales = adjust_scales;
     rect_geom.adjust_everything = adjust_everything;
     rect_geom.saveRectangleIndex = function (index) {

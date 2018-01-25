@@ -7,7 +7,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex, getSpecString: getSpecString,
+        "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
         describe_constraint: describe_constraint,
         getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
@@ -380,33 +380,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         latex_string += symbol + "_{[" + t_lower + "," + t_upper + "]}";
         return latex_string;
     }
-
-
-    function getSpecString(){
-        var spec_string = "";
-        var t_lower, t_upper;
-
-        if (timing_parent_bar){
-            spec_string += timing_parent_bar.getSpecString();
-
-            // start and end times are relative to te track_circle
-            t_lower = XToTime(left_tick_pos) - XToTime(rail.track_circle_pos);
-            t_upper =  XToTime(right_tick_pos) - XToTime(rail.track_circle_pos);
-        } else {
-            // start and end times are absolute
-            t_lower = XToTime(left_tick_pos);
-            t_upper = XToTime(right_tick_pos);
-        }
-
-        t_lower = t_lower.toFixed(2);
-        t_upper = t_upper.toFixed(2);
-
-        var symbol = (kind == "some") ? "Finally" : "Globally";
-
-        spec_string += symbol + "(" + t_lower + "," + t_upper + ",";
-        return spec_string;
-    }
-
+    
     function describe_constraint (){
 
         var time_number;

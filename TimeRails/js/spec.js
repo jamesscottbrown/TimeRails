@@ -13,16 +13,17 @@ function sum (x){
 function addCommonElements(common_geom, subplot_geom){
 
     function plotExampleTrajectory(applyAllConstraints){
+        // TODO: FIXME after everythign else was changed
 
         return function() {
             var spec_strings = [];
 
             if (applyAllConstraints) {
                 for (var i = 0; i < diagrams.length; i++) {
-                    spec_strings.push(diagrams[i].getSpecString(common_geom));
+                    spec_strings.push(JSON.stringify(diagrams[i]));
                 }
             } else {
-                spec_strings.push(getSpecString(common_geom));
+                spec_strings.push(JSON.stringify(common_geom));
             }
 
             $.ajax({
@@ -279,7 +280,7 @@ function addCommonElements(common_geom, subplot_geom){
             d3.select(common_geom.div_name).append('button')
                 .text("Save")
                 .on("click", function () {
-                    var new_spec_string = getSpecString(common_geom);
+                    var new_spec_string = JSON.stringify(common_geom);
                     $.ajax({
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
@@ -321,7 +322,7 @@ function addCommonElements(common_geom, subplot_geom){
 
             var spec_strings = [];
             for (var i=0; i < diagrams.length; i++){
-                spec_strings.push("(" + diagrams[i].getSpecString(common_geom) + ")"); // TODO: get right common_geoms
+                spec_strings.push("(" + JSON.stringify(diagrams[i]) + ")"); // TODO: get right common_geoms
             }
 
             alert(spec_strings.join(symbol));
@@ -329,18 +330,6 @@ function addCommonElements(common_geom, subplot_geom){
         });
 
     return axis_range_div;
-}
-
-function getSpecString(common_geom){
-    var spec_strings = [];
-
-    for (var j=0; j<common_geom.subplot_geoms.length; j++) {
-
-        for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
-            spec_strings.push(common_geom.subplot_geoms[j].rectangles[i].getSpecString(common_geom));
-        }
-    }
-    return spec_strings.join(' && ');
 }
 
 function adjustAllYScales(common_geom, subplot_geom) {
@@ -726,7 +715,6 @@ function Diagram(div_name, spec_id, spec_options) {
     }
 
 
-        common_geom.getSpecString = getSpecString;
         common_geom.addConstraintSubplot = addConstraintSubplot;
         common_geom.addInputSubplot = addInputSubplot;
         common_geom.getVariableNames = function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })};

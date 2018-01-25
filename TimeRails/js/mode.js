@@ -923,36 +923,7 @@ function Mode(common_geom, subplot_geom, options) {
         update_formula();
     }
 
-
-    // functions for generating specification to save
-
-    function getSpecString(){
-
-        // TODO: FIXME
-
-        var spec_string = "";
-        var shift = 0;
-
-        if (timing_parent_bar){
-            spec_string = timing_parent_bar.getSpecString();
-            var shift = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-        }
-
-        var startTime = XToTime(rect_geom.start_time_pos - rect_geom.width_left) - shift;
-        var midTime = XToTime(rect_geom.start_time_pos) - shift;
-        var endTime = common_geom.right_fixed ? (rect_geom.start_time_pos + rect_geom.width) - shift : Infinity;
-
-        var startMin = common_geom.top_fixed_left ? (rect_geom.rect_top_left + rect_geom.height_left) : Infinity;
-        var startMax = common_geom.bottom_fixed_left ? (rect_geom.rect_top_left) : -Infinity;
-        var endMin = common_geom.top_fixed ? YToVal(rect_geom.rect_top + rect_geom.height) : Infinity;
-        var endMax = common_geom.bottom_fixed ? (rect_geom.rect_top) : -Infinity;
-
-        var values = [startTime, midTime, endTime, startMin, startMax, midMin, midMax, endMin, endMax];
-        var modeString = "Mode(" + values.join(",") + ")";
-
-        return spec_string + modeString;
-    }
-
+    
     function add_timing_bar(kind, options){
         // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
@@ -1097,7 +1068,6 @@ function Mode(common_geom, subplot_geom, options) {
     adjust_everything(true);
 
     rect_geom.add_bar = append_timing_bar;
-    rect_geom.getSpecString = getSpecString;
     rect_geom.adjust_scales = adjust_scales;
     rect_geom.adjust_everything = adjust_everything;
     rect_geom.saveRectangleIndex = function (index) {

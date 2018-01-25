@@ -796,29 +796,7 @@ function Interval(common_geom, subplot_geom, options) {
         update_formula();
     }
 
-
-    // functions for generating specification to save
-
-    function getSpecString(){
-        var spec_string = "";
-        var shift = 0;
-
-        if (timing_parent_bar){
-            spec_string = timing_parent_bar.getSpecString();
-            var shift = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
-        }
-
-        var midTime = XToTime(rect_geom.start_time_pos) - shift;
-
-        var midMin = YToVal(rect_geom.transition_max_pos);
-        var midMax = YToVal(rect_geom.transition_min_pos);
-
-        var values = [midTime, midMin, midMax];
-        var intervalString = "Interval(" + values.join(",") + ")";
-
-        return spec_string + intervalString;
-    }
-
+    
     function add_timing_bar(kind, options){
         // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
@@ -952,7 +930,6 @@ function Interval(common_geom, subplot_geom, options) {
     adjust_everything(true);
 
     rect_geom.add_bar = append_timing_bar;
-    rect_geom.getSpecString = getSpecString;
     rect_geom.adjust_scales = adjust_scales;
     rect_geom.adjust_everything = adjust_everything;
     rect_geom.saveRectangleIndex = function (index) {
