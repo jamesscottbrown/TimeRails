@@ -733,7 +733,7 @@ function Mode(common_geom, subplot_geom, options) {
     function link_rail_times(){
         // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
 
-        if (!common_geom.selected_rail){ return; }
+        if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
         if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
 
         // add new mode to the sibling list of all of this mode's siblings
