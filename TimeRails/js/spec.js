@@ -270,6 +270,12 @@ function addCommonElements(common_geom, subplot_geom){
     }
 
         if (common_geom.subplot_geoms.length < 1) {
+
+            if (common_geom.allowLogic){
+                d3.select(common_geom.div_name).append('label').attr("label-for", "logic-box").text("Logic expression");
+                d3.select(common_geom.div_name).append('input').attr("id", "logic-box");
+            }
+
             d3.select(common_geom.div_name).append('button')
                 .text("Save")
                 .on("click", function () {
@@ -445,9 +451,6 @@ function Diagram(div_name, spec_id, spec_options) {
 
         specification_fixed: false,
         use_letters: false,
-        generateExampleTrajectories: spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true,
-
-        saveURL: spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save",
         colorScale: d3.scale.category10(),
 
         xRange: [0, 100],
@@ -477,6 +480,9 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.allow_rectangles = spec_options.hasOwnProperty("allow_rectangles") ? spec_options.allow_rectangles : true;
     common_geom.allow_modes = spec_options.hasOwnProperty("allow_modes") ? spec_options.allow_modes : false;
     common_geom.allow_shared_times = spec_options.hasOwnProperty("allow_shared_times") ? spec_options.allow_modes : true;
+    common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
+    common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
+    common_geom.allowLogic = spec_options.allowLogic ? spec_options.allowLogic : false;
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
