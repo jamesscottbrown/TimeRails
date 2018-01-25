@@ -373,7 +373,12 @@ function Interval(common_geom, subplot_geom, options) {
         // shift x
         var oldx = rect_geom.start_time_pos;
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
-        var newx = imposeLimits(rect_geom.track_circle_pos, subplot_geom.xScale.range()[1], cursor_x);
+        var newx = imposeLimits(common_geom.xScale.range()[0], common_geom.xScale.range()[1], cursor_x);
+
+        if (newx < rect_geom.track_circle_pos){
+            drag_track_circle_inner(newx);
+        }
+
 
         if (timing_parent_bar) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
@@ -394,12 +399,14 @@ function Interval(common_geom, subplot_geom, options) {
         var cursor_y = d3.mouse(subplot_geom.svg.node())[1];
         rect_geom.transition_min_pos = imposeLimits(rect_geom.transition_max_pos, subplot_geom.yScale.range()[1], cursor_y);
 
-
         // shift x
         var oldx = rect_geom.start_time_pos;
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
-        var newx = imposeLimits(rect_geom.track_circle_pos, subplot_geom.yScale.range()[1], cursor_x);
-        newx = imposeLimits(common_geom.xScale.range()[0], common_geom.xScale.range()[1], newx);
+        var newx = imposeLimits(common_geom.xScale.range()[0], common_geom.xScale.range()[1], cursor_x);
+
+        if (newx < rect_geom.track_circle_pos){
+            drag_track_circle_inner(newx);
+        }
 
         if (timing_parent_bar) {
             newx = imposeLimits(timing_parent_bar.get_start_time()+rect_geom.delay_line_length, timing_parent_bar.get_end_time()+rect_geom.delay_line_length, newx);
@@ -585,9 +592,6 @@ function Interval(common_geom, subplot_geom, options) {
 
     var shift_down = false;
 
-// TODO: re-apply menu
-//    dragrect.on('contextmenu', d3.contextMenu(rectMenu));
-
     var transition_marker_top = newg.append("circle")
         .attr("fill", "lightgray")
         .classed("transition_marker", true)
@@ -603,7 +607,8 @@ function Interval(common_geom, subplot_geom, options) {
         })
         .on('mouseup', function(d) {
             shift_down = false;
-        });
+        })
+        .on('contextmenu', d3.contextMenu(rectMenu));
 
 
     var transition_marker_top_tick = newg.append("line").style("stroke", "black");
@@ -623,7 +628,9 @@ function Interval(common_geom, subplot_geom, options) {
         })
         .on('mouseup', function(d) {
             shift_down = false;
-        });
+        })
+        .on('contextmenu', d3.contextMenu(rectMenu));
+
     var transition_marker_bottom_tick = newg.append("line").style("stroke", "black");
     var transition_marker_vertical = newg.append("line").style("stroke", "black");
 
@@ -853,7 +860,7 @@ function Interval(common_geom, subplot_geom, options) {
         startDiv.append("text").text("Then value is momentarily between ");
         var minValBox_mid = startDiv.append("input").attr("value", YToVal(rect_geom.transition_min_pos).toFixed(2)).node();
         startDiv.append("text").text(" and ");
-        var maxValBox_mid = midDiv.append("input").attr("value", YToVal(rect_geom.transition_max_pos).toFixed(2)).node();
+        var maxValBox_mid = startDiv.append("input").attr("value", YToVal(rect_geom.transition_max_pos).toFixed(2)).node();
         startDiv.append("text").text(".");
 
         modalFooter.append("button").text("Save").on("click", function () {
