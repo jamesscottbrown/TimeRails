@@ -370,7 +370,7 @@ function Mode(common_geom, subplot_geom, options) {
 
 
     function drag_track_circle_inner(cursor_x){
-            var newx = imposeLimits(timeToX(0), common_geom.subplotWidth, cursor_x);
+            var newx = imposeLimits(timeToX(0), common_geom.xScale.range()[1], cursor_x);
 
             if (timing_parent_bar) {
                 newx = imposeLimits(timing_parent_bar.get_start_time() + rect_geom.delay_line_length,
@@ -436,7 +436,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         // vertical movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height/2;
-        rect_geom.rect_top = imposeLimits(timeToX(0), common_geom.subplotHeight - rect_geom.height, rect_center);
+        rect_geom.rect_top = imposeLimits(subplot_geom.yScale.range()[0], subplot_geom.yScale.range()[1] - rect_geom.height, rect_center);
         adjust_everything(true);
     }
 
@@ -471,7 +471,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         // vertical movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height_left/2;
-        rect_geom.rect_top_left = imposeLimits(timeToX(0), common_geom.subplotHeight - rect_geom.height, rect_center);
+        rect_geom.rect_top_left = imposeLimits(subplot_geom.yScale.range()[0], subplot_geom.yScale.range()[1] - rect_geom.height, rect_center);
 
         adjust_everything(true);
     }
