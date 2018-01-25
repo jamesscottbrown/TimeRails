@@ -727,10 +727,10 @@ function Mode(common_geom, subplot_geom, options) {
         .style("cursor", "move")
         .classed("track_circle", true)
         .on('contextmenu', d3.contextMenu(menu))
-        .on("click", link_rail_times)
+        .on("click", link_to_start_time)
         .call(drag_track_circle);
 
-    function link_rail_times(){
+    function link_to_start_time(){
         // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
 
         if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
