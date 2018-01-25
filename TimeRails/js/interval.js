@@ -39,6 +39,9 @@ function Interval(common_geom, subplot_geom, options) {
         rail_height: 0,
 
         siblings: [],
+        followers: [],
+        following: false,
+
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
         adjustSharedTimeLine: adjustSharedTimeLine,
@@ -165,7 +168,8 @@ function Interval(common_geom, subplot_geom, options) {
             .attr("y2", rect_geom.rail_height);
 
         track_circle.attr("cx", rect_geom.track_circle_pos)
-                .attr("cy", rect_geom.rail_height);
+                .attr("cy", rect_geom.rail_height)
+                .style("visibility", rect_geom.following ? 'hidden' : 'visible');
 
         transition_marker_top
             .attr("cx", rect_geom.start_time_pos)
@@ -209,6 +213,12 @@ function Interval(common_geom, subplot_geom, options) {
         var min_y = subplot_geom.yOffset + rect_geom.rail_height;
         var max_y = min_y;
 
+        if (rect_geom.siblings.length === 0 && !rect_geom.following){
+            adjustSharedTimeLine(0, 0); // hide line as a point
+            return;
+        } else if (rect_geom.following){
+            return; // line is adjusted by update_end_time
+        }
 
         for (var i=0; i<rect_geom.siblings.length; i++){
             var sibling = rect_geom.siblings[i];
@@ -234,6 +244,25 @@ function Interval(common_geom, subplot_geom, options) {
 
     }
 
+    function update_end_time(){
+        for (var i=0; i<rect_geom.followers.length; i++){
+            var follower = rect_geom.followers[i];
+
+            // Shared time-line goes from this mode to what it is following
+            follower.track_circle_pos = rect_geom.start_time_pos;
+            follower.start_time_pos = rect_geom.start_time_pos;
+
+            var rail_height = subplot_geom.yOffset + rect_geom.rect_top + rect_geom.height;
+            var follower_rail_height = follower.getYOffset() + follower.rail_height;
+
+            follower.adjustSharedTimeLine(rail_height, follower_rail_height);
+            follower.adjust_everything();
+
+            follower.update_end_time();
+        }
+    }
+
+    
     function adjustSharedTimeLine (min_y, max_y){
         link_shared_times_line
             .attr("x1", rect_geom.track_circle_pos)
@@ -253,7 +282,6 @@ function Interval(common_geom, subplot_geom, options) {
         }
 
         // Adjust positions
-        var leftPos = convertX(rect_geom.start_time_pos + rect_geom.width_left);
         rect_geom.start_time_pos = convertX(rect_geom.start_time_pos);
 
         rect_geom.transition_max_pos = convertY(rect_geom.transition_max_pos);
@@ -312,6 +340,7 @@ function Interval(common_geom, subplot_geom, options) {
             if (common_geom.specification_fixed && !timing_parent_bar){
                 return;
             }
+            if (rect_geom.following){ return; }
 
             var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
             drag_track_circle_inner(cursor_x);
@@ -342,6 +371,7 @@ function Interval(common_geom, subplot_geom, options) {
                 }
             }
             update_start_time();
+            update_end_time();
     }
 
     function drag_fixed() {
@@ -390,6 +420,7 @@ function Interval(common_geom, subplot_geom, options) {
 
         drag_resize_left_inner(oldx, newx);
         update_start_time();
+        update_end_time();
     }
 
     function drag_transition_marker_bottom() {
@@ -418,6 +449,7 @@ function Interval(common_geom, subplot_geom, options) {
 
         drag_resize_left_inner(oldx, newx);
         update_start_time();
+        update_end_time();
     }
 
     function drag_resize_left_inner(oldx, newx) {
@@ -498,24 +530,8 @@ function Interval(common_geom, subplot_geom, options) {
             });
             menuOptions.push({
                 title: 'Make start time independent',
-                action: function (elm, d, i) {
-
-                    // remove this rectangle from sibling list of other rectangles
-                    for (var i = 0; i < rect_geom.siblings.length; i++) {
-                        var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
-                        rect_geom.siblings[i].siblings.splice(index, 1);
-                    }
-
-                    // adjust start line for former sibling
-                    rect_geom.siblings[0].update_start_time();
-
-                    // remove from self
-                    rect_geom.siblings = [];
-
-                    // adjust start line for self
-                    rect_geom.update_start_time();
-                },
-                disabled: rect_geom.siblings.length === 0
+                action: makeStartTimeIndependent,
+                disabled: (rect_geom.siblings.length === 0 && !rect_geom.following)
             });
             
             menuOptions.push({
@@ -586,6 +602,10 @@ function Interval(common_geom, subplot_geom, options) {
                 },
                 action: deleteRectangle,
                 disabled: common_geom.specification_fixed
+            },{
+                title: 'Make start time independent',
+                action: makeStartTimeIndependent,
+                disabled: (rect_geom.siblings.length === 0 && !rect_geom.following)
             }];
         };
 
@@ -608,7 +628,8 @@ function Interval(common_geom, subplot_geom, options) {
         .on('mouseup', function(d) {
             shift_down = false;
         })
-        .on('contextmenu', d3.contextMenu(rectMenu));
+        .on('contextmenu', d3.contextMenu(rectMenu))
+        .on("click", link_to_end_time);
 
 
     var transition_marker_top_tick = newg.append("line").style("stroke", "black");
@@ -629,7 +650,9 @@ function Interval(common_geom, subplot_geom, options) {
         .on('mouseup', function(d) {
             shift_down = false;
         })
-        .on('contextmenu', d3.contextMenu(rectMenu));
+        .on('contextmenu', d3.contextMenu(rectMenu))
+        .on("click", link_to_end_time);
+
 
     var transition_marker_bottom_tick = newg.append("line").style("stroke", "black");
     var transition_marker_vertical = newg.append("line").style("stroke", "black");
@@ -649,6 +672,7 @@ function Interval(common_geom, subplot_geom, options) {
 
         if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
         if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
+        if (rect_geom.following){ return; } // Also clear selection?
 
         // add new interval to the sibling list of all of this interval's siblings
         for (var i=0; i<rect_geom.siblings.length; i++){
@@ -673,6 +697,51 @@ function Interval(common_geom, subplot_geom, options) {
         common_geom.selected_rail = false;
     }
 
+         function link_to_end_time(){
+        // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
+
+        if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
+        if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
+
+        rect_geom.followers.push(common_geom.selected_rail);
+        common_geom.selected_rail.following = rect_geom;
+
+        update_end_time();
+
+        common_geom.selected_rail = false;
+    }
+
+    function makeStartTimeIndependent() {
+
+        // remove this rectangle from sibling list of other rectangles
+        for (var i = 0; i < rect_geom.siblings.length; i++) {
+            var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
+            rect_geom.siblings[i].siblings.splice(index, 1);
+        }
+
+        // clear up if following a rectangle
+        if (rect_geom.following){
+            var index = rect_geom.following.followers.indexOf(rect_geom);
+            rect_geom.following.followers.splice(index, 1);
+
+            rect_geom.following = false;
+        }
+
+        // adjust start line for former sibling
+        if (rect_geom.siblings.length > 0){
+            rect_geom.siblings[0].update_start_time();
+
+            // remove from self
+            rect_geom.siblings = [];
+        }
+
+        // adjust start line for self
+        rect_geom.update_start_time();
+
+        rect_geom.adjust_everything(); // to toggle visibility of track_circle
+    }
+
+    
     function toggle_start_line_visibility(){
 
         if (timing_parent_bar){ return; }
@@ -896,20 +965,29 @@ function Interval(common_geom, subplot_geom, options) {
     rect_geom.get_num_rails_above = get_num_rails_above;
     rect_geom.deleteRectangle = deleteRectangle;
     rect_geom.update_start_time = update_start_time;
+
     rect_geom.toJSON = function () {
         // modify copy of this object that will be serialised to eliminate cyclic references
         var clone = Object.assign({}, rect_geom);
 
-        clone.siblings = clone.siblings.map(function (n) {
-            var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
-            var rectIndex = n.subplot.rectangles.indexOf(n);
-            return {subplot_index: subplot_index, rect_index: rectIndex};
-        });
+        clone.siblings = clone.siblings.map(function (n) { return getRectangleIndex(n); });
+        clone.followers = clone.followers.map(function (n) { return getRectangleIndex(n); });
 
+        if (clone.following){
+            clone.following = getRectangleIndex(clone.following);
+        }
         delete clone.subplot;
 
         return clone;
     };
+
+    function getRectangleIndex(n) {
+        var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
+        var rectIndex = n.subplot.rectangles.indexOf(n);
+        return {subplot_index: subplot_index, rect_index: rectIndex};
+    }
+
+    rect_geom.update_end_time = update_end_time;
 
     return rect_geom;
 }

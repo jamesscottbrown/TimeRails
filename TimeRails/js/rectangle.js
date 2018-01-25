@@ -28,6 +28,9 @@ function Rectangle(common_geom, subplot_geom, options) {
         rail_height: 0,
 
         siblings: [],
+        followers: [],
+        following: false,
+
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
         adjustSharedTimeLine: adjustSharedTimeLine,
@@ -177,7 +180,8 @@ function Rectangle(common_geom, subplot_geom, options) {
             .attr("y2", rect_geom.rail_height);
 
         track_circle.attr("cx", rect_geom.track_circle_pos)
-                .attr("cy", rect_geom.rail_height);
+                .attr("cy", rect_geom.rail_height)
+                .style("visibility", rect_geom.following ? 'hidden' : 'visible');
 
         if (timing_parent_bar){
             // may need to shift time bars vertically
@@ -192,6 +196,13 @@ function Rectangle(common_geom, subplot_geom, options) {
 
 
     function update_start_time(){
+        if (rect_geom.siblings.length == 0 && !rect_geom.following){
+            adjustSharedTimeLine(0, 0); // hide line as a point
+            return;
+        } else if (rect_geom.following){
+            return; // line is adjusted by update_end_time
+        }
+
         var min_y = subplot_geom.yOffset + rect_geom.rail_height;
         var max_y = min_y;
 
@@ -218,6 +229,25 @@ function Rectangle(common_geom, subplot_geom, options) {
         }
         adjustSharedTimeLine(min_y, max_y);
     }
+    
+    function update_end_time(){
+        for (var i=0; i<rect_geom.followers.length; i++){
+            var follower = rect_geom.followers[i];
+
+            // Shared time-line goes from this mode to what it is following
+            follower.track_circle_pos = rect_geom.start_time_pos + rect_geom.width;
+            follower.start_time_pos = rect_geom.start_time_pos + rect_geom.width;
+
+            var rail_height = subplot_geom.yOffset + rect_geom.rect_top + rect_geom.height;
+            var follower_rail_height = follower.getYOffset() + follower.rail_height;
+
+            follower.adjustSharedTimeLine(rail_height, follower_rail_height);
+            follower.adjust_everything();
+
+            follower.update_end_time();
+        }
+    }
+
 
     function adjustSharedTimeLine (min_y, max_y){
         link_shared_times_line
@@ -297,10 +327,10 @@ function Rectangle(common_geom, subplot_geom, options) {
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-
             if (common_geom.specification_fixed && !timing_parent_bar){
                 return;
             }
+            if (rect_geom.following){ return; }
 
             var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
             drag_track_circle_inner(cursor_x);
@@ -331,6 +361,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 }
             }
             update_start_time();
+            update_end_time();
     }
 
     function drag_fixed() {
@@ -351,9 +382,10 @@ function Rectangle(common_geom, subplot_geom, options) {
 
     function dragmove(d) {
         if (common_geom.specification_fixed){ return; }
-
+        
         // horizontal movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[0] - rect_geom.width/2;
+        if (rect_geom.following){ rect_center =rect_geom.track_circle_pos; }
 
         if (rect_center < rect_geom.track_circle_pos){
             drag_track_circle_inner(rect_center);
@@ -372,6 +404,7 @@ function Rectangle(common_geom, subplot_geom, options) {
             rect_geom.start_time_pos = new_start_pos;
         }
         update_start_time();
+        update_end_time();
 
         // vertical movement
         var rect_center = d3.mouse(subplot_geom.svg.node())[1] - rect_geom.height/2;
@@ -415,6 +448,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         var cursor_x = d3.mouse(subplot_geom.svg.node())[0];
         var dragx = imposeLimits(rect_geom.start_time_pos, common_geom.xScale.range()[1], cursor_x);
         drag_resize_right_inner(rect_geom.start_time_pos, dragx);
+        update_end_time();
     }
 
     function drag_resize_right_inner(oldx_left, newx_right) {
@@ -540,26 +574,10 @@ function Rectangle(common_geom, subplot_geom, options) {
             });
             menuOptions.push({
                 title: 'Make start time independent',
-                action: function (elm, d, i) {
-
-                    // remove this rectangle from sibling list of other rectangles
-                    for (var i = 0; i < rect_geom.siblings.length; i++) {
-                        var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
-                        rect_geom.siblings[i].siblings.splice(index, 1);
-                    }
-
-                    // adjust start line for former sibling
-                    rect_geom.siblings[0].update_start_time();
-
-                    // remove from self
-                    rect_geom.siblings = [];
-
-                    // adjust start line for self
-                    rect_geom.update_start_time();
-                },
-                disabled: rect_geom.siblings.length === 0
+                action: makeStartTimeIndependent,
+                disabled: (rect_geom.siblings.length === 0 && !rect_geom.following)
             });
-            
+
             menuOptions.push({
                 title: 'Attach to rail',
                 action: function (elm, d, i) {
@@ -678,10 +696,15 @@ function Rectangle(common_geom, subplot_geom, options) {
         {
             title: function(){ return 'Delete rectangle'; },
             action: deleteRectangle
-    }];
+        },{
+                title: 'Make start time independent',
+                action: makeStartTimeIndependent,
+                disabled: (rect_geom.siblings.length === 0 && !rect_geom.following)
+        }];
 
 
-    dragrect.on('contextmenu', d3.contextMenu(rectMenu));
+    dragrect.on('contextmenu', d3.contextMenu(rectMenu))
+            .on("click", link_to_end_time);
 
     var dragbarleft = newg.append("circle")
         .attr("id", "dragleft")
@@ -768,6 +791,8 @@ function Rectangle(common_geom, subplot_geom, options) {
         if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
         if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
 
+        if (rect_geom.following){ return; } // Also clear selection?
+
         // add new mode to the sibling list of all of this mode's siblings
         for (var i=0; i<rect_geom.siblings.length; i++){
             rect_geom.siblings[i].siblings.push(common_geom.selected_rail);
@@ -791,6 +816,51 @@ function Rectangle(common_geom, subplot_geom, options) {
         common_geom.selected_rail = false;
     }
 
+     function link_to_end_time(){
+        // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
+
+        if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
+        if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
+
+        rect_geom.followers.push(common_geom.selected_rail);
+        common_geom.selected_rail.following = rect_geom;
+
+        update_end_time();
+
+        common_geom.selected_rail = false;
+    }
+
+    function makeStartTimeIndependent() {
+
+        // remove this rectangle from sibling list of other rectangles
+        for (var i = 0; i < rect_geom.siblings.length; i++) {
+            var index = rect_geom.siblings[i].siblings.indexOf(rect_geom);
+            rect_geom.siblings[i].siblings.splice(index, 1);
+        }
+
+        // clear up if following a rectangle
+        if (rect_geom.following){
+            var index = rect_geom.following.followers.indexOf(rect_geom);
+            rect_geom.following.followers.splice(index, 1);
+
+            rect_geom.following = false;
+        }
+
+        // adjust start line for former sibling
+        if (rect_geom.siblings.length > 0){
+            rect_geom.siblings[0].update_start_time();
+
+            // remove from self
+            rect_geom.siblings = [];
+        }
+
+        // adjust start line for self
+        rect_geom.update_start_time();
+
+        rect_geom.adjust_everything(); // to toggle visibility of track_circle
+    }
+
+    
     function toggle_start_line_visibility(){
 
         if (timing_parent_bar){ return; }
@@ -1165,24 +1235,45 @@ function Rectangle(common_geom, subplot_geom, options) {
 
 
     adjust_everything(true);
-    return {add_bar: append_timing_bar, getSpecString: getSpecString, adjust_scales: adjust_scales,
-            adjust_everything: adjust_everything, rect_geom: rect_geom,
-            saveRectangleIndex: function(index){rect_geom.rectangleIndex = index;},
-            update_formula: update_formula,
-            get_num_rails: function (){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0; },
-            get_num_rails_above: get_num_rails_above,
-            deleteRectangle: deleteRectangle,
-            update_start_time: update_start_time,
-            toJSON: function () {
-            // modify copy of this object that will be serialised to eliminate cyclic references
-            var clone = Object.assign({}, rect_geom);
+    
+    rect_geom.add_bar = append_timing_bar;
+    rect_geom.getSpecString = getSpecString;
+    rect_geom.adjust_scales = adjust_scales;
+    rect_geom.adjust_everything = adjust_everything;
+    rect_geom.saveRectangleIndex = function (index) {
+        rect_geom.rectangleIndex = index;
+    };
+    rect_geom.update_formula = update_formula;
+    rect_geom.get_num_rails = function () {
+        return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;
+    };
+    rect_geom.get_num_rails_above = get_num_rails_above;
+    rect_geom.deleteRectangle = deleteRectangle;
+    rect_geom.update_start_time = update_start_time;
+    
+    rect_geom.toJSON = function () {
+        // modify copy of this object that will be serialised to eliminate cyclic references
+        var clone = Object.assign({}, rect_geom);
 
-            clone.siblings = clone.siblings.map(function (n) {
-                var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
-                var rectIndex = n.subplot.rectangles.indexOf(n);
-                return {subplot_index: subplot_index, rect_index: rectIndex};
-            });
-            return clone;
+        clone.siblings = clone.siblings.map(function (n) { return getRectangleIndex(n); });
+        clone.followers = clone.followers.map(function (n) { return getRectangleIndex(n); });
+
+        if (clone.following){
+            clone.following = getRectangleIndex(clone.following);
         }
-            }
+        delete clone.subplot;
+
+        return clone;
+    };
+
+    function getRectangleIndex(n) {
+        var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
+        var rectIndex = n.subplot.rectangles.indexOf(n);
+        return {subplot_index: subplot_index, rect_index: rectIndex};
+    }
+
+    rect_geom.update_end_time = update_end_time;
+    
+    return rect;
+
 }
