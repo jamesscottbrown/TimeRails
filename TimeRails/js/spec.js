@@ -479,6 +479,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.max_depth = spec_options.max_depth ? spec_options.max_depth : 5;
     common_geom.allow_rectangles = spec_options.hasOwnProperty("allow_rectangles") ? spec_options.allow_rectangles : true;
     common_geom.allow_modes = spec_options.hasOwnProperty("allow_modes") ? spec_options.allow_modes : false;
+    common_geom.allow_intervals = spec_options.hasOwnProperty("allow_intervals") ? spec_options.allow_intervals : false;
     common_geom.allow_shared_times = spec_options.hasOwnProperty("allow_shared_times") ? spec_options.allow_modes : true;
     common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
@@ -526,6 +527,15 @@ function Diagram(div_name, spec_id, spec_options) {
                     title: 'Add Mode',
                     action: function () {
                         subplot_geom.rectangles.push(Mode(common_geom, subplot_geom))
+                    },
+                    disabled: common_geom.specification_fixed
+                })
+            }
+            if (common_geom.allow_intervals) {
+                menu_options.push({
+                    title: 'Add Interval',
+                    action: function () {
+                        subplot_geom.rectangles.push(Interval(common_geom, subplot_geom))
                     },
                     disabled: common_geom.specification_fixed
                 })
