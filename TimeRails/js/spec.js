@@ -447,6 +447,7 @@ function Diagram(div_name, spec_id, spec_options) {
         use_letters: false,
         generateExampleTrajectories: spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true,
 
+        saveURL: spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save",
         colorScale: d3.scale.category10(),
 
         xRange: [0, 100],
