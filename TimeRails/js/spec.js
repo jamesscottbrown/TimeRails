@@ -460,8 +460,9 @@ function Diagram(div_name, spec_id, spec_options) {
         rectangles: [],
 
         subplot_geoms: [],
-        selected_rail: {},
-        selected_rail_to_add_to_rail: {}
+        selected_rail: false,
+        selected_rail_to_add_to_rail: false,
+        selected_mode_to_link: false
     };
 
     if (!spec_options){ spec_options = {}; }

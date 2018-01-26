@@ -30,6 +30,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         siblings: [],
         followers: [],
+        sharedEndTimes: [],
         following: false,
         startTimeIsBound: true,
         endTimeIsBound: false,
@@ -244,27 +245,64 @@ function Mode(common_geom, subplot_geom, options) {
     }
 
     function update_end_time(){
-        for (var i=0; i<rect_geom.followers.length; i++){
-            var follower = rect_geom.followers[i];
+        updateFollowers(rect_geom);
+
+        // adjust shared end time
+        var min_y = subplot_geom.yOffset + rect_geom.rail_height;
+        var max_y = min_y;
+
+        for (var i=0; i<rect_geom.sharedEndTimes.length; i++){
+            var otherMode = rect_geom.sharedEndTimes[i];
+
+            var y = otherMode.getYOffset() + otherMode.rail_height;
+            min_y = Math.min(min_y, y);
+            max_y = Math.max(max_y, y);
+        }
+
+        for (var i=0; i<rect_geom.sharedEndTimes.length; i++){
+            var linkedMode = rect_geom.sharedEndTimes[i];
+            linkedMode.width = rect_geom.width;
+            linkedMode.track_circle_pos = rect_geom.track_circle_pos;
+            linkedMode.start_time_pos = rect_geom.start_time_pos;
+
+            linkedMode.adjustSharedEndTimeLine(min_y, max_y);
+            linkedMode.adjust_everything();
+
+            updateFollowers(linkedMode);
+        }
+
+        adjustSharedEndTimeLine(min_y, max_y);
+    }
+
+    function updateFollowers(rectangle){
+        for (var i=0; i<rectangle.followers.length; i++){
+            var follower = rectangle.followers[i];
 
             // Shared time-line goes from this mode to what it is following
-            follower.track_circle_pos = rect_geom.start_time_pos + rect_geom.width;
-            follower.start_time_pos = rect_geom.start_time_pos + rect_geom.width;
+            follower.track_circle_pos = rectangle.start_time_pos + rectangle.width;
+            follower.start_time_pos = rectangle.start_time_pos + rectangle.width;
 
-            var rail_height = subplot_geom.yOffset + rect_geom.rect_top + rect_geom.height;
+            var rail_height = subplot_geom.yOffset + rectangle.rect_top + rectangle.height;
             var follower_rail_height = follower.getYOffset() + follower.rail_height;
 
             follower.adjustSharedTimeLine(rail_height, follower_rail_height);
             follower.adjust_everything();
-
-            follower.update_end_time();
         }
+
     }
 
     function adjustSharedTimeLine (min_y, max_y){
         link_shared_times_line
             .attr("x1", rect_geom.track_circle_pos)
             .attr("x2", rect_geom.track_circle_pos)
+            .attr("y1", min_y)
+            .attr("y2", max_y);
+    }
+
+    function adjustSharedEndTimeLine(min_y, max_y){
+        shared_end_times_line
+            .attr("x1", rect_geom.track_circle_pos + rect_geom.width)
+            .attr("x2", rect_geom.track_circle_pos + rect_geom.width)
             .attr("y1", min_y)
             .attr("y2", max_y);
     }
@@ -392,8 +430,6 @@ function Mode(common_geom, subplot_geom, options) {
             adjust_everything();
             update_end_time();
     }
-
-
 
 
     function drag_fixed() {
@@ -676,6 +712,12 @@ function Mode(common_geom, subplot_geom, options) {
         .classed("red-line", true)
         .call(drag_track_circle);
 
+    var shared_end_times_line = common_geom.diagram_svg.select("#linking-line-div")
+        .append("line")
+        .style("opacity", "0.1")
+        .classed("red-line", true);
+
+
     var rectMenu =
         function () {
             return [{
@@ -736,6 +778,10 @@ function Mode(common_geom, subplot_geom, options) {
                     adjust_everything();
                 },
                 disabled: !rect_geom.endTimeIsBound
+            },{
+                title: 'Share times with another mode',
+                action: function(){ common_geom.selected_mode_to_link = rect_geom; },
+                disabled: rect_geom.sharedEndTimes.length > 0 //(rect_geom.siblings.length === 0 && !rect_geom.following)
             }];
         };
 
@@ -839,42 +885,82 @@ function Mode(common_geom, subplot_geom, options) {
         if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
         if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
 
+        addAsSibling(common_geom.selected_rail);
+        common_geom.selected_rail = false;
+    }
+
+
+    function addAsSibling(selected_rail){
         if (rect_geom.following){ return; } // Also clear selection?
         // add new mode to the sibling list of all of this mode's siblings
         for (var i=0; i<rect_geom.siblings.length; i++){
-            rect_geom.siblings[i].siblings.push(common_geom.selected_rail);
+            rect_geom.siblings[i].siblings.push(selected_rail);
         }
 
         // copy this mode's siblings to new mode's sibling list
         for (var i=0; i<rect_geom.siblings.length; i++){
-            common_geom.selected_rail.siblings.push(rect_geom.siblings[i]);
+            selected_rail.siblings.push(rect_geom.siblings[i]);
         }
 
         // add new mode to the sibling list of this mode
-        rect_geom.siblings.push(common_geom.selected_rail);
+        rect_geom.siblings.push(selected_rail);
 
         // add this mode to sibling list of new node
-        common_geom.selected_rail.siblings.push(rect_geom);
+        selected_rail.siblings.push(rect_geom);
 
-        common_geom.selected_rail.setTimingBar(timing_parent_bar);
+        selected_rail.setTimingBar(timing_parent_bar);
 
         update_start_time();
+    }
 
-        common_geom.selected_rail = false;
+    function addAsLinkedEnding(selected_mode){
+        // add new mode to the sharedEndTimes list of all of this mode's sharedEndTimes
+        for (var i=0; i<rect_geom.sharedEndTimes.length; i++){
+            rect_geom.sharedEndTimes[i].sharedEndTimes.push(selected_mode);
+        }
+
+        // copy this mode's sharedEndTimes to new mode's sharedEndTimes list
+        for (var i=0; i<rect_geom.sharedEndTimes.length; i++){
+            selected_mode.sharedEndTimes.push(rect_geom.sharedEndTimes[i]);
+        }
+
+        // add new mode to the sharedEndTimes list of this mode
+        rect_geom.sharedEndTimes.push(selected_mode);
+
+        // add this mode to sharedEndTimes list of new node
+        selected_mode.sharedEndTimes.push(rect_geom);
+
+        update_end_time();
     }
 
      function link_to_end_time(){
         // the menu ensures that common_geom.selected_rail has no siblings, but this rectangle might already
 
-        if (!common_geom.selected_rail || !common_geom.selected_rail.hasOwnProperty('siblings')){ return; }
-        if (common_geom.selected_rail == rect_geom){ common_geom.selected_rail = false; return; }
+        if (common_geom.selected_rail && common_geom.selected_rail.hasOwnProperty('siblings')) {
+            if (common_geom.selected_rail == rect_geom) {
+                common_geom.selected_rail = false;
+                return;
+            }
 
-        rect_geom.followers.push(common_geom.selected_rail);
-        common_geom.selected_rail.following = rect_geom;
+            rect_geom.followers.push(common_geom.selected_rail);
+            common_geom.selected_rail.following = rect_geom;
 
-        update_end_time();
+            update_end_time();
 
-        common_geom.selected_rail = false;
+            common_geom.selected_rail = false;
+        }
+
+         // the menu ensures that common_geom.selected_mode_to_link doesn't add have a linked end time yet, but this rectangle might already
+        if (common_geom.selected_mode_to_link){
+            // call linkedStartTime???
+
+            // record linked-ness
+            addAsLinkedEnding(common_geom.selected_mode_to_link);
+            addAsSibling(common_geom.selected_mode_to_link);
+
+            common_geom.selected_mode_to_link = false;
+        }
+
     }
 
     function makeStartTimeIndependent() {
@@ -905,6 +991,26 @@ function Mode(common_geom, subplot_geom, options) {
         rect_geom.update_start_time();
 
         rect_geom.adjust_everything(); // to toggle visibility of track_circle
+
+
+
+        // remove from sharedEndTimes of other modes
+        for (var i = 0; i < rect_geom.sharedEndTimes.length; i++) {
+            var index = rect_geom.sharedEndTimes[i].sharedEndTimes.indexOf(rect_geom);
+            rect_geom.sharedEndTimes[i].sharedEndTimes.splice(index, 1);
+        }
+
+        // adjust end line for modes formerly ending at same time
+        if (rect_geom.sharedEndTimes.length > 0){
+            rect_geom.sharedEndTimes[0].update_end_time();
+
+            // remove from self
+            rect_geom.sharedEndTimes = [];
+        }
+        rect_geom.update_end_time();
+
+
+
     }
 
 
@@ -1061,8 +1167,11 @@ function Mode(common_geom, subplot_geom, options) {
             sibling.update_start_time();
         }
 
+        // TODO: followers and sharedEndTimes
+
         // remove this rectangle's shared time line
         link_shared_times_line.remove();
+        shared_end_times_line.remove();
 
         // delete description
         placeholder_latex_formula.remove();
@@ -1166,6 +1275,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         clone.siblings = clone.siblings.map(function (n) { return getRectangleIndex(n); });
         clone.followers = clone.followers.map(function (n) { return getRectangleIndex(n); });
+        clone.sharedEndTimes = clone.sharedEndTimes.map(function (n) { return getRectangleIndex(n); });
 
         if (clone.following){
             clone.following = getRectangleIndex(clone.following);
@@ -1182,6 +1292,7 @@ function Mode(common_geom, subplot_geom, options) {
     }
 
     rect_geom.update_end_time = update_end_time;
+    rect_geom.adjustSharedEndTimeLine = adjustSharedEndTimeLine;
 
     return rect_geom;
 }
