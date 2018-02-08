@@ -239,7 +239,10 @@
 
             }
             function getState(){
-                return {type: "linear", positions: [getCircleVal(point1), getCircleVal(point2)]}
+                var intercept = y.invert(point1.attr("cy"));
+                var gradient = (y.invert(point2.attr("cy")) - y.invert(point1.attr("cy"))) / (x.invert(point2.attr("cx")) - x.invert(point1.attr("cx")));
+
+                return {type: "linear", positions: [getCircleVal(point1), getCircleVal(point2)], parameters: {"intercept": intercept, "gradient": gradient}}
             }
 
             return {updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState }
@@ -390,9 +393,15 @@
             function getExpression(){}
 
             function getState(){
+                var initial_value = parseFloat(y.invert(point1.attr("cy")));
+                var midpoint_time = parseFloat(x.invert(point2.attr("cx")));
+                var final_value = parseFloat(y.invert(point3.attr("cy")));
+
                 return {type: "sigmoidal",
                         positions: [getCircleVal(point1), getCircleVal(point2), getCircleVal(point3)],
-                        hillCoefficient: hillCoefficient}
+                        hillCoefficient: hillCoefficient,
+                        parameters: {initial_value: initial_value, midpoint_time: midpoint_time, final_value: final_value, hillCoefficient: hillCoefficient}
+                        }
             }
 
 
@@ -595,7 +604,15 @@
             function getExpression(){}
 
             function getState(){
-                return {type: "bell", positions: [getCircleVal(point1), getCircleVal(point2), getCircleVal(point3), getCircleVal(point4)]}
+                var initial_value = parseFloat(y.invert(point1.attr("cy")));
+                var peak_value = parseFloat(y.invert(point3.attr("cy")));
+                var peak_time = parseFloat(x.invert(point3.attr("cx")));
+                var sigma = (parseFloat(x.invert(point3.attr("cx"))) - parseFloat(x.invert(point2.attr("cx"))));
+
+                return {type: "bell",
+                    positions: [getCircleVal(point1), getCircleVal(point2), getCircleVal(point3), getCircleVal(point4)],
+                    parameters: {initial_value: initial_value, peak_value: peak_value, peak_time: peak_time, sigma: sigma}
+                }
             }
 
             return {updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState}
