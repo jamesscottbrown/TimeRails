@@ -284,7 +284,7 @@ function addCommonElements(common_geom, subplot_geom){
                     $.ajax({
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
-                        url: "http://" + window.location.host + "/specifications/" + common_geom.spec_id + "/save",
+                        url: common_geom.saveURL,
                         dataType: 'html',
                         async: true,
                         data: new_spec_string,
