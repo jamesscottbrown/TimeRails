@@ -560,7 +560,7 @@ function Mode(common_geom, subplot_geom, options) {
 
         var menuOptions = [
             {
-                title: 'Constraint starts at fixed time',
+                title: 'Starts at fixed time',
                 action: function (elm, d, i) {
                     if (timing_parent_bar) {
                         assign_parent_bar(false);
@@ -572,7 +572,7 @@ function Mode(common_geom, subplot_geom, options) {
 
             if (common_geom.max_depth > 1) {
                 menuOptions.push({
-                    title: 'Constraint applies at <i>some</i> time in range',
+                    title: 'Applies at <i>some</i> time in range',
                     action: function (elm, d, i) {
                         var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                         assign_parent_bar(bar);
@@ -580,7 +580,7 @@ function Mode(common_geom, subplot_geom, options) {
                 });
 
                 menuOptions.push({
-                    title: 'Constraint applies at <i>all</i> times in range',
+                    title: 'Applies at <i>all</i> times in range',
                     action: function (elm, d, i) {
                         var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
                         assign_parent_bar(bar);
