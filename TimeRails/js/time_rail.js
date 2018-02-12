@@ -256,28 +256,34 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     var menu = [
         {
-            title: 'Constraint starts at fixed time',
+            title: 'Starts at fixed time',
             action: remove_parent_bar,
             disabled: false // optional, defaults to false
         },
         {
-            title: 'Constraint applies at <i>some</i> time in range',
+            title: 'Applies at <i>some</i> time in range',
             action: set_parent_bar('some'),
             disabled: (level >= geom.max_depth)
-        },
-        {
-            title: 'Constraint applies at <i>all</i> times in range',
-            action: set_parent_bar('all'),
-            disabled: (level >= geom.max_depth)
-        },
-        {
+        }];
+    
+        if (geom.allow_globally) {
+
+            menu.push({
+                title: 'Applies at <i>all</i> times in range',
+                action: set_parent_bar('all'),
+                disabled: (level >= geom.max_depth)
+            });
+        }
+                
+        menu.push({
 				divider: true
-        },
-        {
+        });
+
+        menu.push({
             title: 'Adjust values',
             action: adjust_rail_values
-        }
-    ];
+        });
+
 
 
     // Actual visual elements

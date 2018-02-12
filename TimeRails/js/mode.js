@@ -570,7 +570,7 @@ function Mode(common_geom, subplot_geom, options) {
                 disabled: false // optional, defaults to false
             }];
 
-            if (common_geom.max_depth > 1) {
+            if (common_geom.max_depth > 0) {
                 menuOptions.push({
                     title: 'Applies at <i>some</i> time in range',
                     action: function (elm, d, i) {
@@ -579,20 +579,22 @@ function Mode(common_geom, subplot_geom, options) {
                     }
                 });
 
-                menuOptions.push({
-                    title: 'Applies at <i>all</i> times in range',
-                    action: function (elm, d, i) {
-                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                        assign_parent_bar(bar);
-                    },
-                    disabled: (common_geom.max_depth <= 1)
-                    },
-                    {
-                        divider: true
-                    });
+                if (common_geom.allow_globally) {
+                    menuOptions.push({
+                            title: 'Applies at <i>all</i> times in range',
+                            action: function (elm, d, i) {
+                                var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                                assign_parent_bar(bar);
+                            },
+                            disabled: (common_geom.max_depth <= 1)
+                        },
+                        {
+                            divider: true
+                        });
+                }
             }
 
-            if (common_geom.max_depth > 2){
+            if (common_geom.max_depth >= 2){
                 menuOptions.push({
                     title: 'Eventually-Always',
                     action: function(elm, d, i) {

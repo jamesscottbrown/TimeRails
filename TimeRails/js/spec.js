@@ -470,6 +470,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.allow_rectangles = spec_options.hasOwnProperty("allow_rectangles") ? spec_options.allow_rectangles : true;
     common_geom.allow_modes = spec_options.hasOwnProperty("allow_modes") ? spec_options.allow_modes : false;
     common_geom.allow_intervals = spec_options.hasOwnProperty("allow_intervals") ? spec_options.allow_intervals : false;
+    common_geom.allow_globally = spec_options.hasOwnProperty("allow_globally") ? spec_options.allow_globally : true;
     common_geom.allow_shared_times = spec_options.hasOwnProperty("allow_shared_times") ? spec_options.allow_modes : true;
     common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
