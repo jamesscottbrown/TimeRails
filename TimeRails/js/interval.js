@@ -480,45 +480,51 @@ function Interval(common_geom, subplot_geom, options) {
                     }
                 },
                 disabled: false // optional, defaults to false
-            },
-            {
-                title: 'Constraint applies at <i>some</i> time in range',
-                action: function (elm, d, i) {
-                    var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                    assign_parent_bar(bar);
-                },
-                disabled: (common_geom.max_depth <= 1)
-            },
-            {
-                title: 'Constraint applies at <i>all</i> times in range',
-                action: function (elm, d, i) {
-                    var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                     assign_parent_bar(bar);
-                },
-                disabled: (common_geom.max_depth <= 1)
-            },
-
-            {
-                divider: true
-            },
-            {
-                title: 'Eventually-Always',
-                action: function (elm, d, i) {
-                    var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                    assign_parent_bar(bar);
-                    timing_parent_bar.set_parent_bar('some')();
-                    update_text();
-                }
-            },
-            {
-                title: 'Always-Eventually',
-                action: function (elm, d, i) {
-                    var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
-                    assign_parent_bar(bar);
-                    timing_parent_bar.set_parent_bar('all')();
-                    update_text();
-                }
             }];
+        
+            if (common_geom.max_depth > 1) {
+                menuOptions.push({
+                    title: 'Constraint applies at <i>some</i> time in range',
+                    action: function (elm, d, i) {
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                        assign_parent_bar(bar);
+                    }
+                });
+    
+                menuOptions.push({
+                    title: 'Constraint applies at <i>all</i> times in range',
+                    action: function (elm, d, i) {
+                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                        assign_parent_bar(bar);
+                    },
+                    disabled: (common_geom.max_depth <= 1)
+                    },
+                    {
+                        divider: true
+                    });
+            }
+    
+            if (common_geom.max_depth > 2){
+                menuOptions.push({
+                    title: 'Eventually-Always',
+                    action: function(elm, d, i) {
+                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                        assign_parent_bar(bar);
+                        timing_parent_bar.set_parent_bar('some')();
+                        update_text();
+                    }
+                 });
+                menuOptions.push({
+                    title: 'Always-Eventually',
+                    action: function(elm, d, i) {
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form, newg, helper_funcs);
+                        assign_parent_bar(bar);
+                        timing_parent_bar.set_parent_bar('all')();
+                        update_text();
+                    }
+                });
+            }
+
 
         if (common_geom.allow_shared_times) {
             menuOptions.push({
