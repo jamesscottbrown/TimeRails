@@ -285,6 +285,7 @@ function Mode(common_geom, subplot_geom, options) {
             var rail_height = subplot_geom.yOffset + rectangle.rect_top + rectangle.height;
             var follower_rail_height = follower.getYOffset() + follower.rail_height;
 
+            follower.update_end_time();
             follower.adjustSharedTimeLine(rail_height, follower_rail_height);
             follower.adjust_everything();
         }
