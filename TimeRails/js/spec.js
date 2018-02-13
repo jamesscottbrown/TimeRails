@@ -502,6 +502,21 @@ function Diagram(div_name, spec_id, spec_options) {
             .domain(subplot_geom.yRange)
             .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
 
+        subplot_geom.shift_down = function(){
+            common_geom.diagram_svg.attr("height", parseInt(common_geom.diagram_svg.attr("height")) + common_geom.track_padding);
+
+            // shift later (lower) subplots downwards
+            for (var i=subplot_geom.subplot_index+1; i<common_geom.subplot_geoms.length; i++){
+                var g = common_geom.subplot_geoms[i].svg;
+
+                var transform = g.attr("transform");
+                var p=transform.split(", ");
+
+                var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) + common_geom.track_padding;
+                g.attr("transform", "translate(0, " + newTranslation + ")");
+            }
+        }
+
         function menuOptions(){
             var menu_options = [];
             if (common_geom.allow_rectangles) {

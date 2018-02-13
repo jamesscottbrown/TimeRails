@@ -60,20 +60,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         if (options.hasOwnProperty('right_tick_time')) { right_tick_pos = TimeToX(options.right_tick_time); }
     }
 
-    // increase SVG height
-    diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) + 2*geom.track_padding);
-
-       // shift later (lower) subplots downwards
-    for (var i=subplot_geom.subplot_index+1; i<geom.subplot_geoms.length; i++){
-        var g = geom.subplot_geoms[i].svg;
-
-        var transform = g.attr("transform");
-        var p=transform.split(", ");
-
-        var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) + 2*geom.track_padding;
-        g.attr("transform", "translate(0, " + newTranslation + ")");
-    }
-
+    subplot_geom.shift_down();
+    
     function getStartX(){
         var minStartX = +Infinity;
         var maxStartX = -Infinity;

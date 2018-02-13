@@ -65,6 +65,8 @@ function Mode(common_geom, subplot_geom, options) {
         assign_parent_bar: assign_parent_bar
     };
 
+    subplot_geom.shift_down();
+
     function assign_parent_bar(bar){
         for (var i=0; i < rect_geom.siblings.length; i++){
             rect_geom.siblings[i].setTimingBar(bar);
