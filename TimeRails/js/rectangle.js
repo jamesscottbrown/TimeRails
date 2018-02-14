@@ -18,9 +18,9 @@ function Rectangle(common_geom, subplot_geom, options) {
         bottom_fixed: true,
         left_fixed: true,
         right_fixed: true,
-        followRectangle: false,
+        followRectangle: (options && options.hasOwnProperty("followRectangle")) ? options.followRectangle : false,
         rectangleIndex: subplot_geom.rectangles.length,
-        start_line_visible: true,
+        start_line_visible: (options && options.hasOwnProperty("start_line_visible")) ? options.followRectangle : true,
 
         num_rails_above: 0,
         get_num_rails_above: get_num_rails_above,
@@ -29,7 +29,7 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         siblings: [],
         followers: [],
-        following: false,
+        following: (options && options.hasOwnProperty("following")) ? options.following : false,
 
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
@@ -99,34 +99,16 @@ function Rectangle(common_geom, subplot_geom, options) {
     };
 
     if (options){
-        if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
-            rect_geom.delay_line_length = common_geom.xScale(options.start_time) - common_geom.xScale(options.track_circle_time);
-            rect_geom.start_time_pos = common_geom.xScale(options.start_time);
-            rect_geom.track_circle_pos = common_geom.xScale(options.track_circle_time);
-            rect_geom.width = common_geom.xScale(options.end_time) - common_geom.xScale(options.start_time);
-        } else {
-            rect_geom.left_fixed = false;
-            rect_geom.right_fixed = false;
-
-            rect_geom.delay_line_length = 0;
-            rect_geom.start_time_pos = common_geom.xScale(common_geom.xRange[0]);
-            rect_geom.track_circle_pos = common_geom.xScale(common_geom.xRange[0]);
-            rect_geom.width = common_geom.xScale(common_geom.xRange[1]) - common_geom.xScale(common_geom.xRange[0]);
-
+        if (options.hasOwnProperty('start_time_pos') && options.hasOwnProperty('track_circle_pos')){
+            rect_geom.delay_line_length = options.delay_line_length;
+            rect_geom.start_time_pos = options.start_time_pos;
+            rect_geom.track_circle_pos = options.track_circle_pos;
+            rect_geom.width = options.width;
+            rect_geom.height = options.height;
+            rect_geom.rect_top = options.rect_top;
         }
 
-        if (!options.hasOwnProperty('lt') || !options.lt) {
-            rect_geom.top_fixed = false;
-            options.lt = subplot_geom.yScale(subplot_geom.yRange[1]);
-        }
-        rect_geom.rect_top = subplot_geom.yScale(options.lt);
-
-        if (!options.hasOwnProperty('gt') || !options.gt){
-            rect_geom.bottom_fixed = false;
-            options.lt = subplot_geom.yScale(subplot_geom.yRange[0]);
-        }
-
-        rect_geom.height = subplot_geom.yScale(options.gt) - subplot_geom.yScale(options.lt);
+        rect_geom.height = options.height;
     }
 
     rect_geom.track_circle_pos = rect_geom.start_time_pos - rect_geom.delay_line_length;

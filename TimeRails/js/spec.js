@@ -482,12 +482,12 @@ function Diagram(div_name, spec_id, spec_options) {
 
 
 
-    function addConstraintSubplot(specification_string, variable_name, base_variable_name) {
+    function addConstraintSubplot(specification_string, variable_name, base_variable_name, options) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
             subplot_type: "constraint",
-            yRange: [100, 0],
+            yRange: (options && options.hasOwnProperty("yRange")) ? options.yRange : [100, 0],
             yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
             base_variable_name: base_variable_name ? base_variable_name : variable_name,
@@ -572,6 +572,7 @@ function Diagram(div_name, spec_id, spec_options) {
         svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
 
 
+        if (!specification_string) { specification_string = ""; }
         var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
         drawAxes(common_geom, subplot_geom);
@@ -629,15 +630,17 @@ function Diagram(div_name, spec_id, spec_options) {
                 subplot_geom.rectangles[0].deleteRectangle();
             }
         }
+
+        return subplot_geom;
     }
 
 
-    function addInputSubplot(specification_string, variable_name) {
+    function addInputSubplot(variable_name, options) {
 
         // Group together data that is shared between all rectangles in a sub-plot
         var subplot_geom = {
             subplot_type: "input",
-            yRange: [100, 0],
+            yRange: (options && options.hasOwnProperty("yRange")) ? options.yRange : [100, 0],
             yOffset: (subplotIndex * subplotHeight),
             variable_name: variable_name,
             base_variable_name: variable_name,
@@ -648,21 +651,21 @@ function Diagram(div_name, spec_id, spec_options) {
             deleteSubplot: deleteSubplot
         };
 
+        // TODO: if options, initialise modes from  option.inputSubplot
+
+
         subplot_geom.yScale = d3.scale.linear()
             .domain(subplot_geom.yRange)
             .range([common_geom.vertical_padding, common_geom.subplotHeight-common_geom.vertical_padding]);
 
 
-        // TODO: actually initialise populate from specification_string (and save?)
-
         svg.attr("height", parseFloat(svg.attr("height")) + subplotHeight);
-
-        var string = specification_string.toLowerCase().trim().replace(/ /g, '');
 
         drawAxes(common_geom, subplot_geom);
         var axis_range_div = addCommonElements(common_geom, subplot_geom);
 
-        subplot_geom.inputSubplot = drawInput(common_geom, subplot_geom);
+        var state = (options && options.hasOwnProperty("inputSubplot")) ? options.inputSubplot : {};
+        subplot_geom.inputSubplot = drawInput(common_geom, subplot_geom, [], state);
 
         subplotIndex += 1;
         common_geom.subplot_geoms.push(subplot_geom);
@@ -726,6 +729,103 @@ function Diagram(div_name, spec_id, spec_options) {
             if (sg.base_variable_name == name){
                 sg.deleteSubplot();
                 i--; // we have removed the subplot at position i, so need to check the new one to take its place
+            }
+        }
+
+    }
+
+    common_geom.load = function(jsonString){
+
+        var obj = JSON.parse(jsonString);
+
+        // Assume already set:
+        // - div_name
+        // - spec_id
+        // - index (?)
+        // - rectangles array (why does this exist?)
+        // padding: vertical_padding, horizontal_padding, track_padding, subplotWidth, subplotHeight
+        // -SVG exists
+
+        // set other diagram options
+        common_geom.max_depth = obj.max_depth;
+        common_geom.allow_rectangles = obj.allow_rectangles;
+        common_geom.allow_modes = obj.allow_modes;
+        common_geom.allow_intervals = obj.allow_intervals;
+        common_geom.allow_globally = obj.allow_globally;
+        common_geom.allow_shared_times = obj.allow_shared_times;
+        common_geom.generateExampleTrajectories = obj.generateExampleTrajectories;
+        common_geom.saveURL = obj.saveURL;
+        common_geom.allowLogic = obj.allowLogic;
+
+        common_geom.specification_fixed = obj.specification_fixed;
+        common_geom.use_letters = obj.use_letters; //
+        common_geom.xRange = obj.xRange;
+
+        for (var i=0; i < obj.subplot_geoms.length; i++){
+            var sp = obj.subplot_geoms[i];
+            if (sp.subplot_type == "constraint"){
+                loadConstraintSubplot(sp);
+            } else if (sp.subplot_type == "input"){
+                common_geom.addInputSubplot(sp.variable_name, sp);
+            }
+        }
+
+
+        for (var i=0; i<obj.subplot_geoms.length; i++){
+            for (var j=0; j<obj.subplot_geoms[i].rectangles.length; j++){
+
+                var rect_data = obj.subplot_geoms[i].rectangles[j];
+                var rect_obj = common_geom.subplot_geoms[i].rectangles[j];
+
+                // followers
+                for (var k=0; k<rect_data.followers.length; k++){
+                    var follower = rect_data.followers[k];
+                    rect_obj.followers[k] = common_geom.subplot_geoms[follower.subplot_index].rectangles[follower.rect_index];
+                    rect_obj.update_end_time();
+                }
+
+                // siblings
+                for (var k=0; k<rect_data.siblings.length; k++){
+                    var sibling = rect_data.siblings[k];
+                    rect_obj.siblings[k] = common_geom.subplot_geoms[sibling.subplot_index].rectangles[sibling.rect_index];
+                }
+
+                //sharedEndTimes (interval has none)
+                if (rect_data.hasOwnProperty("sharedEndTimes")){
+                    for (var k=0; k<rect_data.sharedEndTimes.length; k++){
+                        var sharedEndTime = rect_data.sharedEndTimes[k];
+                        rect_obj.sharedEndTimes[k] = common_geom.subplot_geoms[sharedEndTime.subplot_index].rectangles[sharedEndTime.rect_index];
+                    }
+                }
+
+
+                // following
+                if (rect_data.following){
+                    rect_obj.following = common_geom.subplot_geoms[rect_data.following.subplot_index].rectangles[rect_data.following.rect_index];
+                }
+
+            }
+        }
+
+        // TODO: rails
+
+
+
+    };
+
+    function loadConstraintSubplot(sp_data){
+        var sp = addConstraintSubplot("", sp_data.variable_name, sp_data.base_variable_name);
+
+        for (var i=0; i<sp_data.rectangles.length; i++){
+            var rectangle_data = sp_data.rectangles[i];
+
+            // TODO: pass remaining details as options
+            if (rectangle_data.kind == "mode"){
+                sp.rectangles.push(Mode(common_geom, sp, rectangle_data));
+            } else if (rectangle_data.kind == "rectangle"){
+                sp.rectangles.push(Rectangle(common_geom, sp, rectangle_data));
+            } if (rectangle_data.kind == "interval"){
+                sp.rectangles.push(Interval(common_geom, sp, rectangle_data));
             }
         }
 

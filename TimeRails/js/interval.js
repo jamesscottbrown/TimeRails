@@ -29,9 +29,9 @@ function Interval(common_geom, subplot_geom, options) {
         transition_min_pos: 450 * 2/3,
         transition_marker_width: 10,
 
-        followRectangle: false,
+        followRectangle: (options && options.hasOwnProperty("followRectangle")) ? options.followRectangle : false,
         rectangleIndex: subplot_geom.rectangles.length,
-        start_line_visible: true,
+        start_line_visible: (options && options.hasOwnProperty("start_line_visible")) ? options.followRectangle : true,
 
         num_rails_above: 0,
         get_num_rails_above: get_num_rails_above,
@@ -40,7 +40,8 @@ function Interval(common_geom, subplot_geom, options) {
 
         siblings: [],
         followers: [],
-        following: false,
+        following: (options && options.hasOwnProperty("following")) ? options.following : false,
+        sharedEndTimes: [],
 
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
@@ -110,29 +111,17 @@ function Interval(common_geom, subplot_geom, options) {
     };
 
     if (options){
-        if (options.hasOwnProperty('start_time') && options.hasOwnProperty('track_circle_time') && options.hasOwnProperty('end_time')){
-            rect_geom.delay_line_length = common_geom.xScale(options.start_time) - common_geom.xScale(options.track_circle_time);
-            rect_geom.start_time_pos = common_geom.xScale(options.start_time);
-            rect_geom.track_circle_pos = common_geom.xScale(options.track_circle_time);
-        } else {
-            rect_geom.left_fixed = false;
-            rect_geom.right_fixed = false;
+         if (options.hasOwnProperty('start_time_pos') && options.hasOwnProperty('track_circle_pos')){
+            rect_geom.delay_line_length = options.delay_line_length;
+            rect_geom.start_time_pos = options.start_time_pos;
+            rect_geom.track_circle_pos = options.track_circle_pos;
+            rect_geom.width = options.width;
 
-            rect_geom.delay_line_length = 0;
-            rect_geom.start_time_pos = common_geom.xScale(common_geom.xRange[0]);
-            rect_geom.track_circle_pos = common_geom.xScale(common_geom.xRange[0]);
-
+            rect_geom.transition_min_pos = options.transition_min_pos;
+            rect_geom.transition_max_pos = options.transition_max_pos;
         }
 
-        if (!options.hasOwnProperty('lt') || !options.lt) {
-            rect_geom.top_fixed = false;
-            options.lt = subplot_geom.yScale(subplot_geom.yRange[1]);
-        }
-
-        if (!options.hasOwnProperty('gt') || !options.gt){
-            rect_geom.bottom_fixed = false;
-            options.lt = subplot_geom.yScale(subplot_geom.yRange[0]);
-        }
+        rect_geom.height = options.height;
 
     }
 
