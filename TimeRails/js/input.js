@@ -68,6 +68,25 @@
         }
 
 
+        function adjust_scales(new_xScale, new_yScale){
+
+            function convertX(x){
+                return new_xScale(common_geom.xScale.invert(x));
+            }
+
+            function convertY(y){
+                return new_yScale(subplot_geom.yScale.invert(y));
+            }
+
+            for (var i=0; i<terms.length; i++){
+                terms[i].updateScale(convertX, convertY);
+            }
+        }
+
+        function shift_circle(circle, convertX, convertY){
+            circle.attr("cx", convertX(parseFloat(circle.attr("cx"))))
+                  .attr("cy", convertY(parseFloat(circle.attr("cy"))));
+        }
 
         function updateSumPoints(){
 
@@ -221,6 +240,12 @@
                 updateSumPoints();
             }
 
+            function updateScale(convertX, convertY){
+                shift_circle(point1, convertX, convertY);
+                shift_circle(point2, convertX, convertY);
+                updateLine();
+            }
+
             var isDeleted = false;
             function deleteLine() {
                 point1.remove();
@@ -244,7 +269,7 @@
                 return {type: "linear", positions: [getCircleVal(point1), getCircleVal(point2)], parameters: {"intercept": intercept, "gradient": gradient}}
             }
 
-            return {updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState }
+            return {updateScale: updateScale, updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState }
         }
 
 
@@ -391,6 +416,14 @@
             }
             function getExpression(){}
 
+            function updateScale(convertX, convertY){
+                shift_circle(point1, convertX, convertY);
+                shift_circle(point2, convertX, convertY);
+                shift_circle(point3, convertX, convertY);
+
+                updateLine();
+            }
+
             function getState(){
                 var initial_value = parseFloat(y.invert(point1.attr("cy")));
                 var midpoint_time = parseFloat(x.invert(point2.attr("cx")));
@@ -404,7 +437,7 @@
             }
 
 
-            return {updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState}
+            return {updateScale: updateScale, updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState}
 
         }
 
@@ -602,6 +635,15 @@
             }
             function getExpression(){}
 
+            function updateScale(convertX, convertY){
+                shift_circle(point1, convertX, convertY);
+                shift_circle(point2, convertX, convertY);
+                shift_circle(point3, convertX, convertY);
+                shift_circle(point4, convertX, convertY);
+
+                updateLine();
+            }
+
             function getState(){
                 var initial_value = parseFloat(y.invert(point1.attr("cy")));
                 var peak_value = parseFloat(y.invert(point3.attr("cy")));
@@ -614,7 +656,7 @@
                 }
             }
 
-            return {updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState}
+            return {updateScale: updateScale, updateLine: updateLine, deleteLine: deleteLine, getExpression: getExpression, getPoints: getPoints, isDeleted: function(){ return isDeleted; }, getState: getState}
 
         }
 
@@ -635,6 +677,6 @@
             return terms.map(function(term){ return term.getState(); })
         }
 
-        return {addLinearTerm: addLinearTerm, addSigmoidalTerm: addSigmoidalTerm,  addBellTerm: addBellTerm, getExpression: getExpression, getState: getState, getTerms: getTerms, toJSON: toJSON };
+        return {adjust_scales: adjust_scales, addLinearTerm: addLinearTerm, addSigmoidalTerm: addSigmoidalTerm,  addBellTerm: addBellTerm, getExpression: getExpression, getState: getState, getTerms: getTerms, toJSON: toJSON };
     }
 

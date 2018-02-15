@@ -342,6 +342,10 @@ function adjustAllYScales(common_geom, subplot_geom) {
             subplot_geom.rectangles[i].adjust_scales(common_geom.xScale, new_yScale);
         }
 
+        if (subplot_geom.subplot_type == "input"){
+            subplot_geom.inputSubplot.adjust_scales(common_geom.xScale, new_yScale);
+        }
+
         // switch scales
         subplot_geom.yScale = new_yScale;
 
@@ -357,12 +361,22 @@ function adjustAllXScales(common_geom, subplot_geom) {
             .range([common_geom.horizontal_padding, common_geom.subplotWidth - common_geom.horizontal_padding]);
 
         for (var j=0; j<common_geom.subplot_geoms.length; j++) {
+            var this_subplot = common_geom.subplot_geoms[j];
+
             for (var i = 0; i < common_geom.subplot_geoms[j].rectangles.length; i++) {
-                var this_subplot = common_geom.subplot_geoms[j];
                 this_subplot.rectangles[i].adjust_scales(new_xScale, this_subplot.yScale);
                 drawAxes(common_geom, this_subplot, new_xScale);
             }
+
+            if (this_subplot.subplot_type == "input"){
+                this_subplot.inputSubplot.adjust_scales(new_xScale, this_subplot.yScale);
+                drawAxes(common_geom, this_subplot, new_xScale);
+            }
+
         }
+
+
+
         // switch scales
         common_geom.xScale = new_xScale;
 }
