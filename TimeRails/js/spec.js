@@ -735,8 +735,8 @@ function Diagram(div_name, spec_id, spec_options) {
     }
 
     common_geom.load = function(jsonString){
-
         var obj = JSON.parse(jsonString);
+        if (!obj){ return; }
 
         // Assume already set:
         // - div_name
