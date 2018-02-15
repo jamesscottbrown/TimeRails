@@ -1203,6 +1203,11 @@ function Rectangle(common_geom, subplot_geom, options) {
         }
         delete clone.subplot;
 
+        clone.max_val = subplot_geom.yScale.invert(clone.rect_top);
+        clone.min_val = subplot_geom.yScale.invert(clone.rect_top + clone.height);
+        clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width);
+        clone.min_time = common_geom.xScale.invert(clone.start_time_pos);
+
         return clone;
     };
 

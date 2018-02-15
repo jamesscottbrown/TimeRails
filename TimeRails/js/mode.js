@@ -31,7 +31,6 @@ function Mode(common_geom, subplot_geom, options) {
         siblings: [],
         followers: [],
         sharedEndTimes: [],
-        sharedEndTimes: [],
         following: (options && options.hasOwnProperty("following")) ? options.following : false,
         startTimeIsBound: (options && options.hasOwnProperty("startTimeIsBound")) ? options.startTimeIsBound : true,
         endTimeIsBound: (options && options.hasOwnProperty("endTimeIsBound")) ? options.endTimeIsBound : false,
@@ -1274,6 +1273,11 @@ function Mode(common_geom, subplot_geom, options) {
             clone.following = getRectangleIndex(clone.following);
         }
         delete clone.subplot;
+
+        clone.max_val = subplot_geom.yScale.invert(clone.rect_top);
+        clone.min_val = subplot_geom.yScale.invert(clone.rect_top + clone.height);
+        clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width);
+        clone.min_time = common_geom.xScale.invert(clone.start_time_pos);
 
         return clone;
     };

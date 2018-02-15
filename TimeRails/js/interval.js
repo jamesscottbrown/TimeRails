@@ -956,6 +956,11 @@ function Interval(common_geom, subplot_geom, options) {
         }
         delete clone.subplot;
 
+        clone.max_val = subplot_geom.yScale.invert(clone.transition_max_pos);
+        clone.min_val = subplot_geom.yScale.invert(clone.transition_min_pos);
+        clone.max_time = common_geom.xScale.invert(clone.start_time_pos);
+        clone.min_time = common_geom.xScale.invert(clone.start_time_pos);
+
         return clone;
     };
 
