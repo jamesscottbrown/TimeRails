@@ -11,6 +11,15 @@
 
         var color = d3.scale.category10();
 
+        g.append("rect")
+            .attr("x", common_geom.horizontal_padding)
+            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
+            .attr("y", common_geom.vertical_padding)
+            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
+            .style("opacity", 0)
+            .attr("class", "clickable-background")
+            .on('contextmenu', d3.contextMenu(getMenu));
+
         var terms = [];
         if (state && state.length > 0){
             for (var i =0; i<state.length; i++){
@@ -41,16 +50,6 @@
                     disabled: common_geom.specification_fixed
                 }];
             };
-
-
-        g.append("rect")
-            .attr("x", common_geom.horizontal_padding)
-            .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
-            .attr("y", common_geom.vertical_padding)
-            .attr("height", common_geom.subplotHeight - 2*common_geom.vertical_padding)
-            .style("opacity", 0)
-            .attr("class", "clickable-background")
-            .on('contextmenu', d3.contextMenu(getMenu));
 
         function addLinearTerm(s){
             if (!s){ s = {type: "linear", positions: [{x: 0, y: 0}, {x: maxTime, y: maxY} ]}; }
