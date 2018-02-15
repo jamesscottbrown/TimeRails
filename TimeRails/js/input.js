@@ -11,6 +11,23 @@
 
         var color = d3.scale.category10();
 
+        // context menu to add terms
+        var getMenu = function(){
+            return [{
+                    title: 'Add linear term',
+                    action: function(){  addLinearTerm(); }, // wrap in new function to swallow unwanted arguments
+                    disabled: common_geom.specification_fixed
+                }, {
+                    title: 'Add sigmoidal term',
+                    action: function(){ addSigmoidalTerm(); },
+                    disabled: common_geom.specification_fixed
+                },{
+                    title: 'Add bell-shaped term',
+                    action: function(){ addBellTerm(); },
+                    disabled: common_geom.specification_fixed
+                }];
+            };
+
         g.append("rect")
             .attr("x", common_geom.horizontal_padding)
             .attr("width", common_geom.subplotWidth - 2*common_geom.horizontal_padding)
@@ -34,22 +51,6 @@
             }
         }
 
-        // context menu to add terms
-        var getMenu = function(){
-            return [{
-                    title: 'Add linear term',
-                    action: function(){  addLinearTerm(); }, // wrap in new function to swallow unwanted arguments
-                    disabled: common_geom.specification_fixed
-                }, {
-                    title: 'Add sigmoidal term',
-                    action: function(){ addSigmoidalTerm(); },
-                    disabled: common_geom.specification_fixed
-                },{
-                    title: 'Add bell-shaped term',
-                    action: function(){ addBellTerm(); },
-                    disabled: common_geom.specification_fixed
-                }];
-            };
 
         function addLinearTerm(s){
             if (!s){ s = {type: "linear", positions: [{x: 0, y: 0}, {x: maxTime, y: maxY} ]}; }
