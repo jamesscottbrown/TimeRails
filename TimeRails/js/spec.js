@@ -171,50 +171,6 @@ function addCommonElements(common_geom, subplot_geom){
             .on("change", hide_data(dataset_names[i]) );
     }
 
-        // Plotting saved datasets
-    d3.json(window.location + "/data", function(error, all_data){
-
-            if (error){ return; } // TODO: change how data is loaded
-            for (var i=0; i<all_data.length; i++) {
-
-                var data = all_data[i].value;
-
-                var circles = subplot_geom.svg.append('g')
-                    .selectAll('circle')
-                    .data(data)
-                    .enter()
-                    .append("circle")
-                    .attr("cx", function (d) {
-                        return common_geom.xScale(d.time)
-                    })
-                    .attr("cy", function (d) {
-                        return subplot_geom.yScale(d.value)
-                    })
-                    .attr("r", 2)
-                    .classed("data-circle", true);
-
-                    var data_line_generator = d3.svg.line()
-                        .x(function (d) { return common_geom.xScale(d.time); })
-                        .y(function (d) { return subplot_geom.yScale(d.value); });
-
-                subplot_geom.svg
-                    .append("path")
-                    .classed("data-path", true)
-                    .datum(data.filter(function (d) { return d.variable == subplot_geom.variable_name; }))
-                    .attr("fill", "none")
-                    .attr("stroke", common_geom.colorScale(i))
-                    .attr("stroke-linejoin", "round")
-                    .attr("stroke-linecap", "round")
-                    .attr("stroke-width", 1.5)
-                    .attr("d", data_line_generator);
-
-                circles.filter(function (d) {
-                    return d.variable != subplot_geom.variable_name
-                })
-                    .remove();
-
-            }
-    });
 
 
     var axis_range_div = diagram_option.append("div");
@@ -748,6 +704,12 @@ function Diagram(div_name, spec_id, spec_options) {
 
     }
 
+    function plotData() {
+        for (var i = 0; i < common_geom.subplot_geoms.length; i++) {
+            plotCurvesOnSubplot(common_geom, common_geom.subplot_geoms[i])
+        }
+    }
+
     common_geom.load = function(obj){
         //var obj = JSON.parse(jsonString);
         if (!obj){ return; }
@@ -851,10 +813,52 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.getVariableNames = function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })};
         common_geom.renameVariable = renameVariable;
         common_geom.deleteVariable = deleteVariable;
+        common_geom.plotData = plotData;
 
         return common_geom;
 }
 
+function plotCurvesOnSubplot(common_geom, subplot_geom){
+    // Plotting saved datasets
+    d3.json(window.location + "data", function(error, all_data){
+
+            if (error){ return; }
+            for (var i=0; i<all_data.length; i++) {
+
+
+                var data = all_data[i].filter(function(d){ return d.variable.subs("’", "'") == subplot_geom.variable_name});
+
+                var circles = subplot_geom.svg.append('g')
+                    .selectAll('circle')
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return common_geom.xScale(+d.time)
+                    })
+                    .attr("cy", function (d) {
+                        return subplot_geom.yScale(+d.value)
+                    })
+                    .attr("r", 2)
+                    .classed("data-circle", true);
+
+                    var data_line_generator = d3.svg.line()
+                        .x(function (d) { return common_geom.xScale(+d.time); })
+                        .y(function (d) { return subplot_geom.yScale(+d.value); });
+
+                subplot_geom.svg
+                    .append("path")
+                    .classed("data-path", true)
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", common_geom.colorScale(i))
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", data_line_generator);
+            }
+    });
+}
 
 function addRectangleToSubplot(string, common_geom, subplot_geom){
     if (!string){ return Rectangle(common_geom, subplot_geom); }
