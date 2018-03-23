@@ -1,10 +1,11 @@
-function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, options){
+function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placeholder_form, options){
 
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = common_geom.diagram_svg;
 
     var timing_parent_bar = false;
 
+    var newg = subplot_svg.append("g").attr('class', "rail");
     
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
@@ -221,7 +222,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placehold
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, placeholder_form, options);
             common_geom.adjustAllRectangles(true);
             rect_geom.update_text();
         }
