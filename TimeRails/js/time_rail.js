@@ -1,4 +1,4 @@
-function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placeholder_form, options){
+function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = common_geom.diagram_svg;
@@ -222,7 +222,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placehold
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, placeholder_form, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
             common_geom.adjustAllRectangles(true);
             rect_geom.update_text();
         }
@@ -379,7 +379,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placehold
             time_number = 0;
         }
 
-        var newDiv = placeholder_form.append("div").classed("spec-row", true);
+        var newDiv = rect_geom.placeholder_form.append("div").classed("spec-row", true);
 
         newDiv.append("text").text("For ");
 
@@ -438,7 +438,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placehold
     function adjust_rail_values(){
         d3.select("#paramModal").remove();
 
-        var modal_contents = d3.select(placeholder_form.node().parentNode.parentNode).append("div")
+        var modal_contents = d3.select(rect_geom.placeholder_form.node().parentNode.parentNode).append("div")
             .attr("id", "paramModal")
             .classed("modal", true)
             .classed("fade", true)

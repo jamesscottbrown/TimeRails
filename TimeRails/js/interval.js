@@ -474,7 +474,7 @@ function Interval(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Applies at <i>some</i> time in range',
                     action: function (elm, d, i) {
-                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form);
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
                         assign_parent_bar(bar);
                     }
                 });
@@ -483,7 +483,7 @@ function Interval(common_geom, subplot_geom, options) {
                     menuOptions.push({
                             title: 'Applies at <i>all</i> times in range',
                             action: function (elm, d, i) {
-                                var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form);
+                                var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
                                 assign_parent_bar(bar);
                             },
                             disabled: (common_geom.max_depth <= 1)
@@ -498,7 +498,7 @@ function Interval(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Eventually-Always',
                     action: function(elm, d, i) {
-                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom, placeholder_form);
+                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('some')();
                         update_text();
@@ -507,7 +507,7 @@ function Interval(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Always-Eventually',
                     action: function(elm, d, i) {
-                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom, placeholder_form);
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('all')();
                         update_text();
@@ -552,7 +552,7 @@ function Interval(common_geom, subplot_geom, options) {
     /************************************************/
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.subplotWidth + "px");
 
-    var placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form")
+    rect_geom.placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form")
                             .append('div')
                             .classed(".rect-" + rect_geom.rectangleIndex, true)
         .classed("single-rect-spec", true);
@@ -777,7 +777,7 @@ function Interval(common_geom, subplot_geom, options) {
     function update_text() {
 
         function create_initial_bar (kind){
-            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form);
+            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom);
             assign_parent_bar(bar);
         }
 
@@ -791,7 +791,7 @@ function Interval(common_geom, subplot_geom, options) {
             adjust_everything: adjust_everything,
             append_timing_bar: append_timing_bar
         };
-        describe_constraint(timing_parent_bar, subplot_geom.variable_name, placeholder_form, rect_geom, update_functions);
+        describe_constraint(timing_parent_bar, subplot_geom.variable_name, rect_geom.placeholder_form, rect_geom, update_functions);
 
         update_formula();
     }
@@ -805,7 +805,7 @@ function Interval(common_geom, subplot_geom, options) {
             timing_parent_bar.set_parent_bar(kind, options)();
             update_text();
         } else {
-            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, placeholder_form, options);
+            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, options);
             assign_parent_bar(bar);
         }
     }
