@@ -1,7 +1,7 @@
-function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form, newg, options){
+function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholder_form, newg, options){
 
     var subplot_svg = subplot_geom.svg;
-    var diagram_svg = geom.diagram_svg;
+    var diagram_svg = common_geom.diagram_svg;
 
     var timing_parent_bar = false;
 
@@ -14,7 +14,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
         get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
         children: [],
-        track_circle_pos: geom.horizontal_padding,
+        track_circle_pos: common_geom.horizontal_padding,
         subplot: subplot_geom,
 
         toJSON: function () {
@@ -23,14 +23,14 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
             // N.B. .children stores only rectangles/modes (not other rails)
             clone.children = clone.children.map(function (n) {
-                var subplot_index = geom.subplot_geoms.indexOf(n.subplot);
+                var subplot_index = common_geom.subplot_geoms.indexOf(n.subplot);
                 var rectIndex = n.subplot.rectangles.indexOf(n);
                 return {subplot_index: subplot_index, rect_index: rectIndex, kind: n.kind};
             });
 
             clone.timing_parent_bar = false;
             if (timing_parent_bar){
-                var subplot_index = geom.subplot_geoms.indexOf(timing_parent_bar.subplot);
+                var subplot_index = common_geom.subplot_geoms.indexOf(timing_parent_bar.subplot);
                 var railIndex = timing_parent_bar.subplot.rails.indexOf(timing_parent_bar);
                 clone.timing_parent_bar = {subplot_index: subplot_index, railIndex: railIndex, kind: timing_parent_bar.kind};
             }
@@ -41,16 +41,16 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     };
 
         
-    var left_tick_pos = geom.horizontal_padding + 20;
-    var right_tick_pos = geom.w - geom.horizontal_padding - 20;
+    var left_tick_pos = common_geom.horizontal_padding + 20;
+    var right_tick_pos = common_geom.w - common_geom.horizontal_padding - 20;
     var base_y;
 
     function TimeToX(time){
-        return geom.xScale(time);
+        return common_geom.xScale(time);
     }
     
     function XToTime(x){
-        return geom.xScale.invert(x);
+        return common_geom.xScale.invert(x);
     }
 
     
@@ -80,7 +80,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     function adjust_everything(update_description){
 
-        base_y = rectGeom.rail_height + (level - 1) * geom.track_padding;
+        base_y = rectGeom.rail_height + (level - 1) * common_geom.track_padding;
 
         track
             .attr("x1", left_tick_pos)
@@ -92,20 +92,20 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         left_tick
             .attr("x1", left_tick_pos)
             .attr("x2", left_tick_pos)
-            .attr("y1", base_y - geom.track_padding/2)
-            .attr("y2", base_y + geom.track_padding/2);
+            .attr("y1", base_y - common_geom.track_padding/2)
+            .attr("y2", base_y + common_geom.track_padding/2);
 
         right_tick
             .attr("x1", right_tick_pos)
             .attr("x2", right_tick_pos)
-            .attr("y1", base_y - geom.track_padding/2)
-            .attr("y2", base_y + geom.track_padding/2);
+            .attr("y1", base_y - common_geom.track_padding/2)
+            .attr("y2", base_y + common_geom.track_padding/2);
             
         startline    
             .attr("x1", rail.track_circle_pos)
             .attr("x2", rail.track_circle_pos)
             .attr("y1", base_y)
-            .attr("y2", base_y + geom.track_padding);
+            .attr("y2", base_y + common_geom.track_padding);
         
         delay_line
             .attr("x1", rail.track_circle_pos)
@@ -115,7 +115,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         
         track_circle
             .attr("cx", rail.track_circle_pos)
-            .attr("cy", base_y + geom.track_padding);
+            .attr("cy", base_y + common_geom.track_padding);
 
         if (timing_parent_bar){
             timing_parent_bar.adjust_everything();
@@ -148,12 +148,12 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .origin(Object)
         .on("drag", function(){
 
-            if (geom.specification_fixed){ return; }
+            if (common_geom.specification_fixed){ return; }
 
             var track_length = right_tick_pos - left_tick_pos;
             var mouse_pos = d3.mouse(subplot_svg.node())[0];
 
-            var new_left_end = imposeLimits(rail.track_circle_pos, geom.w - geom.horizontal_padding, mouse_pos - track_length/2);
+            var new_left_end = imposeLimits(rail.track_circle_pos, common_geom.w - common_geom.horizontal_padding, mouse_pos - track_length/2);
             var new_right_end = new_left_end + track_length;
 
             [minStartX, maxStartX] = getStartX();
@@ -173,7 +173,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     var drag_left_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            if (geom.specification_fixed){ return; }
+            if (common_geom.specification_fixed){ return; }
 
             [minStartX, maxStartX] = getStartX();
             left_tick_pos = imposeLimits(rail.track_circle_pos, minStartX, d3.mouse(subplot_svg.node())[0]);
@@ -184,17 +184,17 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
     var drag_right_tick = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            if (geom.specification_fixed){ return; }
+            if (common_geom.specification_fixed){ return; }
 
             [minStartX, maxStartX] = getStartX();
-            right_tick_pos = imposeLimits(maxStartX, geom.w, d3.mouse(subplot_svg.node())[0]);
+            right_tick_pos = imposeLimits(maxStartX, common_geom.w, d3.mouse(subplot_svg.node())[0]);
             adjust_everything(true);
         });
 
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            if (geom.specification_fixed && !timing_parent_bar){
+            if (common_geom.specification_fixed && !timing_parent_bar){
                 return;
             }
 
@@ -221,8 +221,8 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, subplot_geom, rectGeom, placeholder_form, newg, options);
-            geom.adjustAllRectangles(true);
+            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rectGeom, placeholder_form, newg, options);
+            common_geom.adjustAllRectangles(true);
             rectGeom.update_text();
         }
     };
@@ -232,7 +232,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             timing_parent_bar.delete();
             timing_parent_bar = false;
         }
-        geom.adjustAllRectangles(true);
+        common_geom.adjustAllRectangles(true);
         rectGeom.update_text();
     };
 
@@ -245,15 +245,15 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         {
             title: 'Applies at <i>some</i> time in range',
             action: set_parent_bar('some'),
-            disabled: (level >= geom.max_depth)
+            disabled: (level >= common_geom.max_depth)
         }];
     
-        if (geom.allow_globally) {
+        if (common_geom.allow_globally) {
 
             menu.push({
                 title: 'Applies at <i>all</i> times in range',
                 action: set_parent_bar('all'),
-                disabled: (level >= geom.max_depth)
+                disabled: (level >= common_geom.max_depth)
             });
         }
                 
@@ -294,9 +294,9 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         .on('contextmenu', d3.contextMenu(menu))
         .call(drag_track_circle)
         .on("click", function(){
-            if (!geom.selected_rail_to_add_to_rail){ return; }
-            geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
-            geom.selected_rail_to_add_to_rail.update_start_time();
+            if (!common_geom.selected_rail_to_add_to_rail){ return; }
+            common_geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
+            common_geom.selected_rail_to_add_to_rail.update_start_time();
         });
 
     // Externally exposed functions
@@ -308,16 +308,16 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         track_circle.remove();
         delay_line.remove();
 
-        diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) - 2*geom.track_padding);
+        diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) - 2*common_geom.track_padding);
 
        // shift later (lower) subplots upwards
-        for (var i=subplot_geom.subplot_index+1; i<geom.subplot_geoms.length; i++){
-            var g = geom.subplot_geoms[i].svg;
+        for (var i=subplot_geom.subplot_index+1; i<common_geom.subplot_geoms.length; i++){
+            var g = common_geom.subplot_geoms[i].svg;
 
             var transform = g.attr("transform");
             var p=transform.split(", ");
 
-            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - 2*geom.track_padding;
+            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - 2*common_geom.track_padding;
             g.attr("transform", "translate(0, " + newTranslation + ")");
         }
 
@@ -357,9 +357,9 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
         var symbol;
         if (kind == "some"){
-            symbol = geom.use_letters ? ' F' : ' \\diamond';
+            symbol = common_geom.use_letters ? ' F' : ' \\diamond';
         } else {
-            symbol = geom.use_letters ? ' G' : ' \\square';
+            symbol = common_geom.use_letters ? ' G' : ' \\square';
         }
 
         //         var symbol = use_letters ? ' G' : ' \\square';
@@ -485,7 +485,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
 
     
     adjust_everything(true);
-    geom.adjustAllRectangles();
+    common_geom.adjustAllRectangles();
     
     subplot_geom.rails.push(rail);
     return rail;
