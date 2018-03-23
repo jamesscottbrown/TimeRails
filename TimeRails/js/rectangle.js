@@ -1219,6 +1219,6 @@ function Rectangle(common_geom, subplot_geom, options) {
 
     rect_geom.update_end_time = update_end_time;
     
-    return rect;
+    return rect_geom;
 
 }
