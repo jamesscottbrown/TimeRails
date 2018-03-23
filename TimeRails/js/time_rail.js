@@ -1,4 +1,4 @@
-function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholder_form, newg, options){
+function create_bar(level, kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, options){
 
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = common_geom.diagram_svg;
@@ -80,7 +80,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholde
 
     function adjust_everything(update_description){
 
-        base_y = rectGeom.rail_height + (level - 1) * common_geom.track_padding;
+        base_y = rect_geom.rail_height + (level - 1) * common_geom.track_padding;
 
         track
             .attr("x1", left_tick_pos)
@@ -122,7 +122,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholde
         }
 
         if (update_description){
-            rectGeom.update_text();
+            rect_geom.update_text();
         }
     }
 
@@ -221,9 +221,9 @@ function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholde
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rectGeom, placeholder_form, newg, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, placeholder_form, newg, options);
             common_geom.adjustAllRectangles(true);
-            rectGeom.update_text();
+            rect_geom.update_text();
         }
     };
 
@@ -233,7 +233,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholde
             timing_parent_bar = false;
         }
         common_geom.adjustAllRectangles(true);
-        rectGeom.update_text();
+        rect_geom.update_text();
     };
 
     var menu = [
@@ -430,7 +430,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rectGeom, placeholde
         select.on("change", function(){
             kind = this.value.startsWith("all") ? "all" : "some";
             adjust_everything();
-            rectGeom.update_formula();
+            rect_geom.update_formula();
         });
     }
 
