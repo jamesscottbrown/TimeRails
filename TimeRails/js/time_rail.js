@@ -1,4 +1,4 @@
-function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form, newg, helper_funcs, options){
+function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form, newg, options){
 
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = geom.diagram_svg;
@@ -122,7 +122,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         }
 
         if (update_description){
-            helper_funcs.update_text();
+            rectGeom.update_text();
         }
     }
 
@@ -213,13 +213,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             adjust_everything(true);
         });
 
-
-    // Context menus and associated functions
-    var helper_funcs_new = {
-        update_text: helper_funcs.update_text,
-        update_formula: helper_funcs.update_formula
-    };
-
+    
     var set_parent_bar = function(bar_kind, options){
         // set the immediate parent of this bar
 
@@ -227,9 +221,9 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             if (timing_parent_bar){
                 timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, geom, subplot_geom, rectGeom, placeholder_form, newg, helper_funcs_new, options);
+            timing_parent_bar = create_bar(level + 1, bar_kind, geom, subplot_geom, rectGeom, placeholder_form, newg, options);
             geom.adjustAllRectangles(true);
-            helper_funcs.update_text();
+            rectGeom.update_text();
         }
     };
 
@@ -239,7 +233,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
             timing_parent_bar = false;
         }
         geom.adjustAllRectangles(true);
-        helper_funcs.update_text();
+        rectGeom.update_text();
     };
 
     var menu = [
@@ -436,7 +430,7 @@ function create_bar(level, kind, geom, subplot_geom, rectGeom, placeholder_form,
         select.on("change", function(){
             kind = this.value.startsWith("all") ? "all" : "some";
             adjust_everything();
-            helper_funcs.update_formula();
+            rectGeom.update_formula();
         });
     }
 
