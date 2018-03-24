@@ -112,11 +112,16 @@ function addCommonElements(common_geom, subplot_geom){
     var example_trajctory_g = subplot_geom.svg.append("g")
         .attr("id", "example_trajectory");
 
-    var diagram_option = d3.select(common_geom.div_name)
-                            .select(".diagram-div")
-                            .append("div");
+    var diagram_option = d3.select(common_geom.div_name).select("#specification-options");
 
-    if (common_geom.subplot_geoms.length < 1) {
+    var first_subplot = false;
+    if (diagram_option.empty()) {
+        first_subplot = true;
+        diagram_option = d3.select(common_geom.div_name)
+                        .select(".diagram-div")
+                        .append("div")
+                        .attr("id", "specification-options");
+
         var constant = diagram_option.append("input")
             .attr("type", "checkbox")
             .attr("id", "constant_checkbox")
@@ -226,7 +231,7 @@ function addCommonElements(common_geom, subplot_geom){
             .style("visibility", "hidden");
     }
 
-        if (common_geom.subplot_geoms.length < 1) {
+        if (first_subplot) {
 
             if (common_geom.allowLogic){
                 d3.select(common_geom.div_name).append('label').attr("label-for", "logic-box").text("Logic expression");
@@ -255,6 +260,18 @@ function addCommonElements(common_geom, subplot_geom){
                         error: function (result, textStatus) {
                         }
                     })
+                });
+
+            d3.select(common_geom.div_name).append('button')
+                .text("Clear")
+                .on("click", function () {
+                    if (window.confirm("Really clear specification?")){
+
+                        while (common_geom.subplot_geoms.length > 0){
+                            common_geom.subplot_geoms[0].deleteSubplot();
+                            common_geom.diagram_svg.attr("height", 50); // TODO: this padding should not be necessary
+                        }
+                    }
                 });
         }
 
