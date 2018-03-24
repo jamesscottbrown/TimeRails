@@ -1275,8 +1275,9 @@ function Mode(common_geom, subplot_geom, options) {
 
         clone.max_val = subplot_geom.yScale.invert(clone.rect_top);
         clone.min_val = subplot_geom.yScale.invert(clone.rect_top + clone.height);
-        clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width);
-        clone.min_time = common_geom.xScale.invert(clone.start_time_pos);
+        
+        clone.min_time = common_geom.xScale.invert(clone.start_time_pos + clone.delay_line_length) - common_geom.xScale.invert(clone.start_time_pos) ;
+        clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width) - common_geom.xScale.invert(clone.start_time_pos + clone.delay_line_length) ;
 
         return clone;
     };
