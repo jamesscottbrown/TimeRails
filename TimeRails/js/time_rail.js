@@ -3,21 +3,21 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = common_geom.diagram_svg;
 
-    var timing_parent_bar = false;
-
     var newg = subplot_svg.append("g").attr('class', "rail");
     
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
         describe_constraint: describe_constraint,
-        getTimingParentBar: function(){return timing_parent_bar;}, adjust_scales: adjust_scales,
+        getTimingParentBar: function(){return rail.timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
-        get_num_rails: function(){ return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;},
+        get_num_rails: function(){ return rail.timing_parent_bar ? (1 + rail.timing_parent_bar.get_num_rails()) : 0;},
         get_rail_height_absolute: function(){ return subplot_geom.yOffset + base_y; },
         children: [],
         track_circle_pos: common_geom.horizontal_padding,
         subplot: subplot_geom,
 
+        timing_parent_bar: false,
+        
         left_tick_pos: common_geom.horizontal_padding + 20,
         right_tick_pos: common_geom.w - common_geom.horizontal_padding - 20,
         
@@ -33,10 +33,10 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             });
 
             clone.timing_parent_bar = false;
-            if (timing_parent_bar){
-                var subplot_index = common_geom.subplot_geoms.indexOf(timing_parent_bar.subplot);
-                var railIndex = timing_parent_bar.subplot.rails.indexOf(timing_parent_bar);
-                clone.timing_parent_bar = {subplot_index: subplot_index, railIndex: railIndex, kind: timing_parent_bar.kind};
+            if (rail.timing_parent_bar){
+                var subplot_index = common_geom.subplot_geoms.indexOf(rail.timing_parent_bar.subplot);
+                var railIndex = rail.timing_parent_bar.subplot.rails.indexOf(rail.timing_parent_bar);
+                clone.timing_parent_bar = {subplot_index: subplot_index, railIndex: railIndex, kind: rail.timing_parent_bar.kind};
             }
 
             clone.start_time = XToTime(rail.track_circle_pos);
@@ -123,8 +123,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             .attr("cx", rail.track_circle_pos)
             .attr("cy", base_y + common_geom.track_padding);
 
-        if (timing_parent_bar){
-            timing_parent_bar.adjust_everything();
+        if (rail.timing_parent_bar){
+            rail.timing_parent_bar.adjust_everything();
         }
 
         if (update_description){
@@ -144,8 +144,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
         adjust_everything();
 
-        if (timing_parent_bar) {
-            timing_parent_bar.adjust_scales(new_xScale);
+        if (rail.timing_parent_bar) {
+            rail.timing_parent_bar.adjust_scales(new_xScale);
         }
     }
 
@@ -200,7 +200,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     var drag_track_circle = d3.behavior.drag()
         .origin(Object)
         .on("drag", function(){
-            if (common_geom.specification_fixed && !timing_parent_bar){
+            if (common_geom.specification_fixed && !rail.timing_parent_bar){
                 return;
             }
 
@@ -209,8 +209,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
             [minStartX, maxStartX] = getStartX();
             var x_left = imposeLimits(maxStartX - start_line_length - track_length, minStartX - start_line_length, d3.mouse(subplot_svg.node())[0]);
-            if (timing_parent_bar) {
-                x_left = imposeLimits(timing_parent_bar.get_start_time(), timing_parent_bar.get_end_time(), x_left);
+            if (rail.timing_parent_bar) {
+                x_left = imposeLimits(rail.timing_parent_bar.get_start_time(), rail.timing_parent_bar.get_end_time(), x_left);
             }
 
             rail.left_tick_pos = rail.left_tick_pos + (x_left - rail.track_circle_pos);
@@ -224,19 +224,19 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         // set the immediate parent of this bar
 
         return function() {
-            if (timing_parent_bar){
-                timing_parent_bar.delete();
+            if (rail.timing_parent_bar){
+                rail.timing_parent_bar.delete();
             }
-            timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
+            rail.timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
             common_geom.adjustAllRectangles(true);
             rect_geom.update_text();
         }
     };
 
     var remove_parent_bar = function() {
-        if (timing_parent_bar){
-            timing_parent_bar.delete();
-            timing_parent_bar = false;
+        if (rail.timing_parent_bar){
+            rail.timing_parent_bar.delete();
+            rail.timing_parent_bar = false;
         }
         common_geom.adjustAllRectangles(true);
         rect_geom.update_text();
@@ -303,6 +303,9 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             if (!common_geom.selected_rail_to_add_to_rail){ return; }
             common_geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
             common_geom.selected_rail_to_add_to_rail.update_start_time();
+
+            common_geom.selected_rail_to_add_to_rail.rail_height = base_y;
+            common_geom.selected_rail_to_add_to_rail.adjust_everything(false);
         });
 
     // Externally exposed functions
@@ -328,9 +331,9 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         }
 
 
-        if (timing_parent_bar){
-            timing_parent_bar.delete();
-            timing_parent_bar = false;
+        if (rail.timing_parent_bar){
+            rail.timing_parent_bar.delete();
+            rail.timing_parent_bar = false;
         }
     }
 
@@ -346,8 +349,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         var latex_string = "";
         var t_lower, t_upper;
 
-        if (timing_parent_bar){
-            latex_string += timing_parent_bar.getLatex();
+        if (rail.timing_parent_bar){
+            latex_string += rail.timing_parent_bar.getLatex();
 
             // start and end times are relative to te track_circle
             t_lower = XToTime(rail.left_tick_pos) - XToTime(rail.track_circle_pos);
@@ -378,8 +381,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     function describe_constraint (){
 
         var time_number;
-        if (timing_parent_bar) {
-            time_number = timing_parent_bar.describe_constraint();
+        if (rail.timing_parent_bar) {
+            time_number = rail.timing_parent_bar.describe_constraint();
         } else {
             time_number = 0;
         }
