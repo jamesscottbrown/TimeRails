@@ -446,7 +446,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     function adjust_rail_values(){
         d3.select("#paramModal").remove();
 
-        var modal_contents = d3.select(rect_geom.placeholder_form.node().parentNode.parentNode).append("div")
+        var modal_contents = d3.select(common_geom.div_name).append("div")
             .attr("id", "paramModal")
             .classed("modal", true)
             .classed("fade", true)
