@@ -7,7 +7,6 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
-        describe_constraint: describe_constraint,
         getTimingParentBar: function(){return rail.timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
         get_num_rails: function(){ return rail.timing_parent_bar ? (1 + rail.timing_parent_bar.get_num_rails()) : 0;},
@@ -378,52 +377,6 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         return latex_string;
     }
     
-    function describe_constraint (){
-
-        var time_number;
-        if (rail.timing_parent_bar) {
-            time_number = rail.timing_parent_bar.describe_constraint();
-        } else {
-            time_number = 0;
-        }
-
-        var newDiv = rect_geom.placeholder_form.append("div").classed("spec-row", true);
-
-        newDiv.append("text").text("For ");
-
-        getSomeAllSelect(newDiv);
-
-        var s1 = " t_ " + (time_number + 1) + " between ";
-        var s2 = (time_number > 0) ? "t_" + time_number + "+" : "";
-
-        newDiv.append("text").text(s1 + s2);
-
-        var start_time = XToTime(rail.left_tick_pos) - XToTime(rail.track_circle_pos);
-
-        newDiv.append("input")
-            .classed("spec_menu", true)
-            .attr("value", start_time.toFixed(2))
-            .attr("size", "6")
-            .on("change", function (){
-                rail.left_tick_pos = TimeToX(parseFloat(this.value) + XToTime(rail.track_circle_pos));
-                adjust_everything();
-            });
-
-        newDiv.append("text").text(" and " + s2);
-
-        var end_time = XToTime(rail.right_tick_pos) - XToTime(rail.track_circle_pos);
-        newDiv.append("input")
-            .classed("spec_menu", true)
-            .attr("value", end_time.toFixed(2))
-            .attr("size", "6")
-            .on("change", function (){
-                rail.right_tick_pos = TimeToX(parseFloat(this.value) + XToTime(rail.track_circle_pos));
-                adjust_everything();
-            });
-
-        return time_number + 1;
-    }
-
     function getSomeAllSelect (newDiv){
         var select = newDiv.append("select").classed("spec_menu", true);
 

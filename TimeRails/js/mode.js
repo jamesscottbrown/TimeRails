@@ -677,10 +677,6 @@ function Mode(common_geom, subplot_geom, options) {
     /************************************************/
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.subplotWidth + "px");
 
-    rect_geom.placeholder_form = d3.select(common_geom.div_name).select(".placeholder-form")
-                            .append('div')
-                            .classed(".rect-" + rect_geom.rectangleIndex, true)
-        .classed("single-rect-spec", true);
     var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
     var placeholder_latex_formula = placeholder_latex.append("div");
 
@@ -1095,7 +1091,6 @@ function Mode(common_geom, subplot_geom, options) {
             adjust_everything: adjust_everything,
             append_timing_bar: append_timing_bar
         };
-        describe_constraint(timing_parent_bar, subplot_geom.variable_name, rect_geom.placeholder_form, rect_geom, update_functions);
 
         update_formula();
     }
@@ -1166,7 +1161,6 @@ function Mode(common_geom, subplot_geom, options) {
 
         // delete description
         placeholder_latex_formula.remove();
-        rect_geom.placeholder_form.remove();
         common_geom.adjustAllRectangles();
     }
 
