@@ -1201,11 +1201,10 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         if (timing_parent_bar){
             clone.min_time = common_geom.xScale.invert(clone.start_time_pos + clone.delay_line_length) - common_geom.xScale.invert(clone.start_time_pos) ;
-            clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width) - common_geom.xScale.invert(clone.start_time_pos + clone.delay_line_length);
-
+            clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.delay_line_length + clone.width) - common_geom.xScale.invert(clone.start_time_pos);
         } else {
             clone.min_time = common_geom.xScale.invert(clone.start_time_pos);
-            clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width) - common_geom.xScale.invert(clone.start_time_pos);
+            clone.max_time = common_geom.xScale.invert(clone.start_time_pos + clone.width);
         }
 
 
