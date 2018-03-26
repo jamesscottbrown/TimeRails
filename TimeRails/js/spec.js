@@ -850,7 +850,7 @@ function plotCurvesOnSubplot(common_geom, subplot_geom, all_data){
     for (var i=0; i<all_data.length; i++) {
 
 
-        var data = all_data[i].filter(function(d){ return d.variable.subs("’", "'") == subplot_geom.variable_name});
+        var data = all_data[i].filter(function(d){ return d.variable.replace("’", "'") == subplot_geom.variable_name});
 
         var circles = subplot_geom.svg.append('g')
             .selectAll('circle')
