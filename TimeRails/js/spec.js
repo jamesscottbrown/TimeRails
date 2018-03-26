@@ -721,9 +721,18 @@ function Diagram(div_name, spec_id, spec_options) {
 
     }
 
-    function plotData() {
+    function loadAndPlotData(){
+            d3.json(window.location + "data", function(error, all_data) {
+                if (error) {
+                    return;
+                }
+                plotData(all_data)
+            });
+    }
+    
+    function plotData(all_data) {
         for (var i = 0; i < common_geom.subplot_geoms.length; i++) {
-            plotCurvesOnSubplot(common_geom, common_geom.subplot_geoms[i])
+            plotCurvesOnSubplot(common_geom, common_geom.subplot_geoms[i], all_data)
         }
     }
 
@@ -830,51 +839,48 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.getVariableNames = function(){ return common_geom.subplot_geoms.map(function(sg){ return sg.variable_name })};
         common_geom.renameVariable = renameVariable;
         common_geom.deleteVariable = deleteVariable;
+        common_geom.loadAndPlotData = loadAndPlotData;
         common_geom.plotData = plotData;
 
         return common_geom;
 }
 
-function plotCurvesOnSubplot(common_geom, subplot_geom){
+function plotCurvesOnSubplot(common_geom, subplot_geom, all_data){
     // Plotting saved datasets
-    d3.json(window.location + "data", function(error, all_data){
-
-            if (error){ return; }
-            for (var i=0; i<all_data.length; i++) {
+    for (var i=0; i<all_data.length; i++) {
 
 
-                var data = all_data[i].filter(function(d){ return d.variable.subs("’", "'") == subplot_geom.variable_name});
+        var data = all_data[i].filter(function(d){ return d.variable.subs("’", "'") == subplot_geom.variable_name});
 
-                var circles = subplot_geom.svg.append('g')
-                    .selectAll('circle')
-                    .data(data)
-                    .enter()
-                    .append("circle")
-                    .attr("cx", function (d) {
-                        return common_geom.xScale(+d.time)
-                    })
-                    .attr("cy", function (d) {
-                        return subplot_geom.yScale(+d.value)
-                    })
-                    .attr("r", 2)
-                    .classed("data-circle", true);
+        var circles = subplot_geom.svg.append('g')
+            .selectAll('circle')
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) {
+                return common_geom.xScale(+d.time)
+            })
+            .attr("cy", function (d) {
+                return subplot_geom.yScale(+d.value)
+            })
+            .attr("r", 2)
+            .classed("data-circle", true);
 
-                    var data_line_generator = d3.svg.line()
-                        .x(function (d) { return common_geom.xScale(+d.time); })
-                        .y(function (d) { return subplot_geom.yScale(+d.value); });
+            var data_line_generator = d3.svg.line()
+                .x(function (d) { return common_geom.xScale(+d.time); })
+                .y(function (d) { return subplot_geom.yScale(+d.value); });
 
-                subplot_geom.svg
-                    .append("path")
-                    .classed("data-path", true)
-                    .datum(data)
-                    .attr("fill", "none")
-                    .attr("stroke", common_geom.colorScale(i))
-                    .attr("stroke-linejoin", "round")
-                    .attr("stroke-linecap", "round")
-                    .attr("stroke-width", 1.5)
-                    .attr("d", data_line_generator);
-            }
-    });
+        subplot_geom.svg
+            .append("path")
+            .classed("data-path", true)
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", common_geom.colorScale(i))
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("stroke-width", 1.5)
+            .attr("d", data_line_generator);
+    }
 }
 
 function addRectangleToSubplot(string, common_geom, subplot_geom){
