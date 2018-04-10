@@ -23,8 +23,7 @@ function Mode(common_geom, subplot_geom, options) {
         rectangleIndex: subplot_geom.rectangles.length,
         start_line_visible: (options && options.hasOwnProperty("start_line_visible")) ? options.followRectangle : true,
 
-        num_rails_above: 0,
-        get_num_rails_above: get_num_rails_above,
+        num_rails_above: ++subplot_geom.lowest_rail_level,
 
         rail_height: 0,
 
@@ -78,14 +77,6 @@ function Mode(common_geom, subplot_geom, options) {
         rect_geom.setTimingBar(bar);
     }
 
-    function get_num_rails_above(){
-        rect_geom.num_rails_above = 0;
-        for (var i=0; i<rect_geom.rectangleIndex; i++){
-            rect_geom.num_rails_above += 1;
-            rect_geom.num_rails_above += subplot_geom.rectangles[i].get_num_rails();
-        }
-        return rect_geom.num_rails_above;
-    }
 
     var timing_parent_bar = false;
 
@@ -125,8 +116,7 @@ function Mode(common_geom, subplot_geom, options) {
     function adjust_everything(update_description){
         // We rely on: rect_geom.width, rect_geom.height, , common_geom.h
 
-        var num_rails_above = get_num_rails_above();
-        rect_geom.rail_height = subplot_geom.yScale.range()[1] + (num_rails_above) * common_geom.track_padding;
+        rect_geom.rail_height = subplot_geom.yScale.range()[1] + (rect_geom.num_rails_above) * common_geom.track_padding;
 
         if (parseInt(subplot_geom.svg.attr("height")) < rect_geom.rail_height + common_geom.vertical_padding){
             subplot_geom.svg.attr("height", rect_geom.rail_height + common_geom.vertical_padding)
@@ -1240,6 +1230,7 @@ function Mode(common_geom, subplot_geom, options) {
 
 
     adjust_everything(true);
+    subplot_geom.shift_down();
 
     rect_geom.add_bar = append_timing_bar;
     rect_geom.adjust_scales = adjust_scales;
@@ -1251,7 +1242,6 @@ function Mode(common_geom, subplot_geom, options) {
     rect_geom.get_num_rails = function () {
         return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;
     };
-    rect_geom.get_num_rails_above = get_num_rails_above;
     rect_geom.deleteRectangle = deleteRectangle;
     rect_geom.update_start_time = update_start_time;
     rect_geom.toJSON = function () {

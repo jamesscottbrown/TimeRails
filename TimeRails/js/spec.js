@@ -482,7 +482,8 @@ function Diagram(div_name, spec_id, spec_options) {
             rectangles: [],
             rails: [],
             subplot_index: common_geom.subplot_geoms.length,
-            deleteSubplot: deleteSubplot
+            deleteSubplot: deleteSubplot,
+            lowest_rail_level: 0
         };
 
         subplot_geom.yScale = d3.scale.linear()

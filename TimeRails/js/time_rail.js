@@ -4,7 +4,18 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     var diagram_svg = common_geom.diagram_svg;
 
     var newg = subplot_svg.append("g").attr('class', "rail");
-    
+
+    // Push down rectangles associated with other
+    for (var i=0; i<subplot_geom.rectangles.length; i++){
+        var rect = subplot_geom.rectangles[i];
+        if (rect.num_rails_above > rect_geom.num_rails_above){
+            rect.num_rails_above++;
+            rect.adjust_everything();
+        }
+    }
+    subplot_geom.lowest_rail_level++;
+
+
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
         getTimingParentBar: function(){return rail.timing_parent_bar;}, adjust_scales: adjust_scales,
@@ -313,6 +324,15 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
             common_geom.selected_rail_to_add_to_rail.rail_height = base_y;
             common_geom.selected_rail_to_add_to_rail.adjust_everything(false);
+
+
+            var kind = common_geom.selected_rail_to_add_to_rail.kind;
+            if (["rectangle", "mode", "interval"].indexOf(kind) !== -1){
+               // adjust height of track-circle to match that of rail
+                common_geom.selected_rail_to_add_to_rail.num_rails_above = rail.level;
+                common_geom.selected_rail_to_add_to_rail.adjust_everything();
+            }
+
         });
 
     // Externally exposed functions
@@ -324,7 +344,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         track_circle.remove();
         delay_line.remove();
 
-        diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) - 2*common_geom.track_padding);
+        diagram_svg.attr("height", parseInt(diagram_svg.attr("height")) - common_geom.track_padding);
+        subplot_geom.lowest_rail_level--;
 
        // shift later (lower) subplots upwards
         for (var i=subplot_geom.subplot_index+1; i<common_geom.subplot_geoms.length; i++){
@@ -333,7 +354,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             var transform = g.attr("transform");
             var p=transform.split(", ");
 
-            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - 2*common_geom.track_padding;
+            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - common_geom.track_padding;
             g.attr("transform", "translate(0, " + newTranslation + ")");
         }
 
