@@ -248,6 +248,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             rail.timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
             common_geom.adjustAllRectangles(true);
             rect_geom.update_text();
+
+            rail.timing_parent_bar.keepChildrenOnRails();
         }
     };
 
