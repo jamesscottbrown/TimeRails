@@ -76,8 +76,16 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             maxStartX = Math.max(maxStartX, rail.children[i].track_circle_pos);
         }
 
-        // TODO: other bars need to be stored as children, not just rect/mode
-        // TODO: we need to expose rail.track_circle_pos from bar
+        for (var i=0; i<common_geom.subplot_geoms.length; i++){
+            var sg = common_geom.subplot_geoms[i];
+            for (var j=0; j<sg.rails.length; j++){
+                if (sg.rails[j].timing_parent_bar === rail){
+                    console.log(i + ", " + j + ": " + sg.rails[j].track_circle_pos);
+                    minStartX = Math.min(minStartX, sg.rails[j].track_circle_pos);
+                    maxStartX = Math.max(maxStartX, sg.rails[j].track_circle_pos);
+                }
+            }
+        }
 
         return [minStartX, maxStartX];
     }
