@@ -444,6 +444,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         modalFooter.append("button").text("Save").on("click", function(){
             rail.left_tick_pos = TimeToX(parseFloat(startTimeBox.value) + XToTime(rail.track_circle_pos));
             rail.right_tick_pos = TimeToX(parseFloat(endTimeBox.value) + XToTime(rail.track_circle_pos));
+            rail.keepChildrenOnRails();
             adjust_everything();
         })
 
@@ -452,6 +453,49 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
         $('#paramModal').modal('toggle');
     }
+
+    rail.keepChildrenOnRails = function(){
+        // Adjust position of rails and rects to ensure they remain on their parent rail after it is adjusted
+
+        var child, new_track_circle_pos, shift;
+        for (var i=0; i<rail.children.length; i++){
+            child = rail.children[i];
+            if (child.track_circle_pos > rail.right_tick_pos || child.track_circle_pos < rail.left_tick_pos){
+                new_track_circle_pos = Math.random()*(rail.right_tick_pos - rail.left_tick_pos) + rail.left_tick_pos;
+                shift = new_track_circle_pos - child.track_circle_pos;
+
+                child.track_circle_pos = new_track_circle_pos;
+                child.start_time_pos += shift;
+                child.adjust_everything();
+                child.update_start_time(); // to adjust things with linked times and redraw
+            }
+        }
+
+
+        for (i=0; i<common_geom.subplot_geoms.length; i++){
+            var sg = common_geom.subplot_geoms[i];
+            for (var j=0; j<sg.rails.length; j++){
+                child = sg.rails[j];
+
+                if (child.timing_parent_bar !== rail){ continue; }
+
+                if (child.track_circle_pos > rail.right_tick_pos || child.track_circle_pos < rail.left_tick_pos){
+
+                    new_track_circle_pos = Math.random()*(rail.right_tick_pos - rail.left_tick_pos) + rail.left_tick_pos;
+                    shift = new_track_circle_pos - child.track_circle_pos;
+
+                    child.track_circle_pos = new_track_circle_pos;
+                    child.left_tick_pos += shift;
+                    child.right_tick_pos += shift;
+
+                    child.adjust_everything();
+                    //child.update_start_time(); // to adjust things with linked times and redraw
+
+                    child.keepChildrenOnRails();
+                }
+            }
+        }
+    };
 
     
     adjust_everything(true);
