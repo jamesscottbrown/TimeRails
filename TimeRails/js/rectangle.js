@@ -1058,7 +1058,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         track_circle.remove();
 
         subplot_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
-        for (var i=0; i<subplot_geom.rectangles; i++){
+        for (var i=0; i<subplot_geom.rectangles.length; i++){
             subplot_geom.rectangles[i].saveRectangleIndex(i);
         }
 
