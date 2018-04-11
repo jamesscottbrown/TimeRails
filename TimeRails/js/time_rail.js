@@ -382,6 +382,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             rail.timing_parent_bar.delete();
             rail.timing_parent_bar = false;
         }
+        subplot_geom.rails.splice(subplot_geom.rails.indexOf(rail), 1)
     }
 
     function get_start_time(){
