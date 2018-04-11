@@ -290,6 +290,13 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             action: adjust_rail_values
         });
 
+        menu.push({
+            title: 'Attach to rail',
+            action: function (elm, d, i) {
+                common_geom.selected_rail_to_add_to_rail = rail;
+            },
+            disabled: false
+        });
 
 
     // Actual visual elements
@@ -319,20 +326,37 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         .call(drag_track_circle)
         .on("click", function(){
             if (!common_geom.selected_rail_to_add_to_rail){ return; }
-            common_geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
-            common_geom.selected_rail_to_add_to_rail.update_start_time();
-
-            common_geom.selected_rail_to_add_to_rail.rail_height = base_y;
-            common_geom.selected_rail_to_add_to_rail.adjust_everything(false);
-
 
             var kind = common_geom.selected_rail_to_add_to_rail.kind;
-            if (["rectangle", "mode", "interval"].indexOf(kind) !== -1){
-               // adjust height of track-circle to match that of rail
-                common_geom.selected_rail_to_add_to_rail.num_rails_above = rail.level;
+            if (kind === "some" || kind === "all"){
+                // We are moving a rail
+
+                if (common_geom.selected_rail_to_add_to_rail.timing_parent_bar && common_geom.selected_rail_to_add_to_rail.timing_parent_bar !== rail) {
+                    common_geom.selected_rail_to_add_to_rail.timing_parent_bar.delete();
+                }
+                common_geom.selected_rail_to_add_to_rail.timing_parent_bar = rail;
+
+                common_geom.adjustAllHeights();
+
+                common_geom.adjustAllRectangles(true);
+                rect_geom.update_text();
+                rect_geom.adjust_everything(); // ?
+                rail.keepChildrenOnRails();
+
+            } else {
+                // We are moving a rectangle. This is simpler, as rails do not need to be adjusted.
+
+                common_geom.selected_rail_to_add_to_rail.assign_parent_bar(rail);
+                common_geom.selected_rail_to_add_to_rail.update_start_time();
+
+                common_geom.selected_rail_to_add_to_rail.rail_height = base_y;
+                common_geom.selected_rail_to_add_to_rail.adjust_everything(false);
+
+                common_geom.selected_rail_to_add_to_rail.physicalLevel = rail.physicalLevel;
                 common_geom.selected_rail_to_add_to_rail.adjust_everything();
             }
 
+            common_geom.selected_rail_to_add_to_rail = false;
         });
 
     // Externally exposed functions
@@ -516,6 +540,20 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
                 }
             }
         }
+    };
+
+    rail.getChildRails = function () {
+        var childRails = [];
+
+        for (var i = 0; i < common_geom.subplot_geoms.length; i++) {
+            var sg = common_geom.subplot_geoms[i];
+            for (var j = 0; j < sg.rails.length; j++) {
+                if (sg.rails[j].timing_parent_bar == rail) {
+                    childRails.push(sg.rails[j]);
+                }
+            }
+        }
+        return childRails;
     };
 
     

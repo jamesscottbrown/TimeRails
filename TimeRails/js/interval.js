@@ -56,7 +56,7 @@ function Interval(common_geom, subplot_geom, options) {
                 timing_parent_bar.children.splice(index, 1);
             }
 
-             if (timing_parent_bar && timing_parent_bar.children.length === 0) {
+             if (timing_parent_bar && timing_parent_bar.children.length === 0 && timing_parent_bar.getChildRails().length === 0) {
                  timing_parent_bar.delete();
              }
 
