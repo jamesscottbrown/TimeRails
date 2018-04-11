@@ -5,17 +5,6 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
     var newg = subplot_svg.append("g").attr('class', "rail");
 
-    // Push down rectangles associated with other
-    for (var i=0; i<subplot_geom.rectangles.length; i++){
-        var rect = subplot_geom.rectangles[i];
-        if (rect.num_rails_above > rect_geom.num_rails_above){
-            rect.num_rails_above++;
-            rect.adjust_everything();
-        }
-    }
-    subplot_geom.lowest_rail_level++;
-
-
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
         "get_end_time": get_end_time, set_parent_bar: set_parent_bar, getLatex: getLatex,
         getTimingParentBar: function(){return rail.timing_parent_bar;}, adjust_scales: adjust_scales,
@@ -25,6 +14,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         children: [],
         track_circle_pos: common_geom.horizontal_padding,
         subplot: subplot_geom,
+        physicalLevel: 1,
 
         timing_parent_bar: false,
         
@@ -104,7 +94,14 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
 
     function adjust_everything(update_description){
 
-        base_y = rect_geom.rail_height + (level - 1) * common_geom.track_padding;
+        base_y = subplot_geom.yScale.range()[1] + (rail.physicalLevel - 1) * common_geom.track_padding;
+
+        var parent_y;
+        if (rail.timing_parent_bar){
+            parent_y = subplot_geom.yScale.range()[1] + (rail.timing_parent_bar.physicalLevel - 1) * common_geom.track_padding;
+        } else {
+            parent_y = base_y + common_geom.track_padding;
+        }
 
         track
             .attr("x1", rail.left_tick_pos)
@@ -129,7 +126,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             .attr("x1", rail.track_circle_pos)
             .attr("x2", rail.track_circle_pos)
             .attr("y1", base_y)
-            .attr("y2", base_y + common_geom.track_padding);
+            .attr("y2", parent_y);
         
         delay_line
             .attr("x1", rail.track_circle_pos)
@@ -139,7 +136,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         
         track_circle
             .attr("cx", rail.track_circle_pos)
-            .attr("cy", base_y + common_geom.track_padding);
+            .attr("cy", parent_y);
 
         if (rail.timing_parent_bar){
             rail.timing_parent_bar.adjust_everything();
@@ -250,6 +247,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             rect_geom.update_text();
 
             rail.timing_parent_bar.keepChildrenOnRails();
+            common_geom.adjustAllHeights();
         }
     };
 

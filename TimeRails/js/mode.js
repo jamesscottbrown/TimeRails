@@ -23,8 +23,6 @@ function Mode(common_geom, subplot_geom, options) {
         rectangleIndex: subplot_geom.rectangles.length,
         start_line_visible: (options && options.hasOwnProperty("start_line_visible")) ? options.followRectangle : true,
 
-        num_rails_above: ++subplot_geom.lowest_rail_level,
-
         rail_height: 0,
 
         siblings: [],
@@ -75,6 +73,7 @@ function Mode(common_geom, subplot_geom, options) {
         }
 
         rect_geom.setTimingBar(bar);
+        common_geom.adjustAllHeights();
     }
 
 
@@ -116,7 +115,7 @@ function Mode(common_geom, subplot_geom, options) {
     function adjust_everything(update_description){
         // We rely on: rect_geom.width, rect_geom.height, , common_geom.h
 
-        rect_geom.rail_height = subplot_geom.yScale.range()[1] + (rect_geom.num_rails_above) * common_geom.track_padding;
+        rect_geom.rail_height = subplot_geom.yScale.range()[1] + (rect_geom.physicalLevel-1) * common_geom.track_padding;
 
         if (parseInt(subplot_geom.svg.attr("height")) < rect_geom.rail_height + common_geom.vertical_padding){
             subplot_geom.svg.attr("height", rect_geom.rail_height + common_geom.vertical_padding)

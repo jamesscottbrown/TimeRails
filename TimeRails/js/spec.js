@@ -511,7 +511,8 @@ function Diagram(div_name, spec_id, spec_options) {
                 menu_options.push({
                     title: 'Add rectangle',
                     action: function () {
-                        subplot_geom.rectangles.push(Rectangle(common_geom, subplot_geom))
+                        subplot_geom.rectangles.push(Rectangle(common_geom, subplot_geom));
+                        common_geom.adjustAllHeights();
                     },
                     disabled: common_geom.specification_fixed
                 });
@@ -822,16 +823,73 @@ function Diagram(div_name, spec_id, spec_options) {
         for (var i=0; i<sp_data.rectangles.length; i++){
             var rectangle_data = sp_data.rectangles[i];
 
-            // TODO: pass remaining details as options
-            if (rectangle_data.kind == "mode"){
-                sp.rectangles.push(Mode(common_geom, sp, rectangle_data));
-            } else if (rectangle_data.kind == "rectangle"){
-                sp.rectangles.push(Rectangle(common_geom, sp, rectangle_data));
-            } if (rectangle_data.kind == "interval"){
-                sp.rectangles.push(Interval(common_geom, sp, rectangle_data));
+
+    function adjustAllHeights(){
+        var processed_bars = [];
+
+        for (var i=0; i<common_geom.subplot_geoms.length; i++){
+            var sg = common_geom.subplot_geoms[i];
+            sg.lowest_rail_level = 0;
+
+
+            for (var j=0; j<sg.rectangles.length; j++) {
+                sg.rectangles[j].physicalLevel = Infinity;
+            }
+
+
+            // assign level by topological sort
+            var made_progress_last_iteration = false;
+            while (processed_bars.length < sg.rails.length) {
+
+                var made_progress = false;
+
+                for (var j = 0; j < sg.rails.length; j++) {
+
+                    if(processed_bars.indexOf(sg.rails[j]) !== -1){ continue; }
+
+                    var parent = sg.rails[j].timing_parent_bar;
+
+                    if (!made_progress_last_iteration && !made_progress && !parent){
+                        // Process top-level node
+                        ++sg.lowest_rail_level; // create a gap
+                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level; // recursively assign values to
+                        processed_bars.push(sg.rails[j]);
+                        made_progress = true;
+                    } else if (processed_bars.indexOf(parent) !== -1) {
+                        // Process down from previously processed node
+                        made_progress = true;
+
+                        // either no parent, or already processed parent
+                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level; // recursively assign values to
+                        processed_bars.push(sg.rails[j]);
+                    }
+                }
+
+                made_progress_last_iteration  = made_progress;
+
+            }
+
+            // reverse levels
+            for (var j=0; j<sg.rails.length; j++){
+                 common_geom.subplot_geoms[i].rails[j].physicalLevel = (sg.lowest_rail_level - sg.rails[j].physicalLevel) + 1;
+                 common_geom.subplot_geoms[i].rails[j].adjust_everything();
+
+                for (var k=0; k<sg.rails[j].children.length; k++){
+                     common_geom.subplot_geoms[i].rails[j].children[k].physicalLevel = sg.rails[j].physicalLevel;
+                }
+            }
+
+            // Now assign level to any fixed rectangle
+            // set all rectangle levels to NaN
+            //
+
+            for (var j=0; j<sg.rectangles.length; j++){
+                if (sg.rectangles[j].physicalLevel == Infinity){
+                    sg.rectangles[j].physicalLevel = ++sg.lowest_rail_level;
+                }
+                sg.rectangles[j].adjust_everything();
             }
         }
-
     }
 
 
@@ -842,6 +900,7 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.deleteVariable = deleteVariable;
         common_geom.loadAndPlotData = loadAndPlotData;
         common_geom.plotData = plotData;
+        common_geom.adjustAllHeights = adjustAllHeights;
 
         return common_geom;
 }
