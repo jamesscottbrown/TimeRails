@@ -500,10 +500,10 @@ function Diagram(div_name, spec_id, spec_options) {
                 var transform = g.attr("transform");
                 var p=transform.split(", ");
 
-                var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) + common_geom.track_padding;
-                g.attr("transform", "translate(0, " + newTranslation + ")");
+                common_geom.subplot_geoms[i].yOffset =  parseInt(p[1].substring(0, p[1].length-1)) + common_geom.track_padding;
+                g.attr("transform", "translate(0, " + common_geom.subplot_geoms[i].yOffset + ")");
             }
-        }
+        };
 
         function menuOptions(){
             var menu_options = [];
@@ -827,15 +827,16 @@ function Diagram(div_name, spec_id, spec_options) {
     function adjustAllHeights(){
         var processed_bars = [];
 
+        for (var i=0; i<common_geom.subplot_geoms.length; i++) {
+            var sg = common_geom.subplot_geoms[i];
+            for (var j = 0; j < sg.rectangles.length; j++) {
+                sg.rectangles[j].physicalLevel = Infinity;
+            }
+        }
+
         for (var i=0; i<common_geom.subplot_geoms.length; i++){
             var sg = common_geom.subplot_geoms[i];
             sg.lowest_rail_level = 0;
-
-
-            for (var j=0; j<sg.rectangles.length; j++) {
-                sg.rectangles[j].physicalLevel = Infinity;
-            }
-
 
             // assign level by topological sort
             var made_progress_last_iteration = false;
@@ -852,7 +853,7 @@ function Diagram(div_name, spec_id, spec_options) {
                     if (!made_progress_last_iteration && !made_progress && !parent){
                         // Process top-level node
                         ++sg.lowest_rail_level; // create a gap
-                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level; // recursively assign values to
+                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level;
                         processed_bars.push(sg.rails[j]);
                         made_progress = true;
                     } else if (processed_bars.indexOf(parent) !== -1) {
@@ -860,7 +861,7 @@ function Diagram(div_name, spec_id, spec_options) {
                         made_progress = true;
 
                         // either no parent, or already processed parent
-                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level; // recursively assign values to
+                        common_geom.subplot_geoms[i].rails[j].physicalLevel = ++sg.lowest_rail_level;
                         processed_bars.push(sg.rails[j]);
                     }
                 }
@@ -879,17 +880,23 @@ function Diagram(div_name, spec_id, spec_options) {
                 }
             }
 
-            // Now assign level to any fixed rectangle
-            // set all rectangle levels to NaN
-            //
 
-            for (var j=0; j<sg.rectangles.length; j++){
-                if (sg.rectangles[j].physicalLevel == Infinity){
+        }
+
+        // Now assign level to any fixed rectangle
+        // set all rectangle levels to NaN
+        for (var i = 0; i < common_geom.subplot_geoms.length; i++) {
+            var sg = common_geom.subplot_geoms[i];
+            for (var j = 0; j < sg.rectangles.length; j++) {
+                if (sg.rectangles[j].physicalLevel == Infinity) {
                     sg.rectangles[j].physicalLevel = ++sg.lowest_rail_level;
                 }
                 sg.rectangles[j].adjust_everything();
+
             }
         }
+
+
     }
 
 

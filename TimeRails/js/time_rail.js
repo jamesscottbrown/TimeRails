@@ -373,8 +373,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             var transform = g.attr("transform");
             var p=transform.split(", ");
 
-            var newTranslation =  parseInt(p[1].substring(0, p[1].length-1)) - common_geom.track_padding;
-            g.attr("transform", "translate(0, " + newTranslation + ")");
+            common_geom.subplot_geoms[i].yOffset =  parseInt(p[1].substring(0, p[1].length-1)) - common_geom.track_padding;
+            g.attr("transform", "translate(0, " + common_geom.subplot_geoms[i].yOffset + ")");
         }
 
 

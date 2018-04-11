@@ -120,7 +120,13 @@ function Interval(common_geom, subplot_geom, options) {
     // Function that defines where each element will be positioned
     /************************************************/
     function adjust_everything(update_description){
-        rect_geom.rail_height = subplot_geom.yScale.range()[1] + (rect_geom.physicalLevel-1) * common_geom.track_padding;
+        
+        var axis_height = subplot_geom.yScale.range()[1];
+        if (timing_parent_bar){
+            axis_height += (timing_parent_bar.subplot.yOffset - subplot_geom.yOffset );
+        }
+
+        rect_geom.rail_height = axis_height + (rect_geom.physicalLevel-1) * common_geom.track_padding;
 
         if (parseInt(subplot_geom.svg.attr("height")) < rect_geom.rail_height + common_geom.vertical_padding){
             subplot_geom.svg.attr("height", rect_geom.rail_height + common_geom.vertical_padding)
