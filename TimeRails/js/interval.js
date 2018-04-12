@@ -755,7 +755,43 @@ function Interval(common_geom, subplot_geom, options) {
     /************************************************/
 
     function get_latex_string(){
-        // TODO
+        var y_latex_string = getYLatexString();
+        var latex_string = "";
+
+        // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
+        if (timing_parent_bar){
+            var delay_time = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
+            delay_time = delay_time.toFixed(2);
+
+            var length =   XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
+            length = length.toFixed(2);
+
+            if (delay_time == 0 && length == 0){
+                return y_latex_string;
+            } else {
+                var symbol = common_geom.use_letters ? ' G' : ' \\square';
+                return  symbol + "_{[" + delay_time + "," + length + "]}" + y_latex_string;
+            }
+        }
+
+        // Otherwise, rectangle is represented by a Global term with a start and end time
+        if (!rect_geom.top_fixed && !rect_geom.bottom_fixed) {
+            return latex_string + "\\;"; // Insert latex symbol for space to avoid empty forumla appearing as '$$'
+        }
+
+        var x_lower = XToTime(rect_geom.start_time_pos).toFixed(2);
+        var x_upper = XToTime(rect_geom.start_time_pos).toFixed(2);
+
+        if (!rect_geom.right_fixed){
+            x_upper = "\\infty";
+        }
+
+        if (!rect_geom.left_fixed){
+            x_lower = "0";
+        }
+
+        var symbol = common_geom.use_letters ? ' G' : ' \\square';
+        return latex_string + symbol + "_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
     }
 
     function add_timing_bar(kind, options){
