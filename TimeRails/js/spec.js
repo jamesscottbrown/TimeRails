@@ -131,6 +131,9 @@ function addCommonElements(common_geom, subplot_geom){
             });
         var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
 
+        if (common_geom.show_formula){
+            diagram_option.append("div").attr("class", "placeholder-latex");
+        }
 
         if (common_geom.allow_logic){
             var logic_div = diagram_option.append("div");
@@ -471,6 +474,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
     common_geom.allow_logic = spec_options.allow_logic ? spec_options.allow_logic : false;
     common_geom.allow_branching = spec_options.allow_branching ? spec_options.allow_branching : true;
+    common_geom.show_formula = spec_options.show_formula ? spec_options.show_formula : true;
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
@@ -774,6 +778,7 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.use_letters = obj.use_letters; //
         common_geom.xRange = obj.xRange;
         common_geom.allow_branching = obj.allow_branching;
+        common_geom.show_formula = obj.show_formula;
 
         for (var i=0; i < obj.subplot_geoms.length; i++){
             var sp = obj.subplot_geoms[i];
