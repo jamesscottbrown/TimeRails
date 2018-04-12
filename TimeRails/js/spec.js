@@ -246,11 +246,6 @@ function addCommonElements(common_geom, subplot_geom){
 
         if (first_subplot) {
 
-            if (common_geom.allowLogic){
-                d3.select(common_geom.div_name).append('label').attr("label-for", "logic-box").text("Logic expression");
-                d3.select(common_geom.div_name).append('input').attr("id", "logic-box");
-            }
-
             d3.select(common_geom.div_name).append('button')
                 .text("Save")
                 .on("click", function () {
@@ -474,7 +469,6 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.allow_shared_times = spec_options.hasOwnProperty("allow_shared_times") ? spec_options.allow_modes : true;
     common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
-    common_geom.allowLogic = spec_options.allowLogic ? spec_options.allowLogic : false;
     common_geom.allow_logic = spec_options.allow_logic ? spec_options.allow_logic : false;
 
     common_geom.xScale = d3.scale.linear()
@@ -745,7 +739,7 @@ function Diagram(div_name, spec_id, spec_options) {
                 plotData(all_data)
             });
     }
-    
+
     function plotData(all_data) {
         for (var i = 0; i < common_geom.subplot_geoms.length; i++) {
             plotCurvesOnSubplot(common_geom, common_geom.subplot_geoms[i], all_data)
@@ -773,8 +767,8 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.allow_shared_times = obj.allow_shared_times;
         common_geom.generateExampleTrajectories = obj.generateExampleTrajectories;
         common_geom.saveURL = obj.saveURL;
-        common_geom.allowLogic = obj.allowLogic;
-
+        common_geom.allow_logic = obj.allow_logic;
+        common_geom.logic_expression = obj.logic_expression;
         common_geom.specification_fixed = obj.specification_fixed;
         common_geom.use_letters = obj.use_letters; //
         common_geom.xRange = obj.xRange;
