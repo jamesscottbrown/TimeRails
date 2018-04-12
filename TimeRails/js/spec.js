@@ -924,6 +924,43 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.plotData = plotData;
         common_geom.adjustAllHeights = adjustAllHeights;
 
+        common_geom.update_formula = function (){
+
+            var rail_formulae = [];
+
+            // Generate formulae for
+            for (var i=0; i<common_geom.subplot_geoms.length; i++){
+                var sg = common_geom.subplot_geoms[i];
+
+                for (var j=0; j<sg.rails.length; j++){
+                    if (!sg.rails[j].timing_parent_bar){
+                        rail_formulae.push(sg.rails[j].get_latex_string());
+                    }
+                }
+
+                for (var j=0; j<sg.rectangles.length; j++){
+                    if (!sg.rectangles[j].get_timing_parent_bar()){
+                        rail_formulae.push(sg.rectangles[j].get_latex_string());
+                    }
+                }
+
+            }
+
+            var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
+            placeholder_latex.node().innerHTML = "";
+
+            placeholder_latex
+                .selectAll("div")
+                .data(rail_formulae)
+                .enter()
+                .append("div")
+                .html(function(d){
+                    return "$" + d + "$"
+                });
+
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        };
+
         return common_geom;
 }
 

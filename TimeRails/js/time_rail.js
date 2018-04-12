@@ -6,7 +6,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     var newg = subplot_svg.append("g").attr('class', "rail");
 
     var rail = {"track": track, "kind": kind, "delete": delete_bar, "level": level, "get_start_time": get_start_time,
-        "get_end_time": get_end_time, getLatex: getLatex,
+        "get_end_time": get_end_time,
         getTimingParentBar: function(){return rail.timing_parent_bar;}, adjust_scales: adjust_scales,
         adjust_everything: adjust_everything,
         get_num_rails: function(){ return rail.timing_parent_bar ? (1 + rail.timing_parent_bar.get_num_rails()) : 0;},
@@ -137,9 +137,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             rail.timing_parent_bar.adjust_everything();
         }
 
-        if (update_description){
-            rect_geom.update_text();
-        }
+        common_geom.update_formula();
     }
 
     function adjust_scales(new_xScale){
@@ -239,10 +237,10 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             }
             rail.timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
             common_geom.adjustAllRectangles(true);
-            rect_geom.update_text();
 
             rail.timing_parent_bar.keepChildrenOnRails();
             common_geom.adjustAllHeights();
+            common_geom.update_formula();
         }
     };
 
@@ -252,7 +250,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             rail.timing_parent_bar = false;
         }
         common_geom.adjustAllRectangles(true);
-        rect_geom.update_text();
+        common_geom.update_formula();
     };
 
     var menu = [
@@ -336,9 +334,9 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
                 common_geom.adjustAllHeights();
 
                 common_geom.adjustAllRectangles(true);
-                rect_geom.update_text();
                 rect_geom.adjust_everything(); // ?
                 rail.keepChildrenOnRails();
+                common_geom.update_formula();
 
             } else {
                 // We are moving a rectangle. This is simpler, as rails do not need to be adjusted.
@@ -396,13 +394,11 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
     }
 
     function getLatex(){
-        var latex_string = "";
+        var temporal_string = "";
         var t_lower, t_upper;
 
         if (rail.timing_parent_bar){
-            latex_string += rail.timing_parent_bar.getLatex();
-
-            // start and end times are relative to te track_circle
+            // start and end times are relative to the track_circle
             t_lower = XToTime(rail.left_tick_pos) - XToTime(rail.track_circle_pos);
             t_upper =  XToTime(rail.right_tick_pos) - XToTime(rail.track_circle_pos);
         } else {
@@ -421,11 +417,23 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             symbol = common_geom.use_letters ? ' G' : ' \\square';
         }
 
-        //         var symbol = use_letters ? ' G' : ' \\square';
+        temporal_string += symbol + "_{[" + t_lower + "," + t_upper + "]}";
 
-        
-        latex_string += symbol + "_{[" + t_lower + "," + t_upper + "]}";
-        return latex_string;
+        // Handle child rectangles
+        var child_strings = [];
+        for (var i=0; i<rail.children.length; i++){
+            var substring = temporal_string + "(" + rail.children[i].get_latex_string() + ")";
+            child_strings.push(substring);
+        }
+
+        // Handle child rails
+        var child_rails = rail.getChildRails();
+        for (var i=0; i<child_rails.length; i++){
+            var substring = temporal_string + "(" + child_rails[i].get_latex_string() + ")";
+            child_strings.push(substring);
+        }
+
+        return child_strings.join(" \\wedge ");
     }
     
     function getSomeAllSelect (newDiv){
@@ -554,7 +562,8 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         return childRails;
     };
     rail.set_parent_bar = set_parent_bar;
-    
+    rail.get_latex_string = getLatex;
+
     adjust_everything(true);
     common_geom.adjustAllRectangles();
     

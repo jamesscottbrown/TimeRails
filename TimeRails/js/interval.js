@@ -40,9 +40,6 @@ function Interval(common_geom, subplot_geom, options) {
         following: (options && options.hasOwnProperty("following")) ? options.following : false,
         sharedEndTimes: [],
 
-        update_text: update_text,
-        update_formula: update_formula,
-
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
         adjustSharedTimeLine: adjustSharedTimeLine,
@@ -61,7 +58,7 @@ function Interval(common_geom, subplot_geom, options) {
              }
 
             timing_parent_bar = newBar;
-            update_text();
+            common_geom.update_formula();
 
             if (newBar){
                 // newBar may be false (rather than a bar)
@@ -192,7 +189,7 @@ function Interval(common_geom, subplot_geom, options) {
         }
 
         if (update_description){
-          update_text();
+          common_geom.update_formula();
         }
         set_edges();
     }
@@ -501,7 +498,7 @@ function Interval(common_geom, subplot_geom, options) {
                         var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('some')();
-                        update_text();
+                        common_geom.update_formula();
                     }
                  });
                 menuOptions.push({
@@ -510,7 +507,7 @@ function Interval(common_geom, subplot_geom, options) {
                         var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('all')();
-                        update_text();
+                        common_geom.update_formula();
                     }
                 });
             }
@@ -551,9 +548,6 @@ function Interval(common_geom, subplot_geom, options) {
     // Actually create visual elements
     /************************************************/
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.subplotWidth + "px");
-
-    var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
-    var placeholder_latex_formula = placeholder_latex.append("div");
 
     var options_form = d3.select(common_geom.div_name).append("div").classed("space-div", true).append("form");
 
@@ -760,45 +754,17 @@ function Interval(common_geom, subplot_geom, options) {
     // Describing selected region
     /************************************************/
 
-    function update_formula(){
-        var latex_string =  get_latex_string();
-        placeholder_latex_formula.html("$" + latex_string + "$");
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    }
-
     function get_latex_string(){
         // TODO
     }
 
-    function update_text() {
-
-        function create_initial_bar (kind){
-            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom);
-            assign_parent_bar(bar);
-        }
-
-        var update_functions = {
-            YToVal: YToVal,
-            valToY: valToY,
-            XToTime: XToTime,
-            timeToX: timeToX,
-            drag_fixed: drag_fixed,
-            update_text: update_text,
-            adjust_everything: adjust_everything,
-            append_timing_bar: append_timing_bar
-        };
-
-        update_formula();
-    }
-
-    
     function add_timing_bar(kind, options){
         // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
 
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
-            update_text();
+            common_geom.update_formula();
         } else {
             var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, options);
             assign_parent_bar(bar);
@@ -854,8 +820,6 @@ function Interval(common_geom, subplot_geom, options) {
         // remove this rectangle's shared time line
         link_shared_times_line.remove();
 
-        // delete description
-        placeholder_latex_formula.remove();
         common_geom.adjustAllRectangles();
     }
 
@@ -931,7 +895,6 @@ function Interval(common_geom, subplot_geom, options) {
     rect_geom.saveRectangleIndex = function (index) {
         rect_geom.rectangleIndex = index;
     };
-    rect_geom.update_formula = update_formula;
     rect_geom.get_num_rails = function () {
         return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;
     };
@@ -966,6 +929,7 @@ function Interval(common_geom, subplot_geom, options) {
     }
 
     rect_geom.update_end_time = update_end_time;
-
+    rect_geom.get_latex_string = get_latex_string;
+    rect_geom.get_timing_parent_bar = function(){ return timing_parent_bar; } // TODO: this is a kludge
     return rect_geom;
 }

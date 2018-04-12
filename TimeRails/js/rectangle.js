@@ -28,10 +28,6 @@ function Rectangle(common_geom, subplot_geom, options) {
         followers: [],
         following: (options && options.hasOwnProperty("following")) ? options.following : false,
 
-        update_text: update_text,
-        update_formula: update_formula,
-
-
         adjust_everything: adjust_everything,
         getYOffset: function(){ return subplot_geom.yOffset; },
         adjustSharedTimeLine: adjustSharedTimeLine,
@@ -50,7 +46,7 @@ function Rectangle(common_geom, subplot_geom, options) {
              }
 
             timing_parent_bar = newBar;
-            update_text();
+            common_geom.update_formula();
 
             if (newBar){
                 // newBar may be false (rather than a bar)
@@ -168,7 +164,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         }
 
         if (update_description){
-          update_text();
+              common_geom.update_formula();
         }
         set_edges();
     }
@@ -493,7 +489,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                 if (timing_parent_bar){
                     assign_parent_bar(false);
                     common_geom.adjustAllRectangles();
-                    update_text();
+                    common_geom.update_formula();
                 }
             },
             disabled: false // optional, defaults to false
@@ -531,7 +527,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                     var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
                     assign_parent_bar(bar);
                     timing_parent_bar.set_parent_bar('some')();
-                    update_text();
+                    common_geom.update_formula();
                 }
              });
             menuOptions.push({
@@ -540,7 +536,7 @@ function Rectangle(common_geom, subplot_geom, options) {
                     var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
                     assign_parent_bar(bar);
                     timing_parent_bar.set_parent_bar('all')();
-                    update_text();
+                    common_geom.update_formula();
                 }
             });
         }
@@ -623,9 +619,6 @@ function Rectangle(common_geom, subplot_geom, options) {
     // Actually create visual elements
     /************************************************/
     d3.select(common_geom.div_name).select(".space-div").style("width", common_geom.subplotWidth + "px");
-
-    var placeholder_latex = d3.select(common_geom.div_name).select(".placeholder-latex");
-    var placeholder_latex_formula = placeholder_latex.append("div");
 
     var options_form = d3.select(common_geom.div_name).append("div").classed("space-div", true).append("form");
 
@@ -890,7 +883,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         }
 
         dragrect.style("stroke-dasharray", dashArray);
-        update_text();
+        common_geom.update_formula();
     }
 
 
@@ -926,19 +919,12 @@ function Rectangle(common_geom, subplot_geom, options) {
         return latex_string;
     }
 
-    function update_formula(){
-        var latex_string =  get_latex_string();
-        placeholder_latex_formula.html("$" + latex_string + "$");
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    }
-
     function get_latex_string(){
         var y_latex_string = getYLatexString();
         var latex_string = "";
 
         // If rectangle has a parent bar, rectangle is represented by a Global term with start/end times measured from start_line
         if (timing_parent_bar){
-            latex_string = timing_parent_bar.getLatex();
             var delay_time = XToTime(rect_geom.start_time_pos) - XToTime(rect_geom.track_circle_pos);
             delay_time = delay_time.toFixed(2);
 
@@ -946,10 +932,10 @@ function Rectangle(common_geom, subplot_geom, options) {
             length = length.toFixed(2);
 
             if (delay_time == 0 && length == 0){
-                return latex_string + y_latex_string;
+                return y_latex_string;
             } else {
                 var symbol = common_geom.use_letters ? ' G' : ' \\square';
-                return latex_string + symbol + "_{[" + delay_time + "," + length + "]}" + y_latex_string;
+                return  symbol + "_{[" + delay_time + "," + length + "]}" + y_latex_string;
             }
         }
 
@@ -973,66 +959,15 @@ function Rectangle(common_geom, subplot_geom, options) {
         return latex_string + symbol + "_{[" + x_lower + "," + x_upper + "]}" + y_latex_string;
     }
 
-    function update_text() {
-
-        function create_initial_bar (kind){
-            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom);
-            assign_parent_bar(bar);
-        }
-
-        var update_functions = {
-            YToVal: YToVal,
-            valToY: valToY,
-            XToTime: XToTime,
-            timeToX: timeToX,
-            drag_fixed: drag_fixed,
-            update_text: update_text,
-            adjust_everything: adjust_everything,
-            append_timing_bar: append_timing_bar
-        };
-
-        update_formula();
-    }
-
-
     // functions for generating specification to save
 
-    function getYSpecString(){
-
-        var y_upper = YToVal(rect_geom.rect_top).toFixed(2);
-        var y_lower = YToVal( valToY(y_upper) + rect_geom.height ).toFixed(2);
-
-        var spec_string;
-
-        // 2 bounds
-        if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower + ", lt=" + y_upper;
-        }
-
-        // 1 bound
-        else if (rect_geom.top_fixed) {
-            spec_string = "Inequality(lt=" + y_upper;
-        }
-        else if (rect_geom.bottom_fixed) {
-            spec_string = "Inequality(gt=" + y_lower;
-        }
-
-        // 0 bounds
-        else {
-            // Don't convert, but keep as an easily checkable sentinel value
-            spec_string = "";
-        }
-
-        return spec_string;
-    }
-    
     function add_timing_bar(kind, options){
         // create timing-bar, and set it as immediate parent of rectangle
         // kind is 'some' or 'all'
 
         if (timing_parent_bar){
             timing_parent_bar.set_parent_bar(kind, options)();
-            update_text();
+            common_geom.update_formula();
         } else {
             var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, options);
             assign_parent_bar(bar);
@@ -1090,7 +1025,6 @@ function Rectangle(common_geom, subplot_geom, options) {
 
 
         // delete description
-        placeholder_latex_formula.remove();
         common_geom.adjustAllRectangles();
     }
 
@@ -1178,7 +1112,6 @@ function Rectangle(common_geom, subplot_geom, options) {
     rect_geom.saveRectangleIndex = function (index) {
         rect_geom.rectangleIndex = index;
     };
-    rect_geom.update_formula = update_formula;
     rect_geom.get_num_rails = function () {
         return timing_parent_bar ? (1 + timing_parent_bar.get_num_rails()) : 0;
     };
@@ -1219,7 +1152,9 @@ function Rectangle(common_geom, subplot_geom, options) {
     }
 
     rect_geom.update_end_time = update_end_time;
-    
+    rect_geom.get_latex_string = get_latex_string;
+    rect_geom.get_timing_parent_bar = function(){ return timing_parent_bar; } // TODO: this is a kludge
+
     return rect_geom;
 
 }
