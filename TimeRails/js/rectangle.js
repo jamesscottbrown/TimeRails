@@ -156,6 +156,12 @@ function Rectangle(common_geom, subplot_geom, options) {
                 .attr("cy", rect_geom.rail_height)
                 .style("visibility", rect_geom.following ? 'hidden' : 'visible');
 
+        rect_label
+            .attr("x", rect_geom.start_time_pos)
+            .attr("y", rect_geom.rect_top - 10)
+            .style("visibility", common_geom.allow_logic ? "visible" : "hidden")
+            .text(subplot_geom.base_variable_name + rect_geom.rectangleIndex);
+
         if (timing_parent_bar){
             // may need to shift time bars vertically
             timing_parent_bar.adjust_everything();
@@ -653,6 +659,8 @@ function Rectangle(common_geom, subplot_geom, options) {
             shift_down = false;
         });
 
+    var rect_label = newg.append("text").text("1"); // TODO: number
+
 
         var rectMenu = [{
             title: function(){ return 'Adjust values'; },
@@ -1060,6 +1068,7 @@ function Rectangle(common_geom, subplot_geom, options) {
         delay_line.remove();
         startline.remove();
         track_circle.remove();
+        rect_label.remove();
 
         subplot_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
         for (var i=0; i<subplot_geom.rectangles.length; i++){

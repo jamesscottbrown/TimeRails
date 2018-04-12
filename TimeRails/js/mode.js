@@ -173,6 +173,12 @@ function Mode(common_geom, subplot_geom, options) {
                 .style("visibility", rect_geom.endTimeIsBound ? 'visible' : 'hidden')
                 .style("visibility", rect_geom.endTimeIsBound ? 'visible' : 'hidden');
 
+        rect_label
+            .attr("x", rect_geom.start_time_pos)
+            .attr("y", rect_geom.rect_top - 10)
+            .style("visibility", common_geom.allow_logic ? "visible" : "hidden")
+            .text(subplot_geom.base_variable_name + rect_geom.rectangleIndex);
+
         if (timing_parent_bar){
             // may need to shift time bars vertically
             timing_parent_bar.adjust_everything();
@@ -697,6 +703,8 @@ function Mode(common_geom, subplot_geom, options) {
         .style("opacity", "0.1")
         .classed("red-line", true);
 
+    var rect_label = newg.append("text").text("1"); // TODO: number
+
 
     var rectMenu =
         function () {
@@ -1130,6 +1138,7 @@ function Mode(common_geom, subplot_geom, options) {
         delay_line.remove();
         startline.remove();
         track_circle.remove();
+        rect_label.remove();
 
         subplot_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
         for (var i=0; i<subplot_geom.rectangles.length; i++){

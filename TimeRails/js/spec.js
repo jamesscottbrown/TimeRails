@@ -132,6 +132,19 @@ function addCommonElements(common_geom, subplot_geom){
         var constant_label = diagram_option.append("label").attr("for", "constant_checkbox").text("Fix specification");
 
 
+        if (common_geom.allow_logic){
+            var logic_div = diagram_option.append("div");
+
+            var logic_expr_label = logic_div.append("label").attr("for", "logic_expr_input").text(" Logic expression: ");
+            var logic_expr_input = logic_div.append("input")
+                .attr("id", "logic_expr_input")
+                .attr("value", common_geom.logic_expression)
+                .attr("length", "6")
+                .on("change", function(){
+                    common_geom.logic_expression = this.value;
+                });
+        }
+
         var time_axis_range_div = diagram_option.append("div");
         var time_max_label = time_axis_range_div.append("label").attr("for", "time_max_input").text(" Max time ");
         var time_max_input = time_axis_range_div.append("input")
@@ -462,6 +475,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
     common_geom.allowLogic = spec_options.allowLogic ? spec_options.allowLogic : false;
+    common_geom.allow_logic = spec_options.allow_logic ? spec_options.allow_logic : false;
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)

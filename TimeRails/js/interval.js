@@ -153,6 +153,12 @@ function Interval(common_geom, subplot_geom, options) {
                 .attr("cy", rect_geom.rail_height)
                 .style("visibility", rect_geom.following ? 'hidden' : 'visible');
 
+        rect_label
+            .attr("x", rect_geom.start_time_pos)
+            .attr("y", rect_geom.rect_top - 10)
+            .style("visibility", common_geom.allow_logic ? "visible" : "hidden")
+            .text(subplot_geom.base_variable_name + rect_geom.rectangleIndex);
+
         transition_marker_top
             .attr("cx", rect_geom.start_time_pos)
             .attr("cy", rect_geom.transition_max_pos);
@@ -564,7 +570,7 @@ function Interval(common_geom, subplot_geom, options) {
         .classed("red-line", true)
         .call(drag_track_circle);
 
-
+    var rect_label = newg.append("text").text("1"); // TODO: number
 
     var rectMenu =
         function () {
@@ -828,6 +834,7 @@ function Interval(common_geom, subplot_geom, options) {
         transition_marker_top.remove();
         transition_marker_top_tick.remove();
         transition_marker_vertical.remove();
+        rect_label.remove();
 
         subplot_geom.rectangles.splice(rect_geom.rectangleIndex, 1);
         for (var i=0; i<subplot_geom.rectangles.length; i++){
