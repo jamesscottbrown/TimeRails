@@ -285,13 +285,15 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             action: adjust_rail_values
         });
 
-        menu.push({
-            title: 'Attach to rail',
-            action: function (elm, d, i) {
-                common_geom.selected_rail_to_add_to_rail = rail;
-            },
-            disabled: false
-        });
+        if (common_geom.allow_branching) {
+            menu.push({
+                title: 'Attach to rail',
+                action: function (elm, d, i) {
+                    common_geom.selected_rail_to_add_to_rail = rail;
+                },
+                disabled: false
+            });
+        }
 
 
     // Actual visual elements

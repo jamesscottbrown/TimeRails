@@ -470,6 +470,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.generateExampleTrajectories = spec_options.hasOwnProperty("generateExampleTrajectories") ? spec_options.generateExampleTrajectories : true;
     common_geom.saveURL = spec_options.saveURL ? spec_options.saveURL : "http://" + window.location.host + "/specifications/" + spec_id + "/save";
     common_geom.allow_logic = spec_options.allow_logic ? spec_options.allow_logic : false;
+    common_geom.allow_branching = spec_options.allow_branching ? spec_options.allow_branching : true;
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
@@ -772,6 +773,7 @@ function Diagram(div_name, spec_id, spec_options) {
         common_geom.specification_fixed = obj.specification_fixed;
         common_geom.use_letters = obj.use_letters; //
         common_geom.xRange = obj.xRange;
+        common_geom.allow_branching = obj.allow_branching;
 
         for (var i=0; i < obj.subplot_geoms.length; i++){
             var sp = obj.subplot_geoms[i];
