@@ -671,11 +671,16 @@
         }
 
         function getTerms(){
-            return terms;
+            return terms.filter(function (d) {
+                return !d.isDeleted();
+            });
         }
 
         function toJSON(){
-            return terms.map(function(term){ return term.getState(); })
+            return terms.filter(function (d) {
+                return !d.isDeleted();
+            })
+                .map(function(term){ return term.getState(); })
         }
 
         return {adjust_scales: adjust_scales, addLinearTerm: addLinearTerm, addSigmoidalTerm: addSigmoidalTerm,  addBellTerm: addBellTerm, getExpression: getExpression, getState: getState, getTerms: getTerms, toJSON: toJSON };
