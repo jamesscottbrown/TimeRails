@@ -826,9 +826,7 @@ function Diagram(div_name, spec_id, spec_options) {
             }
         }
 
-        // TODO: rails
-
-
+        common_geom.adjustAllHeights();
 
     };
 
