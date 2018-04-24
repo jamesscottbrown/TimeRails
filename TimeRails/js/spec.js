@@ -833,10 +833,60 @@ function Diagram(div_name, spec_id, spec_options) {
     };
 
     function loadConstraintSubplot(sp_data){
-        var sp = addConstraintSubplot("", sp_data.variable_name, sp_data.base_variable_name);
+        var sp = addConstraintSubplot("", sp_data.variable_name, sp_data.base_variable_name, {yRange: sp_data.yRange});
 
         for (var i=0; i<sp_data.rectangles.length; i++){
             var rectangle_data = sp_data.rectangles[i];
+
+            // TODO: pass remaining details as options
+            if (rectangle_data.kind == "mode"){
+                sp.rectangles.push(Mode(common_geom, sp, rectangle_data));
+            } else if (rectangle_data.kind == "rectangle"){
+                sp.rectangles.push(Rectangle(common_geom, sp, rectangle_data));
+            } if (rectangle_data.kind == "interval"){
+                sp.rectangles.push(Interval(common_geom, sp, rectangle_data));
+            }
+        }
+
+        for (var i = 0; i < sp_data.rails.length; i++) {
+            var rail_data = sp_data.rails[i];
+            console.log(rail_data);
+
+            var level = rail_data.level; // TODO: save
+            var kind = rail_data.kind;   // TODO: save
+            var options = {
+                start_time: rail_data.start_time,
+                left_tick_time: rail_data.left_tick_time,
+                right_tick_time: rail_data.right_tick_time
+            };
+            // populate options with time
+            var bar = create_bar(level, kind, common_geom, sp, options); // TODO: rect_gwom is kinda meaningless
+
+            // attach children to this rail
+            for (var j=0; j<rail_data.children.length; j++){
+                var child = rail_data.children[j];
+                var child_obj = common_geom.subplot_geoms[ child.subplot_index ].rectangles[child.rect_index]; // TODO: might be a subplot we haven't processed yet
+                child_obj.setTimingBar(bar);
+            }
+        }
+
+        // set parent bars of rails
+        for (var i = 0; i < sp_data.rails.length; i++) {
+            var rail_data = sp_data.rails[i];
+
+            if (rail_data.timing_parent_bar){
+                var parent = common_geom.subplot_geoms[rail_data.timing_parent_bar.subplot_index].rails[rail_data.timing_parent_bar.railIndex];
+                //sp.rails[i].set_parent_bar()(parent); // TODO: change function signature?
+
+                sp.rails[i].timing_parent_bar = parent;
+                common_geom.adjustAllRectangles(true);
+                //rect_geom.update_text();
+            }
+
+
+        }
+
+    }
 
 
     function adjustAllHeights(){
