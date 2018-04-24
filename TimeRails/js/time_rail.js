@@ -1,4 +1,4 @@
-function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
+function create_bar(level, kind, common_geom, subplot_geom, options){
 
     var subplot_svg = subplot_geom.svg;
     var diagram_svg = common_geom.diagram_svg;
@@ -235,7 +235,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
             if (rail.timing_parent_bar){
                 rail.timing_parent_bar.delete();
             }
-            rail.timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, rect_geom, options);
+            rail.timing_parent_bar = create_bar(level + 1, bar_kind, common_geom, subplot_geom, options);
             common_geom.adjustAllRectangles(true);
 
             rail.timing_parent_bar.keepChildrenOnRails();
@@ -334,7 +334,6 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
                 common_geom.adjustAllHeights();
 
                 common_geom.adjustAllRectangles(true);
-                rect_geom.adjust_everything(); // ?
                 rail.keepChildrenOnRails();
                 common_geom.update_formula();
 
@@ -451,7 +450,7 @@ function create_bar(level, kind, common_geom, subplot_geom, rect_geom, options){
         select.on("change", function(){
             kind = this.value.startsWith("all") ? "all" : "some";
             adjust_everything();
-            rect_geom.update_formula();
+            common_geom.update_formula();
         });
     }
 

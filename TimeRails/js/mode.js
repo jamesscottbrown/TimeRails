@@ -554,7 +554,7 @@ function Mode(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Applies at <i>some</i> time in range',
                     action: function (elm, d, i) {
-                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom);
                         assign_parent_bar(bar);
                     }
                 });
@@ -563,7 +563,7 @@ function Mode(common_geom, subplot_geom, options) {
                     menuOptions.push({
                             title: 'Applies at <i>all</i> times in range',
                             action: function (elm, d, i) {
-                                var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
+                                var bar = create_bar(1, 'all', common_geom, subplot_geom);
                                 assign_parent_bar(bar);
                             },
                             disabled: (common_geom.max_depth <= 1)
@@ -578,7 +578,7 @@ function Mode(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Eventually-Always',
                     action: function(elm, d, i) {
-                        var bar = create_bar(1, 'all', common_geom, subplot_geom, rect_geom);
+                        var bar = create_bar(1, 'all', common_geom, subplot_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('some')();
                         common_geom.update_formula();
@@ -587,7 +587,7 @@ function Mode(common_geom, subplot_geom, options) {
                 menuOptions.push({
                     title: 'Always-Eventually',
                     action: function(elm, d, i) {
-                        var bar = create_bar(1, 'some', common_geom, subplot_geom, rect_geom);
+                        var bar = create_bar(1, 'some', common_geom, subplot_geom);
                         assign_parent_bar(bar);
                         timing_parent_bar.set_parent_bar('all')();
                         common_geom.update_formula();
@@ -1071,7 +1071,7 @@ function Mode(common_geom, subplot_geom, options) {
             timing_parent_bar.set_parent_bar(kind, options)();
             common_geom.update_formula();
         } else {
-            var bar = create_bar(1, kind, common_geom, subplot_geom, rect_geom, options);
+            var bar = create_bar(1, kind, common_geom, subplot_geom, options);
             assign_parent_bar(bar);
         }
     }
