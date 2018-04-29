@@ -899,15 +899,15 @@ function Rectangle(common_geom, subplot_geom, options) {
 
         // 2 bounds
         if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + common_geom.index + "<" + y_upper + ")";
+            latex_string = "(" + y_lower + "< " + subplot_geom.variable_name + "<" + y_upper + ")";
         }
 
         // 1 bound
         else if (rect_geom.top_fixed) {
-            latex_string = "(x_" + common_geom.index + "<" + y_upper + ")";
+            latex_string = "(" + subplot_geom.variable_name + "<" + y_upper + ")";
         }
         else if (rect_geom.bottom_fixed) {
-            latex_string = "(" + y_lower + "< x_" + common_geom.index + ")";
+            latex_string = "(" + y_lower + "< " + subplot_geom.variable_name + ")";
         }
 
         // 0 bounds
