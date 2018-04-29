@@ -2,12 +2,10 @@
 
         if (!opts){ opts = []; }
         var maxTime = opts.maxTime ? opts.maxTime : 100;
-        var maxY = opts.maxY ? opts.maxY : 10;
+        var maxY = subplot_geom.yScale.domain()[0];
         var num_points = opts.num_points ? opts.num_points : 100;
 
         var g = subplot_geom.svg;
-        var x = common_geom.xScale;
-        var y = subplot_geom.yScale;
 
         var color = d3.scale.category10();
 
@@ -58,7 +56,7 @@
             terms[terms.length-1].updateLine();
         }
         function addSigmoidalTerm(s){
-            if (!s){ s = {type: "sigmoidal", positions: [{x: 0, y: 0}, {x: maxTime/2, y: maxTime/2}, {x: maxTime, y: maxY} ], hillCoefficient: 10}; }
+            if (!s){ s = {type: "sigmoidal", positions: [{x: 0, y: 0}, {x: maxTime/2, y: maxY/2}, {x: maxTime, y: maxY} ], hillCoefficient: 10}; }
             terms.push(SigmoidalTerm(terms.length, s))
             terms[terms.length-1].updateLine();
         }
@@ -115,22 +113,23 @@
                     }
                 }
 
-               var data_circles = g.selectAll(".data-points").data(total).enter().append("circle")
-                   .attr("cx", function (d) {
-                       return x(d.x)
-                   })
-                   .attr("cy", function (d) {
-                       return y(d.y)
-                   })
-                   .attr("r", 1)
-                   .classed("data-points", true);
+               var data_circles = g.selectAll(".data-points")
+                   .data(total)
+                   .enter()
+                   .append("circle")
+                   .attr("class", "data-points");
 
-               g.selectAll(".data-points").data(total)
+                g.selectAll(".data-points")
+                    .data(total)
+                    .exit()
+                    .remove();
+
+               g.selectAll(".data-points")
                    .attr("cx", function (d) {
-                       return x(d.x)
+                       return common_geom.xScale(d.x)
                    })
                    .attr("cy", function (d) {
-                       return y(d.y)
+                       return subplot_geom.yScale(d.y)
                    })
                    .attr("r", 1)
                    .classed("data-points", true);
@@ -168,8 +167,8 @@
                 .attr("draggable", false);
 
             var point1 = g.append("circle")
-                .attr("cx", x(state.positions[0].x))
-                .attr("cy", y(state.positions[0].y))
+                .attr("cx", common_geom.xScale(state.positions[0].x))
+                .attr("cy", subplot_geom.yScale(state.positions[0].y))
                 .attr("r", 5)
                 .style("cursor", "ns-resize")
                 .style("fill", color(i))
@@ -190,8 +189,8 @@
 
 
             var point2 = g.append("circle")
-                .attr("cx", x(state.positions[1].x))
-                .attr("cy", y(state.positions[1].y))
+                .attr("cx", common_geom.xScale(state.positions[1].x))
+                .attr("cy", subplot_geom.yScale(state.positions[1].y))
                 .attr("r", 5)
                 .style("cursor", "move")
                 .style("fill", color(i))
@@ -225,16 +224,16 @@
             var points = [];
             function updateLine() {
 
-                var intercept = y.invert(point1.attr("cy"));
-                var gradient = (y.invert(point2.attr("cy")) - y.invert(point1.attr("cy"))) / (x.invert(point2.attr("cx")) - x.invert(point1.attr("cx")));
+                var intercept = subplot_geom.yScale.invert(point1.attr("cy"));
+                var gradient = (subplot_geom.yScale.invert(point2.attr("cy")) - subplot_geom.yScale.invert(point1.attr("cy"))) / (common_geom.xScale.invert(point2.attr("cx")) - common_geom.xScale.invert(point1.attr("cx")));
 
-                var t2 = x.invert(point2.attr("cx"));
+                var t2 = common_geom.xScale.invert(point2.attr("cx"));
 
                 line
-                    .attr("x1", x(0))
+                    .attr("x1", common_geom.xScale(0))
                     .attr("y1", point1.attr("cy"))
-                    .attr("x2", x(maxTime))
-                    .attr("y2", y(intercept + gradient * maxTime))
+                    .attr("x2", common_geom.xScale(maxTime))
+                    .attr("y2", subplot_geom.yScale(intercept + gradient * maxTime))
                     .style("stroke", color(i));
 
                 points = [];
@@ -269,8 +268,8 @@
 
             }
             function getState(){
-                var intercept = y.invert(point1.attr("cy"));
-                var gradient = (y.invert(point2.attr("cy")) - y.invert(point1.attr("cy"))) / (x.invert(point2.attr("cx")) - x.invert(point1.attr("cx")));
+                var intercept = subplot_geom.yScale.invert(point1.attr("cy"));
+                var gradient = (subplot_geom.yScale.invert(point2.attr("cy")) - subplot_geom.yScale.invert(point1.attr("cy"))) / (common_geom.xScale.invert(point2.attr("cx")) - common_geom.xScale.invert(point1.attr("cx")));
 
                 return {type: "linear", positions: [getCircleVal(point1), getCircleVal(point2)], parameters: {"intercept": intercept, "gradient": gradient}}
             }
@@ -281,8 +280,8 @@
 
         function SigmoidalTerm(i, state) {
             var point1 = g.append("circle")
-                .attr("cx", x(state.positions[0].x))
-                .attr("cy", y(state.positions[0].y))
+                .attr("cx", common_geom.xScale(state.positions[0].x))
+                .attr("cy", subplot_geom.yScale(state.positions[0].y))
                 .attr("r", 5)
                 .style("cursor", "ns-resize")
                 .style("fill", color(i))
@@ -303,8 +302,8 @@
 
 
             var point2 = g.append("circle")
-                .attr("cx", x(state.positions[1].x))
-                .attr("cy", y(state.positions[1].y))
+                .attr("cx", common_geom.xScale(state.positions[1].x))
+                .attr("cy", subplot_geom.yScale(state.positions[1].y))
                 .attr("r", 5)
                 .style("cursor", "ew-resize")
                 .style("fill", color(i))
@@ -327,8 +326,8 @@
 
 
             var point3 = g.append("circle")
-                .attr("cx", x(state.positions[2].x))
-                .attr("cy", y(state.positions[2].y))
+                .attr("cx", common_geom.xScale(state.positions[2].x))
+                .attr("cy", subplot_geom.yScale(state.positions[2].y))
                 .attr("r", 5)
                 .style("cursor", "ns-resize")
                 .style("fill", color(i))
@@ -373,10 +372,10 @@
             var line = d3.svg.line()
                 .interpolate("linear")
                 .x(function (d) {
-                    return x(d.x);
+                    return common_geom.xScale(d.x);
                 })
                 .y(function (d) {
-                    return y(d.y);
+                    return subplot_geom.yScale(d.y);
                 });
 
             var line_path = g.append("path")
@@ -392,9 +391,9 @@
 
                 point2.attr("cy", ( parseFloat(point1.attr("cy")) + parseFloat(point3.attr("cy"))) / 2);
 
-                var initial_value = parseFloat(y.invert(point1.attr("cy")));
-                var midpoint_time = parseFloat(x.invert(point2.attr("cx")));
-                var final_value = parseFloat(y.invert(point3.attr("cy")));
+                var initial_value = parseFloat(subplot_geom.yScale.invert(point1.attr("cy")));
+                var midpoint_time = parseFloat(common_geom.xScale.invert(point2.attr("cx")));
+                var final_value = parseFloat(subplot_geom.yScale.invert(point3.attr("cy")));
 
                 points = [];
                 for (var t = 0; t < maxTime; t = t + (maxTime / num_points)) {
@@ -431,9 +430,9 @@
             }
 
             function getState(){
-                var initial_value = parseFloat(y.invert(point1.attr("cy")));
-                var midpoint_time = parseFloat(x.invert(point2.attr("cx")));
-                var final_value = parseFloat(y.invert(point3.attr("cy")));
+                var initial_value = parseFloat(subplot_geom.yScale.invert(point1.attr("cy")));
+                var midpoint_time = parseFloat(common_geom.xScale.invert(point2.attr("cx")));
+                var final_value = parseFloat(subplot_geom.yScale.invert(point3.attr("cy")));
 
                 return {type: "sigmoidal",
                         positions: [getCircleVal(point1), getCircleVal(point2), getCircleVal(point3)],
@@ -449,8 +448,8 @@
 
         function BellTerm(i, state) {
             var point1 = g.append("circle")
-                .attr("cx", x(state.positions[0].x))
-                .attr("cy", y(state.positions[0].y))
+                .attr("cx", common_geom.xScale(state.positions[0].x))
+                .attr("cy", subplot_geom.yScale(state.positions[0].y))
                 .attr("r", 5)
                 .style("cursor", "ns-resize")
                 .style("fill", color(i))
@@ -473,8 +472,8 @@
 
 
             var point2 = g.append("circle")
-                .attr("cx", x(state.positions[1].x))
-                .attr("cy", y(state.positions[1].y))
+                .attr("cx", common_geom.xScale(state.positions[1].x))
+                .attr("cy", subplot_geom.yScale(state.positions[1].y))
                 .attr("r", 5)
                 .style("cursor", "ew-resize")
                 .style("fill", color(i))
@@ -500,8 +499,8 @@
 
 
             var point3 = g.append("circle")
-                .attr("cx", x(state.positions[2].x))
-                .attr("cy", y(state.positions[2].y))
+                .attr("cx", common_geom.xScale(state.positions[2].x))
+                .attr("cy", subplot_geom.yScale(state.positions[2].y))
                 .style("cursor", "move")
                 .attr("r", 5)
                 .style("fill", color(i))
@@ -533,8 +532,8 @@
 
 
             var point4 = g.append("circle")
-                .attr("cx", x(state.positions[3].x))
-                .attr("cy", y(state.positions[3].y))
+                .attr("cx", common_geom.xScale(state.positions[3].x))
+                .attr("cy", subplot_geom.yScale(state.positions[3].y))
                 .attr("r", 5)
                 .style("cursor", "ew-resize")
                 .style("fill", color(i))
@@ -566,10 +565,10 @@
             var line = d3.svg.line()
                 .interpolate("linear")
                 .x(function (d) {
-                    return x(d.x);
+                    return common_geom.xScale(d.x);
                 })
                 .y(function (d) {
-                    return y(d.y);
+                    return subplot_geom.yScale(d.y);
                 });
 
             var line_path = g.append("path")
@@ -593,11 +592,11 @@
             function shiftHeight() {
 
 
-                var initial_value = parseFloat(y.invert(point1.attr("cy")));
-                var peak_value = parseFloat(y.invert(point3.attr("cy")));
-                var sigma = (parseFloat(x.invert(point3.attr("cx"))) - parseFloat(x.invert(point2.attr("cx"))));
+                var initial_value = parseFloat(subplot_geom.yScale.invert(point1.attr("cy")));
+                var peak_value = parseFloat(subplot_geom.yScale.invert(point3.attr("cy")));
+                var sigma = (parseFloat(common_geom.xScale.invert(point3.attr("cx"))) - parseFloat(common_geom.xScale.invert(point2.attr("cx"))));
 
-                var y_val = y(initial_value + (peak_value - initial_value) * Math.exp(-1));
+                var y_val = subplot_geom.yScale(initial_value + (peak_value - initial_value) * Math.exp(-1));
 
                 point2.attr("cy", y_val);
                 point4.attr("cy", y_val);
@@ -610,10 +609,10 @@
             var points = [];
             function updateLine() {
 
-                var initial_value = parseFloat(y.invert(point1.attr("cy")));
-                var peak_value = parseFloat(y.invert(point3.attr("cy")));
-                var peak_time = parseFloat(x.invert(point3.attr("cx")));
-                var sigma = (parseFloat(x.invert(point3.attr("cx"))) - parseFloat(x.invert(point2.attr("cx"))));
+                var initial_value = parseFloat(subplot_geom.yScale.invert(point1.attr("cy")));
+                var peak_value = parseFloat(subplot_geom.yScale.invert(point3.attr("cy")));
+                var peak_time = parseFloat(common_geom.xScale.invert(point3.attr("cx")));
+                var sigma = (parseFloat(common_geom.xScale.invert(point3.attr("cx"))) - parseFloat(common_geom.xScale.invert(point2.attr("cx"))));
 
                 points = [];
                 for (var t = 0; t < maxTime; t = t + (maxTime / num_points)) {
@@ -651,10 +650,10 @@
             }
 
             function getState(){
-                var initial_value = parseFloat(y.invert(point1.attr("cy")));
-                var peak_value = parseFloat(y.invert(point3.attr("cy")));
-                var peak_time = parseFloat(x.invert(point3.attr("cx")));
-                var sigma = (parseFloat(x.invert(point3.attr("cx"))) - parseFloat(x.invert(point2.attr("cx"))));
+                var initial_value = parseFloat(subplot_geom.yScale.invert(point1.attr("cy")));
+                var peak_value = parseFloat(subplot_geom.yScale.invert(point3.attr("cy")));
+                var peak_time = parseFloat(common_geom.xScale.invert(point3.attr("cx")));
+                var sigma = (parseFloat(common_geom.xScale.invert(point3.attr("cx"))) - parseFloat(common_geom.xScale.invert(point2.attr("cx"))));
 
                 return {type: "bell",
                     positions: [getCircleVal(point1), getCircleVal(point2), getCircleVal(point3), getCircleVal(point4)],
@@ -671,8 +670,8 @@
         }
 
         function getCircleVal(circle){
-            return {x: x.invert(parseFloat(circle.attr("cx"))),
-                    y: y.invert(parseFloat(circle.attr("cy")))};
+            return {x: common_geom.xScale.invert(parseFloat(circle.attr("cx"))),
+                    y: subplot_geom.yScale.invert(parseFloat(circle.attr("cy")))};
         }
 
         function getTerms(){
