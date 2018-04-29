@@ -82,6 +82,11 @@
             for (var i=0; i<terms.length; i++){
                 terms[i].updateScale(convertX, convertY);
             }
+
+            common_geom.xScale = new_xScale;
+            subplot_geom.yScale = new_yScale;
+
+            maxY = new_yScale.domain()[0];
         }
 
         function shift_circle(circle, convertX, convertY){
