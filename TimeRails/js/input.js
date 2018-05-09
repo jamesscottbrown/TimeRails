@@ -771,6 +771,9 @@
             function deleteLine() {
                 point1.remove();
                 point2.remove();
+                point3.remove();
+                point4.remove();
+
                 line_path.remove();
 
                 isDeleted = true;
