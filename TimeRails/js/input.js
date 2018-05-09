@@ -216,8 +216,21 @@
                             })
                 );
 
-            point1.on('contextmenu', d3.contextMenu(function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}]; }));
-            point2.on('contextmenu', d3.contextMenu(function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}]; }));
+
+            var menu = function () {
+                return [{
+                    title: 'Delete term',
+                    action: deleteLine,
+                    disabled: common_geom.specification_fixed
+                },{
+                    title: 'Adjust values',
+                    action: adjustValues,
+                    disabled: common_geom.specification_fixed
+                }];
+            };
+
+            point1.on('contextmenu', d3.contextMenu(menu));
+            point2.on('contextmenu', d3.contextMenu(menu));
 
             updateLine();
 
@@ -260,6 +273,63 @@
                 isDeleted = true;
                 updateSumPoints();
             }
+
+            function adjustValues(){
+                d3.select("#paramModal").remove();
+                var modal_contents = d3.select(common_geom.div_name).append("div")
+                    .attr("id", "paramModal")
+                    .classed("modal", true)
+                    .classed("fade", true)
+
+                    .append("div")
+                    .classed("modal-dialog", true)
+
+                    .append("div")
+                    .classed("modal-content", true);
+
+                var modalHeader = modal_contents.append("div").classed("modal-header", true);
+                var modalBody = modal_contents.append("div").classed("modal-body", true);
+                var modalFooter = modal_contents.append("div").classed("modal-footer", true);
+
+                modalHeader.append("button")
+                    .classed("close", true)
+                    .attr("data-dismiss", "modal") // ???
+                    .attr("type", "button")
+                    .attr("aria-hidden", true)
+                    .text('×');
+
+                modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
+
+                var startDiv = modalBody.append("div");
+
+                state = getState();
+
+                startDiv.append("text").text(" Increase from ");
+                var minVal = startDiv.append("input").attr("value", state.parameters.intercept).node();
+                startDiv.append("text").text(" and pass through  ");
+                var maxVal = startDiv.append("input").attr("value", subplot_geom.yScale.invert(point2.attr("cy")) ).node();
+                startDiv.append("text").text(" at time ");
+                var endTime = startDiv.append("input").attr("value", common_geom.xScale.invert(point2.attr("cx"))).node();
+
+                startDiv.append("text").text(".");
+
+                modalFooter.append("button").text("Save").on("click", function () {
+
+                    point1.attr("cy", subplot_geom.yScale(+minVal.value));
+
+                    point2.attr("cy", subplot_geom.yScale(+maxVal.value))
+                        .attr("cx", common_geom.xScale(+endTime.value));
+
+                    updateLine();
+                })
+
+                    .attr("data-dismiss", "modal");
+                modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
+
+                $('#paramModal').modal('toggle');
+            }
+
+
 
             function getPoints(){
                 return points;
@@ -354,12 +424,9 @@
                     title: 'Delete term',
                     action: deleteLine,
                     disabled: common_geom.specification_fixed
-                },{
-                    title: 'Adjust steepness',
-                    action: function () {
-                        hillCoefficient = parseFloat(prompt("Steepness (Hill coefficient):", hillCoefficient));
-                        updateLine();
-                        },
+                }, {
+                    title: 'Adjust values',
+                    action: adjustValues,
                     disabled: common_geom.specification_fixed
                 }];
             };
@@ -415,6 +482,70 @@
                 isDeleted = true;
                 updateSumPoints();
             }
+
+
+        function adjustValues(){
+            d3.select("#paramModal").remove();
+            var modal_contents = d3.select(common_geom.div_name).append("div")
+                .attr("id", "paramModal")
+                .classed("modal", true)
+                .classed("fade", true)
+
+                .append("div")
+                .classed("modal-dialog", true)
+
+                .append("div")
+                .classed("modal-content", true);
+
+            var modalHeader = modal_contents.append("div").classed("modal-header", true);
+            var modalBody = modal_contents.append("div").classed("modal-body", true);
+            var modalFooter = modal_contents.append("div").classed("modal-footer", true);
+
+            modalHeader.append("button")
+                .classed("close", true)
+                .attr("data-dismiss", "modal") // ???
+                .attr("type", "button")
+                .attr("aria-hidden", true)
+                .text('×');
+
+            modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
+
+            var startDiv = modalBody.append("div");
+
+            state = getState();
+
+            startDiv.append("text").text(" Increase from ");
+            var minVal = startDiv.append("input").attr("value", state.parameters.initial_value).node();
+            startDiv.append("text").text(" to  ");
+            var maxVal = startDiv.append("input").attr("value", state.parameters.final_value).node();
+            startDiv.append("text").text(" , with midpoint at ");
+            var midpointTime = startDiv.append("input").attr("value", state.parameters.midpoint_time).node();
+            startDiv.append("text").text(" , and steepness ");
+            var hillVal = startDiv.append("input").attr("value", hillCoefficient).node();
+
+            startDiv.append("text").text(".");
+
+            modalFooter.append("button").text("Save").on("click", function () {
+
+                point1.attr("cy", subplot_geom.yScale(minVal.value));
+
+                point3.attr("cy", subplot_geom.yScale(maxVal.value));
+
+                point2.attr("cx", common_geom.xScale(midpointTime.value))
+                    .attr("cy", subplot_geom.yScale( (+minVal.value + maxVal.value)/2 ) );
+
+                hillCoefficient = hillVal.value;
+
+                updateLine();
+            })
+
+                .attr("data-dismiss", "modal");
+            modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
+
+            $('#paramModal').modal('toggle');
+        }
+
+
 
             function getPoints(){
                 return points;
@@ -555,11 +686,22 @@
                             })
                 );
 
-            var deleteMenu = function(){ return [{ title: 'Delete term', action: deleteLine, disabled: common_geom.specification_fixed}] };
-            point1.on('contextmenu', d3.contextMenu(deleteMenu));
-            point2.on('contextmenu', d3.contextMenu(deleteMenu));
-            point3.on('contextmenu', d3.contextMenu(deleteMenu));
-            point4.on('contextmenu', d3.contextMenu(deleteMenu));
+            var menu = function () {
+                return [{
+                    title: 'Delete term',
+                    action: deleteLine,
+                    disabled: common_geom.specification_fixed
+                },{
+                    title: 'Adjust values',
+                    action: adjustValues,
+                    disabled: common_geom.specification_fixed
+                }];
+            };
+
+            point1.on('contextmenu', d3.contextMenu(menu));
+            point2.on('contextmenu', d3.contextMenu(menu));
+            point3.on('contextmenu', d3.contextMenu(menu));
+            point4.on('contextmenu', d3.contextMenu(menu));
 
 
             var line = d3.svg.line()
@@ -634,6 +776,70 @@
                 isDeleted = true;
                 updateSumPoints();
             }
+
+
+            function adjustValues(){
+                d3.select("#paramModal").remove();
+                var modal_contents = d3.select(common_geom.div_name).append("div")
+                    .attr("id", "paramModal")
+                    .classed("modal", true)
+                    .classed("fade", true)
+
+                    .append("div")
+                    .classed("modal-dialog", true)
+
+                    .append("div")
+                    .classed("modal-content", true);
+
+                var modalHeader = modal_contents.append("div").classed("modal-header", true);
+                var modalBody = modal_contents.append("div").classed("modal-body", true);
+                var modalFooter = modal_contents.append("div").classed("modal-footer", true);
+
+                modalHeader.append("button")
+                    .classed("close", true)
+                    .attr("data-dismiss", "modal") // ???
+                    .attr("type", "button")
+                    .attr("aria-hidden", true)
+                    .text('×');
+
+                modalHeader.append("h4").text("Adjust values").classed("modal-title", true);
+
+                var startDiv = modalBody.append("div");
+
+                state = getState();
+
+                startDiv.append("text").text(" Increase from ");
+                var minVal = startDiv.append("input").attr("value", state.parameters.initial_value).node();
+                startDiv.append("text").text(" to  ");
+                var maxVal = startDiv.append("input").attr("value", state.parameters.peak_value).node();
+                startDiv.append("text").text(" at time  ");
+                var peakTime = startDiv.append("input").attr("value", state.parameters.peak_time).node();
+
+                startDiv.append("text").text(" , with width of ");
+                var width = startDiv.append("input").attr("value", state.parameters.sigma).node();
+
+                startDiv.append("text").text(".");
+
+                modalFooter.append("button").text("Save").on("click", function () {
+
+                    point1.attr("cy", subplot_geom.yScale(+minVal.value));
+                    point3.attr("cy", subplot_geom.yScale(+maxVal.value));
+
+                    shiftHeight(); // sets height of points 2 and 4
+
+                    point2.attr("cx", common_geom.xScale(+peakTime.value - width.value));
+                    point3.attr("cx", common_geom.xScale(+peakTime.value));
+                    point4.attr("cx", common_geom.xScale(+peakTime.value + width.value));
+
+                    updateLine();
+                })
+
+                    .attr("data-dismiss", "modal");
+                modalFooter.append("button").text("Close").attr("data-dismiss", "modal");
+
+                $('#paramModal').modal('toggle');
+            }
+
 
             function getPoints(){
                 return points;
