@@ -753,6 +753,35 @@ function Interval(common_geom, subplot_geom, options) {
 
     // Describing selected region
     /************************************************/
+    function getYLatexString(){
+
+        var y_upper = YToVal(rect_geom.rect_top).toFixed(2);
+        var y_lower = YToVal( valToY(y_upper) + rect_geom.height ).toFixed(2);
+
+        var latex_string;
+
+        // 2 bounds
+        if (rect_geom.top_fixed && rect_geom.bottom_fixed) {
+            latex_string = "(" + y_lower + "< " + subplot_geom.variable_name + "<" + y_upper + ")";
+        }
+
+        // 1 bound
+        else if (rect_geom.top_fixed) {
+            latex_string = "(" + subplot_geom.variable_name + "<" + y_upper + ")";
+        }
+        else if (rect_geom.bottom_fixed) {
+            latex_string = "(" + y_lower + "< " + subplot_geom.variable_name + ")";
+        }
+
+        // 0 bounds
+        else {
+            // Don't convert, but keep as an easily checkable sentinel value
+            latex_string = "";
+        }
+
+        return latex_string;
+    }
+
 
     function get_latex_string(){
         var y_latex_string = getYLatexString();
