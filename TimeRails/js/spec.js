@@ -249,29 +249,31 @@ function addCommonElements(common_geom, subplot_geom){
 
         if (first_subplot) {
 
-            d3.select(common_geom.div_name).append('button')
-                .text("Save")
-                .on("click", function () {
-                    var new_spec_string = JSON.stringify(common_geom);
-                    $.ajax({
-                        type: "POST",
-                        contentType: "application/json; charset=utf-8",
-                        url: common_geom.saveURL,
-                        dataType: 'html',
-                        async: true,
-                        data: new_spec_string,
+            if (common_geom.show_save_button){
+                d3.select(common_geom.div_name).append('button')
+                    .text("Save")
+                    .on("click", function () {
+                        var new_spec_string = JSON.stringify(common_geom);
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: common_geom.saveURL,
+                            dataType: 'html',
+                            async: true,
+                            data: new_spec_string,
 
-                        beforeSend: function (xhr, settings) {
-                            xhr.setRequestHeader("X-CSRFToken", csrf_token);
-                        },
+                            beforeSend: function (xhr, settings) {
+                                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                            },
 
-                        success: function (data) {
-                            d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
-                        },
-                        error: function (result, textStatus) {
-                        }
-                    })
-                });
+                            success: function (data) {
+                                d3.select("#spec_string_" + common_geom.spec_id).text(new_spec_string)
+                            },
+                            error: function (result, textStatus) {
+                            }
+                        })
+                    });
+            }
 
             d3.select(common_geom.div_name).append('button')
                 .text("Clear")
@@ -475,6 +477,7 @@ function Diagram(div_name, spec_id, spec_options) {
     common_geom.allow_logic = spec_options.allow_logic ? spec_options.allow_logic : false;
     common_geom.allow_branching = spec_options.allow_branching ? spec_options.allow_branching : true;
     common_geom.show_formula = spec_options.show_formula ? spec_options.show_formula : true;
+    common_geom.show_save_button = spec_options.show_save_button ? spec_options.show_save_button : true;
 
     common_geom.xScale = d3.scale.linear()
         .domain(common_geom.xRange)
